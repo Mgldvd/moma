@@ -1,0 +1,285 @@
+_moma_preview_usage () {
+    cat <<'EOF'
+Moma component preview
+
+Usage:
+  moma preview
+  moma preview md
+  moma preview web
+
+Options:
+  -h, --help   Show this help.
+EOF
+}
+
+_moma_preview_parse_args () {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help) _moma_preview_usage; return 2 ;;
+            *)
+                printf 'moma preview: unknown option: %s\n\n' "$1" >&2
+                _moma_preview_usage >&2
+                return 1
+                ;;
+        esac
+    done
+}
+
+_moma_preview_width () {
+    local width="${COLUMNS:-}"
+    if [[ ! "$width" =~ ^[0-9]+$ ]] && command -v tput &>/dev/null; then
+        width="$(tput cols 2>/dev/null || true)"
+    fi
+    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
+        width=88
+    fi
+    if (( width < 56 )); then
+        width=56
+    elif (( width > 100 )); then
+        width=100
+    fi
+    printf '%s' "$width"
+}
+
+_moma_preview_line () {
+    _moma_repeat_char "${1:--}" "$_moma_preview_width_value"
+}
+
+_moma_preview_header () {
+    if [[ -t 1 ]]; then
+        clear 2>/dev/null || true
+    fi
+    printf '\n%b%s%b\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
+    printf '%b  MOMA%b  %bCOMPONENT GALLERY%b\n' "$MOMA_STYLE_WHITE_BOLD" "$MOMA_COLOR_RESET" "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET"
+    printf '%b  Visual reference for the public terminal UI API%b\n' "$MOMA_COLOR_CYAN" "$MOMA_COLOR_RESET"
+    printf '%b%s%b\n\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
+    printf '  %bLegend%b  %b● success%b  %b● error%b  %b● warning%b  %b● info%b\n\n' \
+        "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$MOMA_COLOR_GREEN" "$MOMA_COLOR_RESET" "$MOMA_COLOR_RED" "$MOMA_COLOR_RESET" \
+        "$MOMA_COLOR_YELLOW" "$MOMA_COLOR_RESET" "$MOMA_COLOR_CYAN" "$MOMA_COLOR_RESET"
+}
+
+_moma_preview_section () {
+    local index="$1"
+    local title="$2"
+    local description="$3"
+    printf '\n%b%s%b\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
+    printf '%b  %s%b  %b%s%b\n' "$MOMA_COLOR_PINK" "$index" "$MOMA_COLOR_RESET" "$MOMA_STYLE_WHITE_BOLD" "$title" "$MOMA_COLOR_RESET"
+    printf '      %b%s%b\n' "$MOMA_COLOR_GRAY" "$description" "$MOMA_COLOR_RESET"
+    printf '%b%s%b\n\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
+}
+
+_moma_preview_component () {
+    local name="$1"
+    local purpose="$2"
+    local example="$3"
+    local renderer="$4"
+
+    printf '%b┌─ %b%s%b\n' "$MOMA_COLOR_GRAY" "$MOMA_STYLE_CYAN_BOLD" "$name" "$MOMA_COLOR_RESET"
+    printf '%b│%b  %s\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$purpose"
+    printf '%b│%b  %b$ %s%b\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$MOMA_COLOR_PINK" "$example" "$MOMA_COLOR_RESET"
+    printf '%b└─ output%b\n\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET"
+    "$renderer"
+    printf '\n'
+}
+
+_moma_preview_render_title () {
+    moma-title "Moma" "Terminal UI library"
+}
+
+_moma_preview_render_title_sub () {
+    moma-title-sub "Deployment" "Production environment"
+}
+
+_moma_preview_render_sections () {
+    moma-section "Dependencies ready" --success
+    moma-section "Configuration failed" --error
+    moma-section "Review required" --warning
+    moma-section "Next step" --info
+}
+
+_moma_preview_render_messages () {
+    moma-msg "Package installed" --success
+    moma-msg "Connection refused" --error
+    moma-msg "Using cached version" --warning
+    moma-msg "Downloading metadata" --info
+    moma-msg "Custom presentation" --icon "◆" --color pink
+}
+
+_moma_preview_render_simple_message () {
+    moma-msg-simple "Package installed"
+    moma-msg-simple "Package installation failed" --error
+}
+
+_moma_preview_render_list () {
+    moma-list "Clone repository" "Install dependencies" "Start application"
+}
+
+_moma_preview_render_boxes () {
+    moma-box "Your configuration is ready." --success
+    moma-box "Back up your files before continuing." --warning
+}
+
+_moma_preview_render_prompt () {
+    moma-prompt "Continue with the installation?" --color pink
+}
+
+_moma_preview_render_label () {
+    moma-label "TEXT HERE"
+}
+
+_moma_preview_render_inputs () {
+    moma-input --title "Project name" --placeholder "my-project"
+    moma-input --title "Environment" --value "production" --info
+    moma-input --title "Danger zone" --warning --color yellow
+}
+
+_moma_preview_render_select () {
+    moma-select "Development" "Staging" "Production" --title "Environment" --choose 2 2>&1 >/dev/null
+}
+
+_moma_preview_render_multi_select () {
+    moma-multi-select "Docker" "CI" "Tests" --title "Features" --choose 1,3 2>&1 >/dev/null
+}
+
+_moma_preview_render_rabbits () {
+    moma-rabbit "Preparing workspace" --info
+    printf '\n'
+    moma-rabbit "Task completed" --success
+}
+
+_moma_preview_render_confirm () {
+    moma-confirm "Continue with deployment?" --default yes --answer yes 2>&1
+}
+
+_moma_preview_render_spinner () {
+    sleep 0.05 &
+    local pid=$!
+    moma-spinner "$pid" "Preparing workspace" --delay 0.01
+}
+
+_moma_preview_render_command_check () {
+    moma-command-check bash
+}
+
+_moma_preview_footer () {
+    printf '%b%s%b\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
+    printf '%b  Browser docs%b  ./dist/moma preview web\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
+    printf '%b  Markdown docs%b  ./dist/moma preview md\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
+    printf '%b  Library help%b  ./dist/moma help\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
+    printf '%b%s%b\n\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
+}
+
+_moma_preview_web () {
+    local port="${MOMA_PREVIEW_PORT:-4173}"
+
+    if [[ ! "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
+        printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
+        return 1
+    fi
+    if ! command -v python3 &>/dev/null; then
+        printf 'moma preview web: python3 is required\n' >&2
+        return 1
+    fi
+
+    local preview_dir
+    preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
+    _moma_preview_web_index > "$preview_dir/index.html"
+    _moma_preview_web_styles > "$preview_dir/styles.css"
+    _moma_preview_web_script > "$preview_dir/app.js"
+
+    (
+        trap 'rm -rf "$preview_dir"' EXIT
+        cd "$preview_dir" || exit 1
+        printf 'Moma web preview: http://127.0.0.1:%s\n' "$port"
+        printf 'Press Ctrl+C to stop.\n'
+        python3 -m http.server "$port" --bind 127.0.0.1
+    )
+}
+
+_moma_preview_reject_extra_args () {
+    local format="$1"
+    shift
+    if [[ $# -gt 0 ]]; then
+        printf 'moma preview %s: unexpected argument: %s\n' "$format" "$1" >&2
+        return 1
+    fi
+}
+
+_moma_preview_markdown () {
+    local width="${MOMA_PREVIEW_WIDTH:-${COLUMNS:-100}}"
+
+    if [[ ! "$width" =~ ^[0-9]+$ ]] || (( width < 20 )); then
+        width=100
+    fi
+
+    if command -v glow &>/dev/null; then
+        if _moma_preview_markdown_document | glow -w "$width" -; then
+            return 0
+        fi
+    fi
+
+    _moma_preview_markdown_document
+}
+
+_moma_preview () {
+    case "${1:-}" in
+        md)
+            shift
+            _moma_preview_reject_extra_args md "$@" || return 1
+            _moma_preview_markdown
+            return 0
+            ;;
+        web)
+            shift
+            _moma_preview_reject_extra_args web "$@" || return 1
+            _moma_preview_web
+            return $?
+            ;;
+    esac
+
+    local _moma_preview_width_value
+    _moma_preview_width_value="$(_moma_preview_width)"
+
+    if [[ -n "${NO_COLOR:-}" ]]; then
+        local MOMA_COLOR_RESET="" MOMA_STYLE_WHITE_BOLD="" MOMA_STYLE_CYAN_BOLD="" MOMA_COLOR_GRAY=""
+        local MOMA_COLOR_PINK="" MOMA_COLOR_CYAN="" MOMA_COLOR_GREEN="" MOMA_COLOR_RED="" MOMA_COLOR_YELLOW=""
+        local MOMA_COLOR_SUCCESS="" MOMA_COLOR_ERROR="" MOMA_COLOR_WARNING=""
+        local MOMA_COLOR_INFO="" MOMA_COLOR_PRIMARY="" MOMA_COLOR_ACCENT="" MOMA_COLOR_MUTED=""
+    fi
+
+    local parse_status=0
+    _moma_preview_parse_args "$@" || parse_status=$?
+    if (( parse_status == 2 )); then
+        return 0
+    elif (( parse_status != 0 )); then
+        return "$parse_status"
+    fi
+
+    _moma_preview_header
+
+    _moma_preview_section "01" "Structure" "Large-format headings for scripts and workflow stages."
+    _moma_preview_component "moma-title" "Primary script header." 'moma-title "Moma" "Terminal UI library"' _moma_preview_render_title
+    _moma_preview_component "moma-title-sub" "Secondary workflow header." 'moma-title-sub "Deployment" "Production environment"' _moma_preview_render_title_sub
+
+    _moma_preview_section "02" "Status and feedback" "Semantic variants share one consistent visual language."
+    _moma_preview_component "moma-section" "Section headings in every semantic state." 'moma-section "Dependencies ready" --success' _moma_preview_render_sections
+    _moma_preview_component "moma-msg" "Compact inline feedback and custom icons." 'moma-msg "Package installed" --success' _moma_preview_render_messages
+    _moma_preview_component "moma-msg-simple" "A clean message with only a dot marker." 'moma-msg-simple "Package installed"' _moma_preview_render_simple_message
+    _moma_preview_component "moma-list" "An unordered list with one marker per item." 'moma-list "Clone repository" "Install dependencies"' _moma_preview_render_list
+    _moma_preview_component "moma-box" "Notices that need stronger visual emphasis." 'moma-box "Your configuration is ready." --success' _moma_preview_render_boxes
+
+    _moma_preview_section "03" "Interaction" "Prompts, fields, and progress-oriented components."
+    _moma_preview_component "moma-prompt" "Question or confirmation lead-in." 'moma-prompt "Continue?" --color pink' _moma_preview_render_prompt
+    _moma_preview_component "moma-label" "Decorated label aligned with input field headers." 'moma-label "TEXT HERE"' _moma_preview_render_label
+    _moma_preview_component "moma-input" "Display and interactive input states." 'moma-input --title "Project name" --placeholder "my-project"' _moma_preview_render_inputs
+    _moma_preview_component "moma-select" "Arrow-key selection with one active dot marker." 'moma-select "Development" "Staging" "Production"' _moma_preview_render_select
+    _moma_preview_component "moma-multi-select" "Toggle multiple choices with empty and filled square markers." 'moma-multi-select "Docker" "CI" "Tests"' _moma_preview_render_multi_select
+    _moma_preview_component "moma-rabbit" "Branded activity and completion feedback." 'moma-rabbit "Preparing workspace" --info' _moma_preview_render_rabbits
+
+    _moma_preview_section "04" "Helpers" "Reusable interaction and environment checks for Bash workflows."
+    _moma_preview_component "moma-confirm" "Arrow-key Yes/No selection with y and n shortcuts." 'moma-confirm "Continue?" --default yes' _moma_preview_render_confirm
+    _moma_preview_component "moma-spinner" "Process progress followed by a semantic completion message." 'moma-spinner "$pid" "Preparing workspace"' _moma_preview_render_spinner
+    _moma_preview_component "moma-command-check" "Check one or more executable dependencies." 'moma-command-check bash curl' _moma_preview_render_command_check
+
+    _moma_preview_footer
+}
