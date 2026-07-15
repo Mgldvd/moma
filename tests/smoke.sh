@@ -266,7 +266,7 @@ preview_reset=$'\033[0m'
 [[ "$colored_terminal_preview" == *"└─ ${preview_yellow}output${preview_reset}:"* ]]
 
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
-[[ "$markdown_preview" == *"# Moma Component Reference"* ]]
+[[ "$markdown_preview" == *"# Moma Documentation"* ]]
 [[ "$markdown_preview" == *'### `moma-confirm`'* ]]
 [[ "$markdown_preview" == *'### `moma-select`'* ]]
 [[ "$markdown_preview" == *'### `moma-multi-select`'* ]]

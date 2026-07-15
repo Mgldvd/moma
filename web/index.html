@@ -306,10 +306,37 @@ o_(")(")</span></pre>
           <p class="api-section__intro">Small reusable helpers for process feedback and dependency checks.</p>
         </header>
 
-        <div class="function-list">
-          <article class="function-row" data-api="moma-spinner progress pid process completion"><div class="function-row__name"><code class="function-row__function">moma-spinner</code><span class="status status--stable">Process</span></div><p class="function-row__description">Display progress while a process is active, then print semantic completion feedback.</p><code class="function-row__signature">moma-spinner pid ["message"] [--delay seconds]</code></article>
-          <article class="function-row" data-api="moma-command-check dependency executable available missing quiet"><div class="function-row__name"><code class="function-row__function">moma-command-check</code><span class="status status--stable">Safe</span></div><p class="function-row__description">Check whether every requested executable is available and return a useful status.</p><code class="function-row__signature">moma-command-check bash curl git [--quiet]</code></article>
-        </div>
+        <article class="api-entry" data-api="moma-spinner progress pid process completion">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Process helper</p><h3 class="api-entry__name">moma-spinner</h3></div>
+            <span class="status status--stable">Process</span>
+          </header>
+          <p class="api-entry__description">Display progress while a process is active, then print semantic completion feedback.</p>
+          <code class="signature">moma-spinner pid ["message"] [--delay seconds]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="terminal-lines">
+              <p class="terminal-lines__item terminal-lines__item--success">▪ ✔ Processing &nbsp;✔</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-command-check dependency executable available missing quiet">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Dependency helper</p><h3 class="api-entry__name">moma-command-check</h3></div>
+            <span class="status status--stable">Safe</span>
+          </header>
+          <p class="api-entry__description">Check whether every requested executable is available and return a useful status.</p>
+          <code class="signature">moma-command-check bash curl git [--quiet]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="dot-lines">
+              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>bash is available</span></p>
+              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>curl is available</span></p>
+              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>git is available</span></p>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section class="api-section" id="cli">

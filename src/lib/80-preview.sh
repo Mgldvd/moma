@@ -188,9 +188,51 @@ _moma_preview_web () {
     (
         trap 'rm -rf "$preview_dir"' EXIT
         cd "$preview_dir" || exit 1
-        printf 'Moma web preview: http://127.0.0.1:%s\n' "$port"
-        printf 'Press Ctrl+C to stop.\n'
-        python3 -m http.server "$port" --bind 127.0.0.1
+        python3 - "$port" <<'PY'
+import errno
+import http.server
+import sys
+
+requested_port = int(sys.argv[1])
+last_port = min(requested_port + 100, 65535)
+server = None
+
+for candidate_port in range(requested_port, last_port + 1):
+    try:
+        server = http.server.ThreadingHTTPServer(
+            ("127.0.0.1", candidate_port),
+            http.server.SimpleHTTPRequestHandler,
+        )
+        break
+    except OSError as error:
+        if error.errno != errno.EADDRINUSE:
+            print(f"moma preview web: {error}", file=sys.stderr)
+            raise SystemExit(1) from None
+
+if server is None:
+    print(
+        f"moma preview web: no free port from {requested_port} to {last_port}",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+selected_port = server.server_address[1]
+if selected_port != requested_port:
+    print(
+        f"Port {requested_port} is already in use; using {selected_port} instead.",
+        flush=True,
+    )
+
+print(f"Moma web preview: http://127.0.0.1:{selected_port}", flush=True)
+print("Press Ctrl+C to stop.", flush=True)
+
+try:
+    server.serve_forever()
+except KeyboardInterrupt:
+    pass
+finally:
+    server.server_close()
+PY
     )
 }
 
@@ -211,12 +253,12 @@ _moma_preview_markdown () {
     fi
 
     if command -v glow &>/dev/null; then
-        if _moma_preview_markdown_document | glow -w "$width" -; then
+        if _moma_docs_markdown_document | glow -w "$width" -; then
             return 0
         fi
     fi
 
-    _moma_preview_markdown_document
+    _moma_docs_markdown_document
 }
 
 _moma_preview () {
