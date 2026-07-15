@@ -214,6 +214,44 @@ html {
   font: calc(0.84rem + 2px)/1.5 var(--font-mono);
 }
 
+.hero-load {
+  padding-top: 1.5rem;
+}
+
+.hero-load__title {
+  margin: 0 0 0.85rem;
+  font-size: calc(1.15rem + 2px);
+  line-height: 1.3;
+}
+
+.hero-load__steps {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0 0 0 1.5rem;
+}
+
+.hero-load__step {
+  padding-left: 0.25rem;
+}
+
+.hero-load__description {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.hero-load__command {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  color: var(--ink);
+  font: calc(0.78rem + 2px)/1.5 var(--font-mono);
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  overflow-x: auto;
+}
+
 .docs-index {
   padding: 3rem 0;
   border-bottom: 1px solid var(--line-strong);
