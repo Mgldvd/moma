@@ -2,7 +2,7 @@
 
 ## Source And Build
 
-- Treat `src/lib/*.sh`, `docs/moma-help.md`, `docs/moma-preview.md`, and `web/{index.html,styles.css,app.js}` as sources. `dist/moma` is generated; never edit it directly.
+- Treat `src/lib/*.sh`, `docs/moma-help.md`, `docs/moma-docs.md`, and `web/{index.html,styles.css,app.js}` as sources. `dist/moma` is generated; never edit it directly.
 - `build.sh` concatenates an explicit, ordered module list and embeds the docs and preview assets. Add or reorder a module in that list, not merely in `src/lib/`.
 - Keep public functions named `moma-*`; `_moma_*` is the private namespace. The generated file must remain safe both to source under `set -euo pipefail` and to execute as a CLI.
 

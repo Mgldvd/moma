@@ -7,7 +7,7 @@ OUTPUT="${1:-$ROOT_DIR/dist/moma}"
 OUTPUT_DIR="$(dirname "$OUTPUT")"
 MODULE_DIR="$ROOT_DIR/src/lib"
 HELP_MARKDOWN="$ROOT_DIR/docs/moma-help.md"
-PREVIEW_MARKDOWN="$ROOT_DIR/docs/moma-preview.md"
+DOCS_MARKDOWN="$ROOT_DIR/docs/moma-docs.md"
 PREVIEW_HTML="$ROOT_DIR/web/index.html"
 PREVIEW_CSS="$ROOT_DIR/web/styles.css"
 PREVIEW_JS="$ROOT_DIR/web/app.js"
@@ -42,7 +42,7 @@ if [[ ! -f "$HELP_MARKDOWN" ]]; then
     exit 1
 fi
 
-for required_asset in "$PREVIEW_MARKDOWN" "$PREVIEW_HTML" "$PREVIEW_CSS" "$PREVIEW_JS"; do
+for required_asset in "$DOCS_MARKDOWN" "$PREVIEW_HTML" "$PREVIEW_CSS" "$PREVIEW_JS"; do
     if [[ ! -f "$required_asset" ]]; then
         printf 'build: missing preview asset: %s\n' "$required_asset" >&2
         exit 1
@@ -63,13 +63,13 @@ HELP_FOOTER
 
 cat >> "$tmp_file" <<'PREVIEW_MD_HEADER'
 
-# embedded document: docs/moma-preview.md
-_moma_preview_markdown_document () {
-    cat <<'MOMA_PREVIEW_MARKDOWN_EOF'
+# embedded document: docs/moma-docs.md
+_moma_docs_markdown_document () {
+    cat <<'MOMA_DOCS_MARKDOWN_EOF'
 PREVIEW_MD_HEADER
-cat "$PREVIEW_MARKDOWN" >> "$tmp_file"
+cat "$DOCS_MARKDOWN" >> "$tmp_file"
 cat >> "$tmp_file" <<'PREVIEW_MD_FOOTER'
-MOMA_PREVIEW_MARKDOWN_EOF
+MOMA_DOCS_MARKDOWN_EOF
 }
 PREVIEW_MD_FOOTER
 

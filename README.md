@@ -12,10 +12,83 @@ Moma is a standalone Bash library and executable for terminal UI components.
 bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview
 ```
 
+## Components
+
+### Visual components
+
+- `moma-title`: Print a primary title and subtitle.
+
+  ![moma-title preview](.mg/moma-title.png)
+
+- `moma-title-sub`: Print a secondary title.
+
+  ![moma-title-sub preview](.mg/moma-title-sub.png)
+
+- `moma-section`: Print a semantic section heading.
+
+  ![moma-section preview](.mg/moma-section.png)
+
+- `moma-msg`: Print a styled semantic message.
+
+  ![moma-msg preview](.mg/moma-msg.png)
+
+- `moma-msg-simple`: Print a compact message with a dot marker.
+
+  ![moma-msg-simple preview](.mg/moma-msg-simple.png)
+
+- `moma-list`: Print a list with consistent markers.
+
+  ![moma-list preview](.mg/moma-list.png)
+
+- `moma-box`: Print a framed notice.
+
+  ![moma-box preview](.mg/moma-box.png)
+
+- `moma-prompt`: Print a question or confirmation prompt.
+
+  ![moma-prompt preview](.mg/moma-prompt.png)
+
+- `moma-label`: Print a decorated input label.
+
+  ![moma-label preview](.mg/moma-label.png)
+
+- `moma-rabbit`: Print the Moma activity component.
+
+  ![moma-rabbit preview](.mg/moma-rabbit.png)
+
+### Interactive components
+
+- `moma-input`: Display or read an input field.
+
+  ![moma-input preview](.mg/moma-input.png)
+
+- `moma-select`: Select one value.
+
+  ![moma-select preview](.mg/moma-select.png)
+
+- `moma-multi-select`: Select multiple values.
+
+  ![moma-multi-select preview](.mg/moma-multi-select.png)
+
+- `moma-confirm`: Select a Yes or No answer.
+
+  ![moma-confirm preview](.mg/moma-confirm.png)
+
+### Workflow components
+
+- `moma-spinner`: Follow a running process and print its result.
+
+  ![moma-spinner preview](.mg/moma-spinner.png)
+
+- `moma-command-check`: Check whether commands are available.
+
+  ![moma-command-check preview](.mg/moma-command-check.png)
+
 ## Project structure
 
 - `src/lib/`: Editable source modules.
 - `docs/`: Embedded Markdown help and reference.
+- `.mg/`: Component preview screenshots.
 - `enhancement.md`: Future component backlog.
 - `web/`: Embedded browser documentation.
 - `build.sh`: Standalone-file builder.
@@ -154,6 +227,6 @@ moma-msg "Ready" --success
 http://127.0.0.1:4173
 ```
 
-Set `MOMA_PREVIEW_PORT` to change the web port. Set `MOMA_HELP_WIDTH` or
-`MOMA_PREVIEW_WIDTH` to change Glow's render width. Set `NO_COLOR=1` to disable
-ANSI colors.
+Set `MOMA_PREVIEW_PORT` to change the starting web port. Moma selects the next
+available port when it is occupied. Set `MOMA_HELP_WIDTH` or `MOMA_PREVIEW_WIDTH`
+to change Glow's render width. Set `NO_COLOR=1` to disable ANSI colors.
