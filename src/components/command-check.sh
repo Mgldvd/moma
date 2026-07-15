@@ -1,22 +1,40 @@
-moma-command-check () {
+# Command availability component.
+moma-command-check() {
     local quiet=false
     local no_color=false
     local -a commands=()
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --quiet|-q) quiet=true; shift ;;
-            --no-color) no_color=true; shift ;;
-            --help|-h)
+            --quiet | -q)
+                quiet=true
+                shift
+                ;;
+            --no-color)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-command-check <command>... [--quiet] [--no-color]
 
 Returns 0 when every command is available and 1 when any command is missing.
 EOF
-                return 0 ;;
-            --) shift; commands+=("$@"); break ;;
-            -*) _moma_unknown_option moma-command-check "$1"; return 2 ;;
-            *) commands+=("$1"); shift ;;
+                return 0
+                ;;
+            --)
+                shift
+                commands+=("$@")
+                break
+                ;;
+            -*)
+                _moma_unknown_option moma-command-check "$1"
+                return 2
+                ;;
+            *)
+                commands+=("$1")
+                shift
+                ;;
         esac
     done
 

@@ -2,6 +2,8 @@
 
 Terminal UI components and workflow helpers for Bash.
 
+Requires Bash 4.0 or newer.
+
 Repository: <https://github.com/Mgldvd/moma>
 
 ## Usage
@@ -94,3 +96,7 @@ moma-box "Important notice" --info
 
 Use `--color <value>`, `--icon <value>`, or `--no-color` where supported.
 Set `NO_COLOR=1` to disable ANSI colors globally.
+
+Interactive controls and diagnostics use stderr. Capturable input and selection
+values use stdout. Exit statuses are 0 for success, 1 for an expected negative
+result, 2 for invalid usage, 3 for a runtime failure, and 130 for cancellation.

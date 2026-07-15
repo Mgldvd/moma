@@ -6,15 +6,28 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MOMA_DIST="$ROOT_DIR/dist/moma"
 
 "$ROOT_DIR/build.sh" >/dev/null
-bash -n "$ROOT_DIR/build.sh" "$ROOT_DIR"/src/lib/*.sh "$MOMA_DIST"
+bash -n \
+    "$ROOT_DIR/build.sh" \
+    "$ROOT_DIR"/src/core/*.sh \
+    "$ROOT_DIR"/src/components/*.sh \
+    "$ROOT_DIR"/src/preview/*.sh \
+    "$ROOT_DIR"/src/cli/*.sh \
+    "$MOMA_DIST"
+
+deterministic_copy="$(mktemp "${TMPDIR:-/tmp}/moma-build.XXXXXX")"
+cp "$MOMA_DIST" "$deterministic_copy"
+"$ROOT_DIR/build.sh" >/dev/null
+cmp -s "$deterministic_copy" "$MOMA_DIST"
+rm -f "$deterministic_copy"
 
 [[ -x "$MOMA_DIST" ]]
 [[ ! -e "$ROOT_DIR/moma.sh" ]]
-[[ ! -e "$ROOT_DIR/src/lib/00-colors.sh" ]]
 
 plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"Moma - terminal UI components for Bash"* ]]
-[[ "$plain_help" == *"confirm, spinner, command-check"* ]]
+[[ "$plain_help" == *"confirm"* ]]
+[[ "$plain_help" == *"spinner"* ]]
+[[ "$plain_help" == *"command-check"* ]]
 
 binary_output="$(NO_COLOR=1 "$MOMA_DIST" msg "Ready" --success)"
 [[ "$binary_output" == *"Ready"* ]]
@@ -42,6 +55,34 @@ label_spacing="$({
 
 strict_output="$(NO_COLOR=1 bash -euo pipefail -c 'source "$1"; moma-msg "Strict mode" --success' _ "$MOMA_DIST")"
 [[ "$strict_output" == *"Strict mode"* ]]
+
+bash -euo pipefail -c '
+    before_pwd="$PWD"
+    before_ifs="$(printf %q "$IFS")"
+    before_options="$(set +o)"
+    before_shopt="$(shopt -p)"
+    trap ": consumer-int" INT
+    before_int="$(trap -p INT)"
+    capture="$(mktemp)"
+    trap '\''rm -f "$capture"'\'' EXIT
+
+    source "$1" >"$capture" 2>&1
+
+    [[ ! -s "$capture" ]]
+    [[ "$PWD" == "$before_pwd" ]]
+    [[ "$(printf %q "$IFS")" == "$before_ifs" ]]
+    [[ "$(set +o)" == "$before_options" ]]
+    [[ "$(shopt -p)" == "$before_shopt" ]]
+    [[ "$(trap -p INT)" == "$before_int" ]]
+' _ "$MOMA_DIST"
+
+bash -c '
+    source "$1"
+    [[ "$(_moma_select_transition 0 3 up)" == $'\''2\tcontinue'\'' ]]
+    [[ "$(_moma_multi_select_transition 1 "0,2" 3 space)" == $'\''1\t0,2,1\tcontinue'\'' ]]
+    [[ "$(_moma_confirm_transition 0 n)" == $'\''1\tconfirm'\'' ]]
+    _moma_require_bash_version 4 0
+' _ "$MOMA_DIST"
 
 input_output="$(printf '  project  \n' | NO_COLOR=1 "$MOMA_DIST" input --title "Project" --read --trim 2>/dev/null)"
 [[ "$input_output" == "project" ]]
@@ -98,6 +139,8 @@ secret_output="$(printf 'secret-value\n' | NO_COLOR=1 "$MOMA_DIST" input --title
 [[ "$secret_output" == "secret-value" ]]
 
 if command -v script &>/dev/null; then
+    script -qec "bash -c 'before=\"\$(stty -g)\"; source \"$MOMA_DIST\"; after=\"\$(stty -g)\"; [[ \"\$before\" == \"\$after\" ]]'" /dev/null >/dev/null
+
     masked_output="$(printf $'abc\177d\n' | script -qec "NO_COLOR=1 '$MOMA_DIST' input --title Secret --read --secret" /dev/null)"
     [[ "$masked_output" == *'│❯ ***'* ]]
     [[ "$masked_output" == *$'│❯ ***\r\n\r\n'* ]]
@@ -196,10 +239,17 @@ moma-title-sub
 EOF
 
 mapfile -t actual_functions < <(
-    bash -c 'source "$1"; compgen -A function | LC_ALL=C sort' _ "$MOMA_DIST" \
-        | rg '^moma-'
+    bash -c 'source "$1"; compgen -A function | LC_ALL=C sort' _ "$MOMA_DIST" |
+        rg '^moma-'
 )
 [[ "${actual_functions[*]}" == "${expected_functions[*]}" ]]
+
+mapfile -t registered_functions < <(
+    bash -c 'source "$1"; _moma_command_registry' _ "$MOMA_DIST" |
+        cut -f 2 |
+        LC_ALL=C sort
+)
+[[ "${registered_functions[*]}" == "${expected_functions[*]}" ]]
 
 for public_function in "${expected_functions[@]}"; do
     bash -c 'source "$1"; declare -F "$2" >/dev/null' _ "$MOMA_DIST" "$public_function"
@@ -209,8 +259,8 @@ for public_function in "${expected_functions[@]}"; do
 done
 
 example_output="$(
-    printf 'demo-project\nteam@example.com\nsuper-secret\nyes\n' \
-        | NO_COLOR=1 "$ROOT_DIR/example.sh" 2>&1
+    printf 'demo-project\nteam@example.com\nsuper-secret\nyes\n' |
+        NO_COLOR=1 "$ROOT_DIR/example.sh" 2>&1
 )"
 [[ "$example_output" == *"Component showcase"* ]]
 [[ "$example_output" == *"All required commands are available."* ]]
@@ -232,7 +282,7 @@ standalone_output="$(NO_COLOR=1 bash -c '
 
 fake_bin="$standalone_dir/bin"
 mkdir -p "$fake_bin"
-cat > "$fake_bin/glow" <<'EOF'
+cat >"$fake_bin/glow" <<'EOF'
 #!/usr/bin/env bash
 printf 'glow arguments: %s\n' "$*"
 cat
@@ -267,9 +317,12 @@ preview_reset=$'\033[0m'
 
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
 [[ "$markdown_preview" == *"# Moma Documentation"* ]]
-[[ "$markdown_preview" == *'### `moma-confirm`'* ]]
-[[ "$markdown_preview" == *'### `moma-select`'* ]]
-[[ "$markdown_preview" == *'### `moma-multi-select`'* ]]
+confirm_heading="### \`moma-confirm\`"
+select_heading="### \`moma-select\`"
+multi_select_heading="### \`moma-multi-select\`"
+[[ "$markdown_preview" == *"$confirm_heading"* ]]
+[[ "$markdown_preview" == *"$select_heading"* ]]
+[[ "$markdown_preview" == *"$multi_select_heading"* ]]
 [[ "$markdown_preview" == *"./dist/moma preview web"* ]]
 
 glow_preview="$(PATH="$fake_bin:/usr/bin:/bin" MOMA_PREVIEW_WIDTH=76 "$MOMA_DIST" preview md)"
