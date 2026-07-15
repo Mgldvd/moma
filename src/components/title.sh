@@ -1,4 +1,5 @@
-_moma_render_title () {
+# Title components.
+_moma_render_title() {
     local title="$1"
     local subtitle="${2:-}"
     local primary="${3:-$MOMA_COLOR_PRIMARY}"
@@ -40,7 +41,7 @@ _moma_render_title () {
     printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$box_width")" "$reset"
 }
 
-moma-title () {
+moma-title() {
     local title=""
     local subtitle=""
     local primary="$MOMA_COLOR_PRIMARY"
@@ -52,33 +53,64 @@ moma-title () {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --primary)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title "$1"; return 1; fi
-                primary="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title "$1"
+                    return 1
+                fi
+                primary="$2"
+                shift 2
+                ;;
             --primary=*)
-                primary="${1#*=}"; shift ;;
+                primary="${1#*=}"
+                shift
+                ;;
             --accent)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title "$1"; return 1; fi
-                accent="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title "$1"
+                    return 1
+                fi
+                accent="$2"
+                shift 2
+                ;;
             --accent=*)
-                accent="${1#*=}"; shift ;;
+                accent="${1#*=}"
+                shift
+                ;;
             --min-width)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title "$1"; return 1; fi
-                min_width="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title "$1"
+                    return 1
+                fi
+                min_width="$2"
+                shift 2
+                ;;
             --min-width=*)
-                min_width="${1#*=}"; shift ;;
+                min_width="${1#*=}"
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-title "<title>" ["subtitle"] [--primary <color>] [--accent <color>] [--min-width <n>] [--no-color]
 EOF
-                return 0 ;;
+                return 0
+                ;;
             --)
-                shift; positional+=("$@"); break ;;
+                shift
+                positional+=("$@")
+                break
+                ;;
             -*)
-                _moma_unknown_option moma-title "$1"; return 1 ;;
+                _moma_unknown_option moma-title "$1"
+                return 1
+                ;;
             *)
-                positional+=("$1"); shift ;;
+                positional+=("$1")
+                shift
+                ;;
         esac
     done
 
@@ -87,7 +119,7 @@ EOF
     _moma_render_title "$title" "$subtitle" "$primary" "$accent" "$min_width" "$no_color"
 }
 
-_moma_render_title_sub () {
+_moma_render_title_sub() {
     local text="$1"
     local detail="${2:-}"
     local color="${3:-$MOMA_COLOR_PRIMARY}"
@@ -109,7 +141,7 @@ _moma_render_title_sub () {
     if [[ -n "$detail" ]]; then
         combined_text+=" $detail"
     fi
-    box_width=$(( ${#combined_text} + 6 > min_width ? ${#combined_text} + 6 : min_width ))
+    box_width=$((${#combined_text} + 6 > min_width ? ${#combined_text} + 6 : min_width))
 
     printf '%b\n' "$resolved_color"
     if [[ -n "$detail" ]]; then
@@ -125,7 +157,7 @@ _moma_render_title_sub () {
     printf '%b\n' "$reset"
 }
 
-moma-title-sub () {
+moma-title-sub() {
     local text=""
     local detail=""
     local color="$MOMA_COLOR_PRIMARY"
@@ -136,34 +168,65 @@ moma-title-sub () {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --color|-c)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title-sub "$1"; return 1; fi
-                color="$2"; shift 2 ;;
+            --color | -c)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title-sub "$1"
+                    return 1
+                fi
+                color="$2"
+                shift 2
+                ;;
             --color=*)
-                color="${1#*=}"; shift ;;
+                color="${1#*=}"
+                shift
+                ;;
             --message)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title-sub "$1"; return 1; fi
-                message="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title-sub "$1"
+                    return 1
+                fi
+                message="$2"
+                shift 2
+                ;;
             --message=*)
-                message="${1#*=}"; shift ;;
+                message="${1#*=}"
+                shift
+                ;;
             --min-width)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-title-sub "$1"; return 1; fi
-                min_width="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title-sub "$1"
+                    return 1
+                fi
+                min_width="$2"
+                shift 2
+                ;;
             --min-width=*)
-                min_width="${1#*=}"; shift ;;
+                min_width="${1#*=}"
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-title-sub "<text>" ["detail"] [--color <color>] [--message <text>] [--min-width <n>] [--no-color]
 EOF
-                return 0 ;;
+                return 0
+                ;;
             --)
-                shift; positional+=("$@"); break ;;
+                shift
+                positional+=("$@")
+                break
+                ;;
             -*)
-                _moma_unknown_option moma-title-sub "$1"; return 1 ;;
+                _moma_unknown_option moma-title-sub "$1"
+                return 1
+                ;;
             *)
-                positional+=("$1"); shift ;;
+                positional+=("$1")
+                shift
+                ;;
         esac
     done
 

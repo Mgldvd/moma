@@ -54,10 +54,10 @@ multi_select_args=(
     --required
 )
 if [[ ! -t 0 || ! -t 2 ]]; then
-    multi_select_args+=(--choose 1,3)
+    multi_select_args+=(--choose "1,3")
 fi
 selected_features="$(moma-multi-select "${multi_select_args[@]}")"
-mapfile -t features <<< "$selected_features"
+mapfile -t features <<<"$selected_features"
 features_summary=""
 for feature in "${features[@]}"; do
     [[ -z "$features_summary" ]] || features_summary+=", "

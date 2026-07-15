@@ -2,15 +2,15 @@
 
 ## Source And Build
 
-- Treat `src/lib/*.sh`, `docs/moma-help.md`, `docs/moma-docs.md`, and `web/{index.html,styles.css,app.js}` as sources. `dist/moma` is generated; never edit it directly.
-- `build.sh` concatenates an explicit, ordered module list and embeds the docs and preview assets. Add or reorder a module in that list, not merely in `src/lib/`.
+- Treat `src/{core,components,preview,cli}/*.sh`, `docs/moma-help.md`, `docs/moma-docs.md`, and `web/{index.html,styles.css,app.js}` as sources. `dist/moma` is generated; never edit it directly.
+- `build.sh` concatenates an explicit, ordered module list and embeds the docs and preview assets. Add or reorder a module in that list, not merely under `src/`.
 - Keep public functions named `moma-*`; `_moma_*` is the private namespace. The generated file must remain safe both to source under `set -euo pipefail` and to execute as a CLI.
 
 ## Verification
 
 - Run `./tests/smoke.sh` for the full verification. It rebuilds `dist/moma`, runs Bash syntax checks, and exercises library, CLI, interactive, documentation, and standalone behavior.
 - The smoke suite requires `rg`. TTY-specific checks run only when the system `script` command is available.
-- There is no separate focused test harness. For a quick syntax/build check, run `./build.sh && bash -n build.sh src/lib/*.sh dist/moma` before the full smoke suite.
+- Bats suites under `tests/{unit,integration,contract}` provide focused coverage when Bats-core is installed. For a quick syntax/build check, run `make build && make lint` before the full smoke suite.
 
 ## Cross-File Contracts
 

@@ -1,6 +1,7 @@
-# Moma Source Module Index
+# Moma Source Index
 
-Edit these modules and run the build from the project root.
+The legacy `src/lib` directory now contains this compatibility index. Editable
+modules live in the layered directories under `src/`.
 
 ```bash
 ./build.sh
@@ -8,27 +9,30 @@ Edit these modules and run the build from the project root.
 
 ## Module index
 
-| File | Responsibility | Public functions |
+| Layer or file | Responsibility | Public functions |
 | --- | --- | --- |
-| [`10-core.sh`](./10-core.sh) | Theme defaults and private shared helpers. | None |
-| [`20-title.sh`](./20-title.sh) | Primary and secondary headings. | `moma-title`, `moma-title-sub` |
-| [`30-section-message.sh`](./30-section-message.sh) | Semantic sections and messages. | `moma-section`, `moma-msg` |
-| [`35-simple-list.sh`](./35-simple-list.sh) | Dot messages and unordered lists. | `moma-msg-simple`, `moma-list` |
-| [`40-box-prompt.sh`](./40-box-prompt.sh) | Framed notices and prompt lead-ins. | `moma-box`, `moma-prompt` |
-| [`45-label.sh`](./45-label.sh) | Decorated labels aligned with input headers. | `moma-label` |
-| [`50-input.sh`](./50-input.sh) | Display and interactive input fields. | `moma-input` |
-| [`55-select.sh`](./55-select.sh) | Single and multiple arrow-key selection lists. | `moma-select`, `moma-multi-select` |
-| [`60-rabbit.sh`](./60-rabbit.sh) | Branded activity feedback. | `moma-rabbit` |
-| [`70-interaction.sh`](./70-interaction.sh) | Confirmation and process feedback. | `moma-confirm`, `moma-spinner` |
-| [`75-system.sh`](./75-system.sh) | Executable dependency checks. | `moma-command-check` |
-| [`80-preview.sh`](./80-preview.sh) | Terminal, Markdown, and browser previews. | None |
-| [`90-cli.sh`](./90-cli.sh) | Executable command dispatcher and help renderer. | None |
+| [`src/core/`](../core/) | Version, errors, strings, validation, palette, semantics, terminal, and registry. | None |
+| [`src/components/title.sh`](../components/title.sh) | Primary and secondary headings. | `moma-title`, `moma-title-sub` |
+| [`src/components/section-message.sh`](../components/section-message.sh) | Semantic sections and messages. | `moma-section`, `moma-msg` |
+| [`src/components/simple-list.sh`](../components/simple-list.sh) | Dot messages and unordered lists. | `moma-msg-simple`, `moma-list` |
+| [`src/components/box-prompt.sh`](../components/box-prompt.sh) | Framed notices and prompt lead-ins. | `moma-box`, `moma-prompt` |
+| [`src/components/label.sh`](../components/label.sh) | Decorated labels. | `moma-label` |
+| [`src/components/input.sh`](../components/input.sh) | Display and interactive input fields. | `moma-input` |
+| [`src/components/select.sh`](../components/select.sh) | Single and multiple selection state machines. | `moma-select`, `moma-multi-select` |
+| [`src/components/rabbit.sh`](../components/rabbit.sh) | Branded activity feedback. | `moma-rabbit` |
+| [`src/components/interaction.sh`](../components/interaction.sh) | Confirmation and process feedback. | `moma-confirm`, `moma-spinner` |
+| [`src/components/command-check.sh`](../components/command-check.sh) | Executable dependency checks. | `moma-command-check` |
+| [`src/preview/web.sh`](../preview/web.sh) | Embedded browser preview server. | None |
+| [`src/preview/markdown.sh`](../preview/markdown.sh) | Embedded Markdown preview. | None |
+| [`src/preview/main.sh`](../preview/main.sh) | Terminal preview and preview dispatcher. | None |
+| [`src/cli/usage.sh`](../cli/usage.sh) | Plain and Markdown-aware CLI help. | None |
+| [`src/cli/main.sh`](../cli/main.sh) | Explicit executable command dispatcher. | None |
 
 Functions beginning with `_moma_` are private implementation details.
 
 Interactive controls and decorated labels leave one blank line below their output. Compact messages, lists, and content lead-ins remain continuous.
 
-## `10-core.sh`
+## `src/core/`
 
 Defines the namespaced ANSI palette, semantic theme values, option errors, text
 helpers, and color resolution shared by every component.
@@ -42,7 +46,7 @@ info    → cyan + →
 
 ---
 
-## `20-title.sh`
+## `src/components/title.sh`
 
 ### `moma-title`
 
@@ -69,7 +73,7 @@ moma-title-sub "Deployment" "Production environment"
 
 ---
 
-## `30-section-message.sh`
+## `src/components/section-message.sh`
 
 ### `moma-section`
 
@@ -95,7 +99,7 @@ moma-msg "Package installed" --success
 
 ---
 
-## `35-simple-list.sh`
+## `src/components/simple-list.sh`
 
 ### `moma-msg-simple`
 
@@ -123,7 +127,7 @@ moma-list "Clone repository" "Install dependencies" "Start application"
 
 ---
 
-## `40-box-prompt.sh`
+## `src/components/box-prompt.sh`
 
 ### `moma-box`
 
@@ -150,7 +154,7 @@ moma-prompt "Continue with the installation?" --color pink
 
 ---
 
-## `45-label.sh`
+## `src/components/label.sh`
 
 ### `moma-label`
 
@@ -167,7 +171,7 @@ The label leaves one blank line below the decorated line.
 
 ---
 
-## `50-input.sh`
+## `src/components/input.sh`
 
 ### `moma-input`
 
@@ -203,7 +207,7 @@ Interactive inputs leave one blank line below the entered value.
 
 ---
 
-## `55-select.sh`
+## `src/components/select.sh`
 
 ### `moma-select`
 
@@ -257,7 +261,7 @@ The selector leaves one blank line below the controls when it finishes.
 
 ---
 
-## `60-rabbit.sh`
+## `src/components/rabbit.sh`
 
 ### `moma-rabbit`
 
@@ -276,7 +280,7 @@ moma-rabbit "Preparing workspace" --info
 
 ---
 
-## `70-interaction.sh`
+## `src/components/interaction.sh`
 
 ### `moma-confirm`
 
@@ -308,7 +312,7 @@ moma-spinner "$!" "Preparing workspace"
 
 ---
 
-## `75-system.sh`
+## `src/components/command-check.sh`
 
 ### `moma-command-check`
 
@@ -323,7 +327,7 @@ moma-command-check bash curl
 
 ---
 
-## `80-preview.sh`
+## `src/preview/main.sh`
 
 Provides the documentation previews used by the standalone executable.
 
@@ -335,7 +339,7 @@ Provides the documentation previews used by the standalone executable.
 
 ---
 
-## `90-cli.sh`
+## `src/cli/main.sh`
 
 Dispatches executable commands and renders embedded help.
 

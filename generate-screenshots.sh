@@ -41,12 +41,12 @@ if ! command -v timeout &>/dev/null; then
 fi
 
 mapfile -t components < <(
-    rg -o 'data-api="moma-[a-z-]+' "$WEB_INDEX" \
-        | cut -d '"' -f 2 \
-        | awk '!seen[$0]++'
+    rg -o 'data-api="moma-[a-z-]+' "$WEB_INDEX" |
+        cut -d '"' -f 2 |
+        awk '!seen[$0]++'
 )
 
-if (( ${#components[@]} == 0 )); then
+if ((${#components[@]} == 0)); then
     printf 'generate-screenshots: no API components found in %s\n' "$WEB_INDEX" >&2
     exit 1
 fi

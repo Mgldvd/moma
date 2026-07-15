@@ -124,7 +124,10 @@ moma --help
 
 ## Project structure
 
-- `src/lib/`: Editable source modules.
+- `src/core/`: Runtime, error, string, color, semantic, terminal, validation, and command-registry modules.
+- `src/components/`: Public terminal UI components.
+- `src/preview/`: Terminal, Markdown, and browser preview implementation.
+- `src/cli/`: Executable help and explicit command dispatcher.
 - `docs/`: Embedded Markdown help and reference.
 - `.img/`: Logos and component preview screenshots.
 - `enhancement.md`: Future component backlog.
@@ -132,12 +135,14 @@ moma --help
 - `build.sh`: Standalone-file builder.
 - `dist/moma`: Generated library and executable.
 - `tests/smoke.sh`: API and behavior checks.
+- `tests/{unit,integration,contract}/`: Bats development suites.
+- `Makefile`: Build, test, lint, format, check, and clean entrypoints.
 
 Edit the source modules. Do not edit `dist/moma` directly.
 
 ## Requirements
 
-- Bash 4 or newer.
+- Bash 4.0 or newer.
 - Python 3 only for `preview web`.
 - Glow optionally for rendered help and Markdown previews.
 - `tput` optionally for the interactive spinner.
@@ -163,6 +168,22 @@ Edit the source modules. Do not edit `dist/moma` directly.
 ```bash
 ./tests/smoke.sh
 ```
+
+2. Run all available test suites.
+
+```bash
+make test
+```
+
+Install Bats-core to enable the unit, integration, and contract suites. Install
+ShellCheck and shfmt to use `make lint` and `make format`. These tools are only
+development dependencies.
+
+## Architecture
+
+Read [`docs/architecture.md`](docs/architecture.md) for the layer boundaries,
+output channels, exit statuses, terminal lifecycle, and build flow. Read
+[`docs/migration-notes.md`](docs/migration-notes.md) for compatibility details.
 
 ## Run the example
 

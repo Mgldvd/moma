@@ -1,4 +1,5 @@
-_moma_preview_usage () {
+# Terminal preview and preview dispatcher.
+_moma_preview_usage() {
     cat <<'EOF'
 Moma component preview
 
@@ -12,10 +13,13 @@ Options:
 EOF
 }
 
-_moma_preview_parse_args () {
+_moma_preview_parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h|--help) _moma_preview_usage; return 2 ;;
+            -h | --help)
+                _moma_preview_usage
+                return 2
+                ;;
             *)
                 printf 'moma preview: unknown option: %s\n\n' "$1" >&2
                 _moma_preview_usage >&2
@@ -25,27 +29,22 @@ _moma_preview_parse_args () {
     done
 }
 
-_moma_preview_width () {
-    local width="${COLUMNS:-}"
-    if [[ ! "$width" =~ ^[0-9]+$ ]] && command -v tput &>/dev/null; then
-        width="$(tput cols 2>/dev/null || true)"
-    fi
-    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
-        width=88
-    fi
-    if (( width < 56 )); then
+_moma_preview_width() {
+    local width
+    width="$(_moma_term_width 88)"
+    if ((width < 56)); then
         width=56
-    elif (( width > 100 )); then
+    elif ((width > 100)); then
         width=100
     fi
     printf '%s' "$width"
 }
 
-_moma_preview_line () {
+_moma_preview_line() {
     _moma_repeat_char "${1:--}" "$_moma_preview_width_value"
 }
 
-_moma_preview_header () {
+_moma_preview_header() {
     if [[ -t 1 ]]; then
         clear 2>/dev/null || true
     fi
@@ -56,7 +55,7 @@ _moma_preview_header () {
     printf '  Legend  ● success  ● error  ● warning  ● info%b\n\n' "$MOMA_COLOR_RESET"
 }
 
-_moma_preview_section () {
+_moma_preview_section() {
     local index="$1"
     local title="$2"
     local description="$3"
@@ -66,7 +65,7 @@ _moma_preview_section () {
     printf '%s%b\n\n' "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
 }
 
-_moma_preview_component () {
+_moma_preview_component() {
     local name="$1"
     local purpose="$2"
     local example="$3"
@@ -80,22 +79,22 @@ _moma_preview_component () {
     printf '\n'
 }
 
-_moma_preview_render_title () {
+_moma_preview_render_title() {
     moma-title "Moma" "Terminal UI library"
 }
 
-_moma_preview_render_title_sub () {
+_moma_preview_render_title_sub() {
     moma-title-sub "Deployment" "Production environment"
 }
 
-_moma_preview_render_sections () {
+_moma_preview_render_sections() {
     moma-section "Dependencies ready" --success
     moma-section "Configuration failed" --error
     moma-section "Review required" --warning
     moma-section "Next step" --info
 }
 
-_moma_preview_render_messages () {
+_moma_preview_render_messages() {
     moma-msg "Package installed" --success
     moma-msg "Connection refused" --error
     moma-msg "Using cached version" --warning
@@ -103,63 +102,63 @@ _moma_preview_render_messages () {
     moma-msg "Custom presentation" --icon "◆" --color pink
 }
 
-_moma_preview_render_simple_message () {
+_moma_preview_render_simple_message() {
     moma-msg-simple "Package installed"
     moma-msg-simple "Package installation failed" --error
 }
 
-_moma_preview_render_list () {
+_moma_preview_render_list() {
     moma-list "Clone repository" "Install dependencies" "Start application"
 }
 
-_moma_preview_render_boxes () {
+_moma_preview_render_boxes() {
     moma-box "Your configuration is ready." --success
     moma-box "Back up your files before continuing." --warning
 }
 
-_moma_preview_render_prompt () {
+_moma_preview_render_prompt() {
     moma-prompt "Continue with the installation?" --color pink
 }
 
-_moma_preview_render_label () {
+_moma_preview_render_label() {
     moma-label "TEXT HERE"
 }
 
-_moma_preview_render_inputs () {
+_moma_preview_render_inputs() {
     moma-input --title "Project name" --placeholder "my-project"
     moma-input --title "Environment" --value "production" --info
     moma-input --title "Danger zone" --warning --color yellow
 }
 
-_moma_preview_render_select () {
-    moma-select "Development" "Staging" "Production" --title "Environment" --choose 2 2>&1 >/dev/null
+_moma_preview_render_select() {
+    { moma-select "Development" "Staging" "Production" --title "Environment" --choose 2 >/dev/null; } 2>&1
 }
 
-_moma_preview_render_multi_select () {
-    moma-multi-select "Docker" "CI" "Tests" --title "Features" --choose 1,3 2>&1 >/dev/null
+_moma_preview_render_multi_select() {
+    { moma-multi-select "Docker" "CI" "Tests" --title "Features" --choose 1,3 >/dev/null; } 2>&1
 }
 
-_moma_preview_render_rabbits () {
+_moma_preview_render_rabbits() {
     moma-rabbit "Preparing workspace" --info
     printf '\n'
     moma-rabbit "Task completed" --success
 }
 
-_moma_preview_render_confirm () {
+_moma_preview_render_confirm() {
     moma-confirm "Continue with deployment?" --default yes --answer yes 2>&1
 }
 
-_moma_preview_render_spinner () {
+_moma_preview_render_spinner() {
     sleep 0.05 &
     local pid=$!
     moma-spinner "$pid" "Preparing workspace" --delay 0.01
 }
 
-_moma_preview_render_command_check () {
+_moma_preview_render_command_check() {
     moma-command-check bash
 }
 
-_moma_preview_footer () {
+_moma_preview_footer() {
     printf '%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '━')"
     printf '  Browser docs  ./dist/moma preview web\n'
     printf '  Markdown docs  ./dist/moma preview md\n'
@@ -167,101 +166,7 @@ _moma_preview_footer () {
     printf '%s%b\n\n' "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
 }
 
-_moma_preview_web () {
-    local port="${MOMA_PREVIEW_PORT:-4173}"
-
-    if [[ ! "$port" =~ ^[0-9]+$ ]] || (( port < 1 || port > 65535 )); then
-        printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
-        return 1
-    fi
-    if ! command -v python3 &>/dev/null; then
-        printf 'moma preview web: python3 is required\n' >&2
-        return 1
-    fi
-
-    local preview_dir
-    preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
-    _moma_preview_web_index > "$preview_dir/index.html"
-    _moma_preview_web_styles > "$preview_dir/styles.css"
-    _moma_preview_web_script > "$preview_dir/app.js"
-
-    (
-        trap 'rm -rf "$preview_dir"' EXIT
-        cd "$preview_dir" || exit 1
-        python3 - "$port" <<'PY'
-import errno
-import http.server
-import sys
-
-requested_port = int(sys.argv[1])
-last_port = min(requested_port + 100, 65535)
-server = None
-
-for candidate_port in range(requested_port, last_port + 1):
-    try:
-        server = http.server.ThreadingHTTPServer(
-            ("127.0.0.1", candidate_port),
-            http.server.SimpleHTTPRequestHandler,
-        )
-        break
-    except OSError as error:
-        if error.errno != errno.EADDRINUSE:
-            print(f"moma preview web: {error}", file=sys.stderr)
-            raise SystemExit(1) from None
-
-if server is None:
-    print(
-        f"moma preview web: no free port from {requested_port} to {last_port}",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
-
-selected_port = server.server_address[1]
-if selected_port != requested_port:
-    print(
-        f"Port {requested_port} is already in use; using {selected_port} instead.",
-        flush=True,
-    )
-
-print(f"Moma web preview: http://127.0.0.1:{selected_port}", flush=True)
-print("Press Ctrl+C to stop.", flush=True)
-
-try:
-    server.serve_forever()
-except KeyboardInterrupt:
-    pass
-finally:
-    server.server_close()
-PY
-    )
-}
-
-_moma_preview_reject_extra_args () {
-    local format="$1"
-    shift
-    if [[ $# -gt 0 ]]; then
-        printf 'moma preview %s: unexpected argument: %s\n' "$format" "$1" >&2
-        return 1
-    fi
-}
-
-_moma_preview_markdown () {
-    local width="${MOMA_PREVIEW_WIDTH:-${COLUMNS:-100}}"
-
-    if [[ ! "$width" =~ ^[0-9]+$ ]] || (( width < 20 )); then
-        width=100
-    fi
-
-    if command -v glow &>/dev/null; then
-        if _moma_docs_markdown_document | glow -w "$width" -; then
-            return 0
-        fi
-    fi
-
-    _moma_docs_markdown_document
-}
-
-_moma_preview () {
+_moma_preview() {
     case "${1:-}" in
         md)
             shift
@@ -281,17 +186,22 @@ _moma_preview () {
     _moma_preview_width_value="$(_moma_preview_width)"
 
     if [[ -n "${NO_COLOR:-}" ]]; then
+        # These locals are consumed through Bash dynamic scope by previewed components.
+        # shellcheck disable=SC2034
         local MOMA_COLOR_RESET="" MOMA_STYLE_WHITE_BOLD="" MOMA_STYLE_CYAN_BOLD="" MOMA_COLOR_GRAY=""
+        # shellcheck disable=SC2034
         local MOMA_COLOR_PINK="" MOMA_COLOR_CYAN="" MOMA_COLOR_GREEN="" MOMA_COLOR_RED="" MOMA_COLOR_YELLOW=""
+        # shellcheck disable=SC2034
         local MOMA_COLOR_SUCCESS="" MOMA_COLOR_ERROR="" MOMA_COLOR_WARNING=""
+        # shellcheck disable=SC2034
         local MOMA_COLOR_INFO="" MOMA_COLOR_PRIMARY="" MOMA_COLOR_ACCENT="" MOMA_COLOR_MUTED=""
     fi
 
     local parse_status=0
     _moma_preview_parse_args "$@" || parse_status=$?
-    if (( parse_status == 2 )); then
+    if ((parse_status == 2)); then
         return 0
-    elif (( parse_status != 0 )); then
+    elif ((parse_status != 0)); then
         return "$parse_status"
     fi
 
@@ -318,7 +228,8 @@ _moma_preview () {
 
     _moma_preview_section "04" "Helpers" "Reusable interaction and environment checks for Bash workflows."
     _moma_preview_component "moma-confirm" "Arrow-key Yes/No selection with y and n shortcuts." 'moma-confirm "Continue?" --default yes' _moma_preview_render_confirm
-    _moma_preview_component "moma-spinner" "Process progress followed by a semantic completion message." 'moma-spinner "$pid" "Preparing workspace"' _moma_preview_render_spinner
+    local spinner_example="moma-spinner \"\$pid\" \"Preparing workspace\""
+    _moma_preview_component "moma-spinner" "Process progress followed by a semantic completion message." "$spinner_example" _moma_preview_render_spinner
     _moma_preview_component "moma-command-check" "Check one or more executable dependencies." 'moma-command-check bash curl' _moma_preview_render_command_check
 
     _moma_preview_footer

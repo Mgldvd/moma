@@ -1,4 +1,5 @@
-_moma_render_rabbit () {
+# Rabbit component.
+_moma_render_rabbit() {
     local message="$1"
     local color="${2:-}"
     local icon="${3:-}"
@@ -22,14 +23,14 @@ _moma_render_rabbit () {
                 line="${line:$max_width}"
             done
             lines+=("$line")
-        done <<< "$display_message"
+        done <<<"$display_message"
 
         for line in "${lines[@]}"; do
             output+="  | $line"$'\n'
         done
 
-        local last_index=$(( ${#lines[@]} - 1 ))
-        local tail_length=$(( ${#lines[$last_index]} + 3 ))
+        local last_index=$((${#lines[@]} - 1))
+        local tail_length=$((${#lines[$last_index]} + 3))
         output+="  /$(_moma_repeat_char "⎺" "$tail_length")"$'\n'
     fi
 
@@ -50,7 +51,7 @@ _moma_render_rabbit () {
     printf '%b%s\n%b' "$resolved_color" "$output" "$reset"
 }
 
-moma-rabbit () {
+moma-rabbit() {
     local color=""
     local icon=""
     local no_color=false
@@ -59,34 +60,59 @@ moma-rabbit () {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --success|--error|--warning|--info)
+            --success | --error | --warning | --info)
                 style="$(_moma_apply_semantic_style "${1#--}")"
                 color="${style%%$'\t'*}"
                 icon="${style#*$'\t'}"
-                shift ;;
-            --color|-c)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-rabbit "$1"; return 1; fi
-                color="$2"; shift 2 ;;
+                shift
+                ;;
+            --color | -c)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-rabbit "$1"
+                    return 1
+                fi
+                color="$2"
+                shift 2
+                ;;
             --color=*)
-                color="${1#*=}"; shift ;;
-            --icon|-i)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-rabbit "$1"; return 1; fi
-                icon="$2"; shift 2 ;;
+                color="${1#*=}"
+                shift
+                ;;
+            --icon | -i)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-rabbit "$1"
+                    return 1
+                fi
+                icon="$2"
+                shift 2
+                ;;
             --icon=*)
-                icon="${1#*=}"; shift ;;
+                icon="${1#*=}"
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-rabbit ["message"] [--success|--error|--warning|--info] [--color <color>] [--icon <icon>] [--no-color]
 EOF
-                return 0 ;;
+                return 0
+                ;;
             --)
-                shift; message+=("$@"); break ;;
+                shift
+                message+=("$@")
+                break
+                ;;
             -*)
-                _moma_unknown_option moma-rabbit "$1"; return 1 ;;
+                _moma_unknown_option moma-rabbit "$1"
+                return 1
+                ;;
             *)
-                message+=("$1"); shift ;;
+                message+=("$1")
+                shift
+                ;;
         esac
     done
 

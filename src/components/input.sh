@@ -1,4 +1,5 @@
-_moma_render_input () {
+# Input component.
+_moma_render_input() {
     local title="$1"
     local placeholder="$2"
     local default_value="$3"
@@ -24,20 +25,20 @@ _moma_render_input () {
         display_value="$placeholder"
     fi
 
-    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
+    if ! _moma_is_uint "$width"; then
         printf 'moma-input: invalid width: %s\n' "$width" >&2
         return 1
     fi
-    if (( width < 20 )); then
+    if ((width < 20)); then
         width=20
     fi
 
     local label_width=${#label}
     local display_width=${#display_value}
-    if (( label_width + 4 > width )); then
+    if ((label_width + 4 > width)); then
         width=$((label_width + 4))
     fi
-    if (( display_width + 2 > width )); then
+    if ((display_width + 2 > width)); then
         width=$((display_width + 2))
     fi
 
@@ -50,12 +51,12 @@ _moma_render_input () {
     else
         dash_count=$width
     fi
-    if (( dash_count < 1 )); then
+    if ((dash_count < 1)); then
         dash_count=1
     fi
 
     value_space=$((width - display_width - 2))
-    if (( value_space < 0 )); then
+    if ((value_space < 0)); then
         value_space=0
     fi
 
@@ -68,7 +69,7 @@ _moma_render_input () {
     printf '%b  └%s┘%b\n\n' "$resolved_color" "$(_moma_repeat_char "─" "$width")" "$reset"
 }
 
-_moma_render_input_open () {
+_moma_render_input_open() {
     local title="$1"
     local placeholder="$2"
     local default_value="$3"
@@ -86,11 +87,11 @@ _moma_render_input_open () {
         label="$icon"
     fi
 
-    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
+    if ! _moma_is_uint "$width"; then
         printf 'moma-input: invalid width: %s\n' "$width" >&2
         return 1
     fi
-    if (( width < 20 )); then
+    if ((width < 20)); then
         width=20
     fi
 
@@ -98,16 +99,16 @@ _moma_render_input_open () {
     local placeholder_width=${#placeholder}
     local default_width=${#default_value}
     local value_width=${#value}
-    if (( label_width + 4 > width )); then
+    if ((label_width + 4 > width)); then
         width=$((label_width + 4))
     fi
-    if (( placeholder_width + 2 > width )); then
+    if ((placeholder_width + 2 > width)); then
         width=$((placeholder_width + 2))
     fi
-    if (( default_width + 2 > width )); then
+    if ((default_width + 2 > width)); then
         width=$((default_width + 2))
     fi
-    if (( value_width + 2 > width )); then
+    if ((value_width + 2 > width)); then
         width=$((value_width + 2))
     fi
 
@@ -120,7 +121,7 @@ _moma_render_input_open () {
     else
         dash_count=$width
     fi
-    if (( dash_count < 1 )); then
+    if ((dash_count < 1)); then
         dash_count=1
     fi
 
@@ -138,7 +139,7 @@ _moma_render_input_open () {
     printf '%b  │%s%b' "$resolved_color" "$prompt_text" "$reset" >&2
 }
 
-_moma_read_secret () {
+_moma_read_secret() {
     local target_var="$1"
     local mask="${2:-*}"
     local secret_value=""
@@ -150,10 +151,13 @@ _moma_read_secret () {
         return 0
     fi
 
+    local read_status
     while true; do
-        if ! IFS= read -r -s -n 1 character; then
+        IFS= read -r -s -n 1 character
+        read_status=$?
+        if ((read_status != 0)); then
             printf '\n' >&2
-            return 1
+            return "$read_status"
         fi
 
         if [[ -z "$character" ]]; then
@@ -162,7 +166,7 @@ _moma_read_secret () {
         fi
 
         case "$character" in
-            $'\177'|$'\b')
+            $'\177' | $'\b')
                 if [[ -n "$secret_value" ]]; then
                     secret_value="${secret_value%?}"
                     printf '\b \b' >&2
@@ -178,7 +182,41 @@ _moma_read_secret () {
     printf -v "$target_var" '%s' "$secret_value"
 }
 
-moma-input () {
+_moma_input_validate() {
+    local width="$1"
+    if ! _moma_is_uint "$width"; then
+        printf 'moma-input: invalid width: %s\n' "$width" >&2
+        return 1
+    fi
+}
+
+_moma_input_resolve_result() {
+    local response="$1"
+    local default_value="$2"
+    local value="$3"
+    local trim="$4"
+    local result="$response"
+
+    if $trim; then
+        result="$(_moma_trim "$result")"
+    fi
+    if [[ -z "$result" && -n "$default_value" ]]; then
+        result="$default_value"
+    fi
+    if [[ -z "$result" && -n "$value" ]]; then
+        result="$value"
+    fi
+    if $trim; then
+        result="$(_moma_trim "$result")"
+    fi
+    printf '%s' "$result"
+}
+
+_moma_input_emit_result() {
+    printf '%s\n' "$1"
+}
+
+moma-input() {
     local title=""
     local placeholder=""
     local default_value=""
@@ -198,66 +236,140 @@ moma-input () {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --title)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                title="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                title="$2"
+                shift 2
+                ;;
             --title=*)
-                title="${1#*=}"; shift ;;
+                title="${1#*=}"
+                shift
+                ;;
             --placeholder)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                placeholder="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                placeholder="$2"
+                shift 2
+                ;;
             --placeholder=*)
-                placeholder="${1#*=}"; shift ;;
+                placeholder="${1#*=}"
+                shift
+                ;;
             --default)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                default_value="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                default_value="$2"
+                shift 2
+                ;;
             --default=*)
-                default_value="${1#*=}"; shift ;;
+                default_value="${1#*=}"
+                shift
+                ;;
             --value)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                value="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                value="$2"
+                shift 2
+                ;;
             --value=*)
-                value="${1#*=}"; shift ;;
+                value="${1#*=}"
+                shift
+                ;;
             --width)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                width="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                width="$2"
+                shift 2
+                ;;
             --width=*)
-                width="${1#*=}"; shift ;;
-            --color|-c)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                color="$2"; shift 2 ;;
+                width="${1#*=}"
+                shift
+                ;;
+            --color | -c)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                color="$2"
+                shift 2
+                ;;
             --color=*)
-                color="${1#*=}"; shift ;;
-            --icon|-i)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                icon="$2"; shift 2 ;;
+                color="${1#*=}"
+                shift
+                ;;
+            --icon | -i)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                icon="$2"
+                shift 2
+                ;;
             --icon=*)
-                icon="${1#*=}"; shift ;;
+                icon="${1#*=}"
+                shift
+                ;;
             --prompt)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                prompt_marker="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                prompt_marker="$2"
+                shift 2
+                ;;
             --prompt=*)
-                prompt_marker="${1#*=}"; shift ;;
+                prompt_marker="${1#*=}"
+                shift
+                ;;
             --mask)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-input "$1"; return 1; fi
-                secret_mask="$2"; shift 2 ;;
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                secret_mask="$2"
+                shift 2
+                ;;
             --mask=*)
-                secret_mask="${1#*=}"; shift ;;
-            --success|--error|--warning|--info)
+                secret_mask="${1#*=}"
+                shift
+                ;;
+            --success | --error | --warning | --info)
                 style="$(_moma_apply_semantic_style "${1#--}")"
                 color="${style%%$'\t'*}"
                 icon="${style#*$'\t'}"
-                shift ;;
+                shift
+                ;;
             --read)
-                read_mode=true; shift ;;
+                read_mode=true
+                shift
+                ;;
             --secret)
-                secret=true; shift ;;
+                secret=true
+                shift
+                ;;
             --required)
-                required=true; shift ;;
+                required=true
+                shift
+                ;;
             --trim)
-                trim=true; shift ;;
+                trim=true
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage:
   moma-input --title "Name"
@@ -289,18 +401,20 @@ Options:
   --help, -h
 
 EOF
-                return 0 ;;
+                return 0
+                ;;
             -*)
-                _moma_unknown_option moma-input "$1"; return 1 ;;
+                _moma_unknown_option moma-input "$1"
+                return 1
+                ;;
             *)
-                _moma_unknown_option moma-input "$1"; return 1 ;;
+                _moma_unknown_option moma-input "$1"
+                return 1
+                ;;
         esac
     done
 
-    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
-        printf 'moma-input: invalid width: %s\n' "$width" >&2
-        return 1
-    fi
+    _moma_input_validate "$width" || return $?
 
     if ! $read_mode; then
         _moma_render_input "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$no_color"
@@ -328,31 +442,19 @@ EOF
             printf '\n\n' >&2
         fi
 
-        result="$response"
-        if $trim; then
-            result="$(_moma_trim "$result")"
-        fi
-        if [[ -z "$result" && -n "$default_value" ]]; then
-            result="$default_value"
-        fi
-        if [[ -z "$result" && -n "$value" ]]; then
-            result="$value"
-        fi
-        if $trim; then
-            result="$(_moma_trim "$result")"
-        fi
+        result="$(_moma_input_resolve_result "$response" "$default_value" "$value" "$trim")"
 
         if ! $required || [[ -n "$result" ]]; then
-            printf '%s\n' "$result"
+            _moma_input_emit_result "$result"
             return 0
         fi
 
-        if (( read_status != 0 )); then
+        if ((read_status != 0)); then
             printf 'moma-input: value is required\n' >&2
             return 1
         fi
 
-        if declare -F moma-msg > /dev/null; then
+        if declare -F moma-msg >/dev/null; then
             moma-msg "This field is required" --error >&2
         else
             printf 'moma-input: value is required\n' >&2

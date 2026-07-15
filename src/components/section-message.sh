@@ -1,4 +1,5 @@
-_moma_render_section () {
+# Section and message components.
+_moma_render_section() {
     local text="$1"
     local color="${2:-$MOMA_COLOR_PRIMARY}"
     local icon="${3:-}"
@@ -18,7 +19,7 @@ _moma_render_section () {
     printf '  └ %b\n' "$reset"
 }
 
-moma-section () {
+moma-section() {
     local text=""
     local color="$MOMA_COLOR_PRIMARY"
     local icon=""
@@ -28,34 +29,59 @@ moma-section () {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --success|--error|--warning|--info)
+            --success | --error | --warning | --info)
                 style="$(_moma_apply_semantic_style "${1#--}")"
                 color="${style%%$'\t'*}"
                 icon="${style#*$'\t'}"
-                shift ;;
-            --color|-c)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-section "$1"; return 1; fi
-                color="$2"; shift 2 ;;
+                shift
+                ;;
+            --color | -c)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-section "$1"
+                    return 1
+                fi
+                color="$2"
+                shift 2
+                ;;
             --color=*)
-                color="${1#*=}"; shift ;;
-            --icon|-i)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-section "$1"; return 1; fi
-                icon="$2"; shift 2 ;;
+                color="${1#*=}"
+                shift
+                ;;
+            --icon | -i)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-section "$1"
+                    return 1
+                fi
+                icon="$2"
+                shift 2
+                ;;
             --icon=*)
-                icon="${1#*=}"; shift ;;
+                icon="${1#*=}"
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-section "<text>" [--success|--error|--warning|--info] [--color <color>] [--icon <icon>] [--no-color]
 EOF
-                return 0 ;;
+                return 0
+                ;;
             --)
-                shift; positional+=("$@"); break ;;
+                shift
+                positional+=("$@")
+                break
+                ;;
             -*)
-                _moma_unknown_option moma-section "$1"; return 1 ;;
+                _moma_unknown_option moma-section "$1"
+                return 1
+                ;;
             *)
-                positional+=("$1"); shift ;;
+                positional+=("$1")
+                shift
+                ;;
         esac
     done
 
@@ -63,7 +89,7 @@ EOF
     _moma_render_section "$text" "$color" "$icon" "$no_color"
 }
 
-_moma_render_msg () {
+_moma_render_msg() {
     local text="$1"
     local color="${2:-$MOMA_COLOR_PRIMARY}"
     local icon="${3:-}"
@@ -92,7 +118,7 @@ _moma_render_msg () {
     esac
 }
 
-moma-msg () {
+moma-msg() {
     local text=""
     local color="$MOMA_COLOR_PRIMARY"
     local icon=""
@@ -103,36 +129,63 @@ moma-msg () {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --success|--error|--warning|--info)
+            --success | --error | --warning | --info)
                 style="$(_moma_apply_semantic_style "${1#--}")"
                 color="${style%%$'\t'*}"
                 icon="${style#*$'\t'}"
-                shift ;;
+                shift
+                ;;
             --plain)
-                variant=plain; shift ;;
-            --color|-c)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-msg "$1"; return 1; fi
-                color="$2"; shift 2 ;;
+                variant=plain
+                shift
+                ;;
+            --color | -c)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-msg "$1"
+                    return 1
+                fi
+                color="$2"
+                shift 2
+                ;;
             --color=*)
-                color="${1#*=}"; shift ;;
-            --icon|-i)
-                if [[ $# -lt 2 ]]; then _moma_option_requires_value moma-msg "$1"; return 1; fi
-                icon="$2"; shift 2 ;;
+                color="${1#*=}"
+                shift
+                ;;
+            --icon | -i)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-msg "$1"
+                    return 1
+                fi
+                icon="$2"
+                shift 2
+                ;;
             --icon=*)
-                icon="${1#*=}"; shift ;;
+                icon="${1#*=}"
+                shift
+                ;;
             --no-color)
-                no_color=true; shift ;;
-            --help|-h)
+                no_color=true
+                shift
+                ;;
+            --help | -h)
                 cat <<'EOF'
 Usage: moma-msg "<text>" [--success|--error|--warning|--info] [--color <color>] [--icon <icon>] [--plain] [--no-color]
 EOF
-                return 0 ;;
+                return 0
+                ;;
             --)
-                shift; positional+=("$@"); break ;;
+                shift
+                positional+=("$@")
+                break
+                ;;
             -*)
-                _moma_unknown_option moma-msg "$1"; return 1 ;;
+                _moma_unknown_option moma-msg "$1"
+                return 1
+                ;;
             *)
-                positional+=("$1"); shift ;;
+                positional+=("$1")
+                shift
+                ;;
         esac
     done
 
