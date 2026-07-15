@@ -306,8 +306,13 @@ terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 
 colored_terminal_preview="$(env -u NO_COLOR "$MOMA_DIST" preview)"
 preview_gray=$'\033[38;2;200;200;200m'
+preview_green=$'\033[32m'
+preview_red=$'\033[31m'
 preview_yellow=$'\033[33m'
+preview_cyan=$'\033[36m'
 preview_reset=$'\033[0m'
+expected_legend="  Legend  ${preview_green}● success${preview_reset}  ${preview_red}● error${preview_reset}  ${preview_yellow}● warning${preview_reset}  ${preview_cyan}● info${preview_reset}"
+[[ "$colored_terminal_preview" == *"$expected_legend"* ]]
 [[ "$colored_terminal_preview" == *"${preview_gray}────────────────"* ]]
 [[ "$colored_terminal_preview" == *"  02  Status and feedback"* ]]
 [[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
