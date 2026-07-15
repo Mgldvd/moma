@@ -337,10 +337,12 @@ glow_preview="$(PATH="$fake_bin:/usr/bin:/bin" MOMA_PREVIEW_WIDTH=76 "$MOMA_DIST
 [[ -s "$ROOT_DIR/web/styles.css" ]]
 [[ -s "$ROOT_DIR/web/app.js" ]]
 rg -Fq 'bash &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview' "$ROOT_DIR/web/index.html"
-rg -Fq '<h2 class="hero-load__title">Load from GitHub</h2>' "$ROOT_DIR/web/index.html"
+[[ "$(rg -c '<span class="quick-start__label">' "$ROOT_DIR/web/index.html")" == "2" ]]
+rg -Fq '<span class="quick-start__label">Preview</span>' "$ROOT_DIR/web/index.html"
+rg -Fq '<span class="quick-start__label">Load</span>' "$ROOT_DIR/web/index.html"
 rg -Fq 'source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)' "$ROOT_DIR/web/index.html"
 rg -Fq 'moma-msg "Ready" --success' "$ROOT_DIR/web/index.html"
-! rg -Fq 'gitlab.com/mgldvd/Linux-Utils' "$ROOT_DIR/web/index.html"
+! rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
 [[ "$api_count" == "16" ]]
