@@ -31,7 +31,7 @@ moma-title "Deploy" "Production" --primary cyan
 moma-title "Backup" "Nightly job" --accent yellow --min-width 48
 ```
 
-![moma-title preview](../.mg/moma-title.png)
+![moma-title preview](../.img/moma-title.png)
 
 ### `moma-title-sub`
 
@@ -52,7 +52,7 @@ moma-title-sub "Deploy" "Production" --color cyan
 moma-title-sub "Tests" --message "Running suite" --min-width 42
 ```
 
-![moma-title-sub preview](../.mg/moma-title-sub.png)
+![moma-title-sub preview](../.img/moma-title-sub.png)
 
 ### `moma-section`
 
@@ -73,7 +73,7 @@ moma-section "Configuration failed" --error
 moma-section "Next step" --info --icon "→"
 ```
 
-![moma-section preview](../.mg/moma-section.png)
+![moma-section preview](../.img/moma-section.png)
 
 ### `moma-msg`
 
@@ -94,7 +94,7 @@ moma-msg "Connection refused" --error
 moma-msg "Downloading metadata" --color cyan --icon "→"
 ```
 
-![moma-msg preview](../.mg/moma-msg.png)
+![moma-msg preview](../.img/moma-msg.png)
 
 ### `moma-msg-simple`
 
@@ -115,7 +115,7 @@ moma-msg-simple "Package installation failed" --error
 moma-msg-simple "Queued" --color yellow --marker "•"
 ```
 
-![moma-msg-simple preview](../.mg/moma-msg-simple.png)
+![moma-msg-simple preview](../.img/moma-msg-simple.png)
 
 ### `moma-list`
 
@@ -136,7 +136,7 @@ moma-list "Database ready" "Cache ready" --success
 moma-list "Review logs" "Retry deployment" --marker "→" --color yellow
 ```
 
-![moma-list preview](../.mg/moma-list.png)
+![moma-list preview](../.img/moma-list.png)
 
 ### `moma-box`
 
@@ -157,7 +157,7 @@ moma-box "Review the deployment settings." --warning --width 48
 moma-box "Build failed." --error --icon "✖" --padding 2
 ```
 
-![moma-box preview](../.mg/moma-box.png)
+![moma-box preview](../.img/moma-box.png)
 
 ### `moma-prompt`
 
@@ -178,7 +178,7 @@ moma-prompt "Select an environment" --color cyan
 moma-prompt "Deploy now?" --default "yes" --icon "?"
 ```
 
-![moma-prompt preview](../.mg/moma-prompt.png)
+![moma-prompt preview](../.img/moma-prompt.png)
 
 ### `moma-label`
 
@@ -199,7 +199,7 @@ moma-label "DEPLOYMENT" --success
 moma-label "NOTES" --width 52 --color cyan --icon "→"
 ```
 
-![moma-label preview](../.mg/moma-label.png)
+![moma-label preview](../.img/moma-label.png)
 
 ### `moma-rabbit`
 
@@ -220,7 +220,7 @@ moma-rabbit "Deployment complete" --success
 moma-rabbit "Build needs attention" --warning --icon "!"
 ```
 
-![moma-rabbit preview](../.mg/moma-rabbit.png)
+![moma-rabbit preview](../.img/moma-rabbit.png)
 
 ## Interactive components
 
@@ -243,7 +243,7 @@ project="$(moma-input --title "Project name" --read --required --trim)"
 password="$(moma-input --title "Password" --read --secret --required)"
 ```
 
-![moma-input preview](../.mg/moma-input.png)
+![moma-input preview](../.img/moma-input.png)
 
 ### `moma-select`
 
@@ -264,7 +264,7 @@ environment="$(moma-select "Development" "Staging" "Production" --choose 2)"
 region="$(moma-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
 ```
 
-![moma-select preview](../.mg/moma-select.png)
+![moma-select preview](../.img/moma-select.png)
 
 ### `moma-multi-select`
 
@@ -285,7 +285,7 @@ features="$(moma-multi-select "Docker" "CI" "Tests" --choose 1,3)"
 features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
 ```
 
-![moma-multi-select preview](../.mg/moma-multi-select.png)
+![moma-multi-select preview](../.img/moma-multi-select.png)
 
 ### `moma-confirm`
 
@@ -308,7 +308,7 @@ if moma-confirm "Deploy now?"; then
 fi
 ```
 
-![moma-confirm preview](../.mg/moma-confirm.png)
+![moma-confirm preview](../.img/moma-confirm.png)
 
 ## Workflow helpers
 
@@ -334,7 +334,7 @@ build_project &
 moma-spinner "$!" "Building" --delay 0.05
 ```
 
-![moma-spinner preview](../.mg/moma-spinner.png)
+![moma-spinner preview](../.img/moma-spinner.png)
 
 ### `moma-command-check`
 
@@ -357,7 +357,7 @@ if ! moma-command-check git; then
 fi
 ```
 
-![moma-command-check preview](../.mg/moma-command-check.png)
+![moma-command-check preview](../.img/moma-command-check.png)
 
 ## Semantic styles
 

@@ -4,12 +4,13 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WEB_INDEX="$ROOT_DIR/web/index.html"
-OUTPUT_DIR="${1:-$ROOT_DIR/.mg}"
+OUTPUT_DIR="${1:-$ROOT_DIR/.img}"
 SCREENSHOT_WIDTH="${SCREENSHOT_WIDTH:-1200}"
 SCREENSHOT_HEIGHT="${SCREENSHOT_HEIGHT:-664}"
+SCREENSHOT_TIMEOUT="${SCREENSHOT_TIMEOUT:-30}"
 
-if [[ ! "$SCREENSHOT_WIDTH" =~ ^[1-9][0-9]*$ ]] || [[ ! "$SCREENSHOT_HEIGHT" =~ ^[1-9][0-9]*$ ]]; then
-    printf 'generate-screenshots: width and height must be positive integers\n' >&2
+if [[ ! "$SCREENSHOT_WIDTH" =~ ^[1-9][0-9]*$ ]] || [[ ! "$SCREENSHOT_HEIGHT" =~ ^[1-9][0-9]*$ ]] || [[ ! "$SCREENSHOT_TIMEOUT" =~ ^[1-9][0-9]*$ ]]; then
+    printf 'generate-screenshots: width, height, and timeout must be positive integers\n' >&2
     exit 1
 fi
 
@@ -34,6 +35,11 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
+if ! command -v timeout &>/dev/null; then
+    printf 'generate-screenshots: timeout is required to limit Chromium runs\n' >&2
+    exit 1
+fi
+
 mapfile -t components < <(
     rg -o 'data-api="moma-[a-z-]+' "$WEB_INDEX" \
         | cut -d '"' -f 2 \
@@ -55,7 +61,7 @@ trap 'rm -rf "$browser_profile"' EXIT
 for component in "${components[@]}"; do
     output_file="$OUTPUT_DIR/$component.png"
 
-    if ! "$chromium_bin" \
+    if ! timeout --signal=TERM --kill-after=5 "$SCREENSHOT_TIMEOUT" "$chromium_bin" \
         --headless=new \
         --disable-dev-shm-usage \
         --disable-extensions \
