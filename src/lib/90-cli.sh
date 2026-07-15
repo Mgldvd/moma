@@ -12,8 +12,7 @@ Commands:
   preview
 
 Options:
-  -h, --help       Show this help.
-  -v, --version    Show the Moma version.
+  -h, --help    Show this help.
 
 Library example:
   source dist/moma
@@ -48,7 +47,6 @@ _moma_main () {
 
     case "$command" in
         ""|-h|--help|help) _moma_usage ;;
-        -v|--version|version) printf 'moma %s\n' "$MOMA_VERSION" ;;
         title) moma-title "$@" ;;
         title-sub) moma-title-sub "$@" ;;
         section) moma-section "$@" ;;

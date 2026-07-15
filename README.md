@@ -6,20 +6,10 @@
 
 Moma is a standalone Bash library and executable for terminal UI components.
 
-Repository: <https://github.com/Mgldvd/moma>
-
-## Clone the repository
-
-1. Clone Moma from GitHub.
+## Preview with curl
 
 ```bash
-git clone https://github.com/Mgldvd/moma.git
-```
-
-2. Enter the repository.
-
-```bash
-cd moma
+bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview
 ```
 
 ## Project structure
@@ -27,7 +17,7 @@ cd moma
 - `src/lib/`: Editable source modules.
 - `docs/`: Embedded Markdown help and reference.
 - `enhancement.md`: Future component backlog.
-- `preview/`: Embedded browser documentation.
+- `web/`: Embedded browser documentation.
 - `build.sh`: Standalone-file builder.
 - `dist/moma`: Generated library and executable.
 - `tests/smoke.sh`: API and behavior checks.
@@ -49,10 +39,10 @@ Edit the source modules. Do not edit `dist/moma` directly.
 ./build.sh
 ```
 
-2. Check the generated file.
+2. Check the generated file help.
 
 ```bash
-./dist/moma --version
+./dist/moma --help
 ```
 
 ## Test
@@ -109,14 +99,6 @@ source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/mo
 
 ```bash
 moma-msg "Ready" --success
-```
-
-## Preview with curl
-
-1. Download and open the terminal component reference.
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview
 ```
 
 ## Run as an executable

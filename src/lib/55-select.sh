@@ -8,16 +8,20 @@ _moma_render_select () {
     local -a options=("$@")
     local marker="▪"
 
-    local active_color reset
+    local active_color reset header_width
     active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
     reset="$(_moma_reset_color "$no_color")"
+    header_width=$(( ${#title} + 6 > 30 ? ${#title} + 6 : 30 ))
 
     if $redraw; then
-        printf '\033[%dA' "$(( ${#options[@]} + 2 ))" >&2
+        printf '\033[%dA' "$(( ${#options[@]} + 3 ))" >&2
     fi
 
     if $redraw; then printf '\033[2K\r' >&2; fi
-    printf '  %s\n' "$title" >&2
+    printf '  %b▪%b  %s\n' "$active_color" "$reset" "$title" >&2
+
+    if $redraw; then printf '\033[2K\r' >&2; fi
+    printf '  %b└%s%b\n' "$active_color" "$(_moma_repeat_char "─" "$header_width")" "$reset" >&2
 
     local index
     for index in "${!options[@]}"; do

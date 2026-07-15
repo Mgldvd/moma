@@ -55,7 +55,6 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 ## Global options
 
 - `-h`, `--help`: Show help.
-- `-v`, `--version`: Show the Moma version.
 
 ## Binary examples
 

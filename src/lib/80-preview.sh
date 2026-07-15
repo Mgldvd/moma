@@ -49,23 +49,21 @@ _moma_preview_header () {
     if [[ -t 1 ]]; then
         clear 2>/dev/null || true
     fi
-    printf '\n%b%s%b\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
-    printf '%b  MOMA%b  %bCOMPONENT GALLERY%b\n' "$MOMA_STYLE_WHITE_BOLD" "$MOMA_COLOR_RESET" "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET"
-    printf '%b  Visual reference for the public terminal UI API%b\n' "$MOMA_COLOR_CYAN" "$MOMA_COLOR_RESET"
-    printf '%b%s%b\n\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
-    printf '  %bLegend%b  %b● success%b  %b● error%b  %b● warning%b  %b● info%b\n\n' \
-        "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$MOMA_COLOR_GREEN" "$MOMA_COLOR_RESET" "$MOMA_COLOR_RED" "$MOMA_COLOR_RESET" \
-        "$MOMA_COLOR_YELLOW" "$MOMA_COLOR_RESET" "$MOMA_COLOR_CYAN" "$MOMA_COLOR_RESET"
+    printf '\n%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '━')"
+    printf '  MOMA  COMPONENT GALLERY\n'
+    printf '  Visual reference for the public terminal UI API\n'
+    printf '%s\n\n' "$(_moma_preview_line '━')"
+    printf '  Legend  ● success  ● error  ● warning  ● info%b\n\n' "$MOMA_COLOR_RESET"
 }
 
 _moma_preview_section () {
     local index="$1"
     local title="$2"
     local description="$3"
-    printf '\n%b%s%b\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
-    printf '%b  %s%b  %b%s%b\n' "$MOMA_COLOR_PINK" "$index" "$MOMA_COLOR_RESET" "$MOMA_STYLE_WHITE_BOLD" "$title" "$MOMA_COLOR_RESET"
-    printf '      %b%s%b\n' "$MOMA_COLOR_GRAY" "$description" "$MOMA_COLOR_RESET"
-    printf '%b%s%b\n\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
+    printf '\n%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '─')"
+    printf '  %s  %s\n' "$index" "$title"
+    printf '      %s\n' "$description"
+    printf '%s%b\n\n' "$(_moma_preview_line '─')" "$MOMA_COLOR_RESET"
 }
 
 _moma_preview_component () {
@@ -74,10 +72,10 @@ _moma_preview_component () {
     local example="$3"
     local renderer="$4"
 
-    printf '%b┌─ %b%s%b\n' "$MOMA_COLOR_GRAY" "$MOMA_STYLE_CYAN_BOLD" "$name" "$MOMA_COLOR_RESET"
-    printf '%b│%b  %s\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$purpose"
-    printf '%b│%b  %b$ %s%b\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET" "$MOMA_COLOR_PINK" "$example" "$MOMA_COLOR_RESET"
-    printf '%b└─ output%b\n\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET"
+    printf '%b┌─ %s\n' "$MOMA_COLOR_GRAY" "$name"
+    printf '│  %s\n' "$purpose"
+    printf '│  $ %s\n' "$example"
+    printf '└─ %boutput%b:\n\n' "$MOMA_COLOR_YELLOW" "$MOMA_COLOR_RESET"
     "$renderer"
     printf '\n'
 }
@@ -162,11 +160,11 @@ _moma_preview_render_command_check () {
 }
 
 _moma_preview_footer () {
-    printf '%b%s%b\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
-    printf '%b  Browser docs%b  ./dist/moma preview web\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
-    printf '%b  Markdown docs%b  ./dist/moma preview md\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
-    printf '%b  Library help%b  ./dist/moma help\n' "$MOMA_STYLE_CYAN_BOLD" "$MOMA_COLOR_RESET"
-    printf '%b%s%b\n\n' "$MOMA_COLOR_PINK" "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
+    printf '%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '━')"
+    printf '  Browser docs  ./dist/moma preview web\n'
+    printf '  Markdown docs  ./dist/moma preview md\n'
+    printf '  Library help  ./dist/moma help\n'
+    printf '%s%b\n\n' "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
 }
 
 _moma_preview_web () {
@@ -272,7 +270,7 @@ _moma_preview () {
     _moma_preview_component "moma-prompt" "Question or confirmation lead-in." 'moma-prompt "Continue?" --color pink' _moma_preview_render_prompt
     _moma_preview_component "moma-label" "Decorated label aligned with input field headers." 'moma-label "TEXT HERE"' _moma_preview_render_label
     _moma_preview_component "moma-input" "Display and interactive input states." 'moma-input --title "Project name" --placeholder "my-project"' _moma_preview_render_inputs
-    _moma_preview_component "moma-select" "Arrow-key selection with one active dot marker." 'moma-select "Development" "Staging" "Production"' _moma_preview_render_select
+    _moma_preview_component "moma-select" "Arrow-key selection with one active dot marker." 'moma-select "Development" "Staging" "Production" --title "Environment"' _moma_preview_render_select
     _moma_preview_component "moma-multi-select" "Toggle multiple choices with empty and filled square markers." 'moma-multi-select "Docker" "CI" "Tests"' _moma_preview_render_multi_select
     _moma_preview_component "moma-rabbit" "Branded activity and completion feedback." 'moma-rabbit "Preparing workspace" --info' _moma_preview_render_rabbits
 
