@@ -162,7 +162,8 @@ environment="$(
 ```
 
 ```text
-  Environment
+  ▪  Environment
+  └──────────────────────────────
     Development
   ▪ Staging
     Production

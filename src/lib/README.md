@@ -218,7 +218,8 @@ environment="$(
 ```
 
 ```text
-  Environment
+  ▪  Environment
+  └──────────────────────────────
     Development
   ▪ Staging
     Production
@@ -340,5 +341,5 @@ Dispatches executable commands and renders embedded help.
 
 ```bash
 ./dist/moma help
-./dist/moma --version
+./dist/moma --help
 ```

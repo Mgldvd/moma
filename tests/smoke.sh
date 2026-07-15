@@ -12,8 +12,6 @@ bash -n "$ROOT_DIR/build.sh" "$ROOT_DIR"/src/lib/*.sh "$MOMA_DIST"
 [[ ! -e "$ROOT_DIR/moma.sh" ]]
 [[ ! -e "$ROOT_DIR/src/lib/00-colors.sh" ]]
 
-[[ "$("$MOMA_DIST" --version)" == "moma 1.4.4" ]]
-
 plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"Moma - terminal UI components for Bash"* ]]
 [[ "$plain_help" == *"confirm, spinner, command-check"* ]]
@@ -67,7 +65,7 @@ select_visual="$(
     NO_COLOR=1 "$MOMA_DIST" select Development Staging Production --title Environment --choose 2 2>&1 >/dev/null
     printf 'NEXT'
 )"
-[[ "$select_visual" == $'  Environment\n    Development\n  ▪ Staging\n    Production\n  ↑/↓ move · Enter select · q cancel\n\nNEXT' ]]
+[[ "$select_visual" == $'  ▪  Environment\n  └──────────────────────────────\n    Development\n  ▪ Staging\n    Production\n  ↑/↓ move · Enter select · q cancel\n\nNEXT' ]]
 
 multi_select_output="$(NO_COLOR=1 "$MOMA_DIST" multi-select Docker CI Tests --title Features --choose 1,3 2>/dev/null)"
 [[ "$multi_select_output" == $'Docker\nTests' ]]
@@ -107,6 +105,8 @@ if command -v script &>/dev/null; then
 
     select_tty_output="$(printf $'\033[B\n' | script -qec "NO_COLOR=1 '$MOMA_DIST' select Development Staging Production --title Environment" /dev/null)"
     [[ "$select_tty_output" == *'▪ Staging'* ]]
+    [[ "$select_tty_output" == *'▪  Environment'* ]]
+    [[ "$select_tty_output" == *'└──────────────────────────────'* ]]
     [[ "$select_tty_output" == *$'Staging\r'* ]]
 
     multi_select_tty_output="$(printf $' \033[B \n' | script -qec "NO_COLOR=1 '$MOMA_DIST' multi-select Docker CI Tests --title Features --required" /dev/null)"
@@ -203,7 +203,7 @@ mapfile -t actual_functions < <(
 
 for public_function in "${expected_functions[@]}"; do
     bash -c 'source "$1"; declare -F "$2" >/dev/null' _ "$MOMA_DIST" "$public_function"
-    rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/preview/index.html"
+    rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/web/index.html"
     rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
     rg -q "\\b$public_function\\b" "$ROOT_DIR/example.sh"
 done
@@ -254,6 +254,17 @@ terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 [[ "$terminal_preview" == *"moma-command-check"* ]]
 [[ "$terminal_preview" == *"Browser docs"* ]]
 
+colored_terminal_preview="$(env -u NO_COLOR "$MOMA_DIST" preview)"
+preview_gray=$'\033[38;2;200;200;200m'
+preview_yellow=$'\033[33m'
+preview_reset=$'\033[0m'
+[[ "$colored_terminal_preview" == *"${preview_gray}────────────────"* ]]
+[[ "$colored_terminal_preview" == *"  02  Status and feedback"* ]]
+[[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
+[[ "$colored_terminal_preview" == *'$ moma-section "Dependencies ready" --success'* ]]
+[[ "$colored_terminal_preview" == *'$ moma-select "Development" "Staging" "Production" --title "Environment"'* ]]
+[[ "$colored_terminal_preview" == *"└─ ${preview_yellow}output${preview_reset}:"* ]]
+
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
 [[ "$markdown_preview" == *"# Moma Component Reference"* ]]
 [[ "$markdown_preview" == *'### `moma-confirm`'* ]]
@@ -264,11 +275,11 @@ markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
 glow_preview="$(PATH="$fake_bin:/usr/bin:/bin" MOMA_PREVIEW_WIDTH=76 "$MOMA_DIST" preview md)"
 [[ "$glow_preview" == *"glow arguments: -w 76 -"* ]]
 
-[[ -s "$ROOT_DIR/preview/index.html" ]]
-[[ -s "$ROOT_DIR/preview/styles.css" ]]
-[[ -s "$ROOT_DIR/preview/app.js" ]]
+[[ -s "$ROOT_DIR/web/index.html" ]]
+[[ -s "$ROOT_DIR/web/styles.css" ]]
+[[ -s "$ROOT_DIR/web/app.js" ]]
 
-api_count="$(rg -o 'data-api=' "$ROOT_DIR/preview/index.html" | wc -l | tr -d ' ')"
+api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
 [[ "$api_count" == "16" ]]
 
 printf 'Smoke tests passed.\n'
