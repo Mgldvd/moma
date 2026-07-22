@@ -50,6 +50,40 @@ export PATH="$HOME/.local/bin:$PATH"
 moma --help
 ```
 
+## Consistent decoration widths
+
+1. Set one fixed inner width for every horizontal decoration.
+
+```bash
+export MOMA_WIDTH=50
+```
+
+2. Print components with the shared width.
+
+```bash
+moma box "Your configuration is ready." --success
+moma box "Back up your files before continuing." --warning
+```
+
+3. Use an automatic width with a maximum limit when needed.
+
+```bash
+unset MOMA_WIDTH
+export MOMA_MAX_WIDTH=50
+```
+
+4. Override the width for one supported component when needed.
+
+```bash
+moma box "Important notice" --width 60
+moma box "A long notice that may wrap" --max-width 40
+```
+
+Fixed width takes priority over maximum width. Long boxed content wraps inside
+the border. Embedded labels use an ellipsis when they cannot fit.
+The minimum effective decoration width is 8 columns. Box padding can require a
+larger width.
+
 ## Components
 
 ### Visual components

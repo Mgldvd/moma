@@ -1,10 +1,11 @@
 # Label component.
 _moma_render_label() {
     local text="$1"
-    local width="${2:-40}"
+    local width="${2:-}"
     local color="${3:-$MOMA_COLOR_PRIMARY}"
     local icon="${4:-}"
     local no_color="${5:-false}"
+    local max_width="${6:-}"
 
     local label="$text"
     if [[ -n "$icon" && -n "$label" ]]; then
@@ -13,16 +14,8 @@ _moma_render_label() {
         label="$icon"
     fi
 
-    if [[ ! "$width" =~ ^[0-9]+$ ]]; then
-        printf 'moma-label: invalid width: %s\n' "$width" >&2
-        return 1
-    fi
-    if ((width < 20)); then
-        width=20
-    fi
-    if ((${#label} + 4 > width)); then
-        width=$((${#label} + 4))
-    fi
+    width="$(_moma_resolve_decor_width "$((${#label} + 4))" 40 "$width" "$max_width" 8)"
+    label="$(_moma_truncate_text "$label" "$((width - 4))")"
 
     local dash_count resolved_color reset
     dash_count=$((width - ${#label} - 3))
@@ -35,7 +28,8 @@ _moma_render_label() {
 
 moma-label() {
     local text=""
-    local width=40
+    local width=""
+    local max_width=""
     local color="$MOMA_COLOR_PRIMARY"
     local icon=""
     local no_color=false
@@ -54,6 +48,18 @@ moma-label() {
                 ;;
             --width=*)
                 width="${1#*=}"
+                shift
+                ;;
+            --max-width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-label "$1"
+                    return 1
+                fi
+                max_width="$2"
+                shift 2
+                ;;
+            --max-width=*)
+                max_width="${1#*=}"
                 shift
                 ;;
             --color | -c)
@@ -92,7 +98,7 @@ moma-label() {
                 ;;
             --help | -h)
                 cat <<'EOF'
-Usage: moma-label "<text>" [--width <number>] [--color <color>] [--icon <symbol>] [--success|--error|--warning|--info] [--no-color]
+Usage: moma-label "<text>" [--width <number>] [--max-width <number>] [--color <color>] [--icon <symbol>] [--success|--error|--warning|--info] [--no-color]
 EOF
                 return 0
                 ;;
@@ -113,5 +119,13 @@ EOF
     done
 
     text="${positional[*]}"
-    _moma_render_label "$text" "$width" "$color" "$icon" "$no_color"
+    if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+        _moma_usage_error moma-label "invalid width: $width"
+        return 2
+    fi
+    if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+        _moma_usage_error moma-label "invalid max width: $max_width"
+        return 2
+    fi
+    _moma_render_label "$text" "$width" "$color" "$icon" "$no_color" "$max_width"
 }

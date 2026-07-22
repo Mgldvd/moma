@@ -32,6 +32,16 @@ Functions beginning with `_moma_` are private implementation details.
 
 Interactive controls and decorated labels leave one blank line below their output. Compact messages, lists, and content lead-ins remain continuous.
 
+## Decoration widths
+
+1. Set `MOMA_WIDTH=<number>` to give all horizontal decorations one fixed
+   inner width.
+2. Set `MOMA_MAX_WIDTH=<number>` instead to cap automatic widths.
+3. Use component-level `--width` or `--max-width` on titles, boxes, prompts,
+   labels, and inputs when a local override is needed.
+
+Fixed width takes priority over maximum width.
+
 ## `src/core/`
 
 Defines the namespaced ANSI palette, semantic theme values, option errors, text
@@ -133,6 +143,7 @@ moma-list "Clone repository" "Install dependencies" "Start application"
 
 ```bash
 moma-box "Configuration is ready." --success
+moma-box "Back up your files before continuing." --warning --width 50
 ```
 
 ```text
@@ -166,7 +177,7 @@ moma-label "TEXT HERE"
   ┌─ TEXT HERE ────────────────────────────┐
 ```
 
-Use `--width <number>`, `--color <color>`, `--icon <symbol>`, or a semantic style.
+Use `--width <number>`, `--max-width <number>`, `--color <color>`, `--icon <symbol>`, or a semantic style.
 The label leaves one blank line below the decorated line.
 
 ---

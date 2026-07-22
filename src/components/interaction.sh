@@ -11,7 +11,7 @@ _moma_render_confirm() {
     reset="$(_moma_reset_color "$no_color")"
     if ((selected_index == 0)); then selected_answer=yes; else selected_answer=no; fi
     prompt_text="$question [$selected_answer]"
-    box_width=$((${#prompt_text} + 6 > 30 ? ${#prompt_text} + 6 : 30))
+    box_width="$(_moma_resolve_decor_width "$((${#prompt_text} + 6))" 30 "" "" 8)"
 
     if $redraw; then _moma_term_move_up 6; fi
     if $redraw; then _moma_term_clear_line; fi

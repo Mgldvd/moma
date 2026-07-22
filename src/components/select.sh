@@ -12,7 +12,7 @@ _moma_render_select() {
     local active_color reset header_width
     active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
     reset="$(_moma_reset_color "$no_color")"
-    header_width=$((${#title} + 6 > 30 ? ${#title} + 6 : 30))
+    header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
 
     if $redraw; then
         _moma_term_move_up "$((${#options[@]} + 3))"
@@ -209,7 +209,7 @@ _moma_render_multi_select() {
     local active_color reset checkbox pointer header_width
     active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
     reset="$(_moma_reset_color "$no_color")"
-    header_width=$((${#title} + 6 > 30 ? ${#title} + 6 : 30))
+    header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
 
     if $redraw; then
         _moma_term_move_up "$((${#options[@]} + 3))"
