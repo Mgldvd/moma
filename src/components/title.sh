@@ -6,6 +6,8 @@ _moma_render_title() {
     local accent="${4:-$MOMA_COLOR_ACCENT}"
     local min_width="${5:-35}"
     local no_color="${6:-false}"
+    local width="${7:-}"
+    local max_width="${8:-}"
 
     title="$(_moma_trim "$title")"
     subtitle="$(_moma_trim "$subtitle")"
@@ -23,12 +25,25 @@ _moma_render_title() {
         text_length=$((text_length + ${#subtitle} + 1))
     fi
 
-    local box_width=$((text_length + 6 > min_width ? text_length + 6 : min_width))
+    local box_width
+    box_width="$(_moma_resolve_decor_width "$((text_length + 6))" "$min_width" "$width" "$max_width" 8)"
     local padding=$((box_width - text_length - 4))
 
     printf '%b\n' "$primary_color"
     printf '  ┌%s┐\n' "$(_moma_repeat_char "─" "$box_width")"
-    if [[ -n "$subtitle" ]]; then
+    if ((padding < 0)); then
+        local combined_text="$title"
+        local wrapped_line wrapped_padding
+        local -a wrapped_lines=()
+        [[ -z "$subtitle" ]] || combined_text+=" $subtitle"
+        mapfile -t wrapped_lines < <(_moma_wrap_text "$combined_text" "$((box_width - 4))")
+        for wrapped_line in "${wrapped_lines[@]}"; do
+            wrapped_padding=$((box_width - ${#wrapped_line} - 4))
+            printf '  ▪  %b%s%b%s  ▪\n' \
+                "$primary_color" "$wrapped_line" "$primary_color" \
+                "$(printf '%*s' "$wrapped_padding" '')"
+        done
+    elif [[ -n "$subtitle" ]]; then
         printf '  ▪  %b%s%b %b%s%b%s  ▪\n' \
             "$primary_color" "$title" "$primary_color" \
             "$accent_color" "$subtitle" "$primary_color" \
@@ -47,6 +62,8 @@ moma-title() {
     local primary="$MOMA_COLOR_PRIMARY"
     local accent="$MOMA_COLOR_ACCENT"
     local min_width=35
+    local width=""
+    local max_width=""
     local no_color=false
     local -a positional=()
 
@@ -88,13 +105,37 @@ moma-title() {
                 min_width="${1#*=}"
                 shift
                 ;;
+            --width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title "$1"
+                    return 1
+                fi
+                width="$2"
+                shift 2
+                ;;
+            --width=*)
+                width="${1#*=}"
+                shift
+                ;;
+            --max-width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title "$1"
+                    return 1
+                fi
+                max_width="$2"
+                shift 2
+                ;;
+            --max-width=*)
+                max_width="${1#*=}"
+                shift
+                ;;
             --no-color)
                 no_color=true
                 shift
                 ;;
             --help | -h)
                 cat <<'EOF'
-Usage: moma-title "<title>" ["subtitle"] [--primary <color>] [--accent <color>] [--min-width <n>] [--no-color]
+Usage: moma-title "<title>" ["subtitle"] [--primary <color>] [--accent <color>] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
 EOF
                 return 0
                 ;;
@@ -116,7 +157,15 @@ EOF
 
     title="${positional[0]:-}"
     subtitle="${positional[1]:-}"
-    _moma_render_title "$title" "$subtitle" "$primary" "$accent" "$min_width" "$no_color"
+    if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+        _moma_usage_error moma-title "invalid width: $width"
+        return 2
+    fi
+    if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+        _moma_usage_error moma-title "invalid max width: $max_width"
+        return 2
+    fi
+    _moma_render_title "$title" "$subtitle" "$primary" "$accent" "$min_width" "$no_color" "$width" "$max_width"
 }
 
 _moma_render_title_sub() {
@@ -126,6 +175,8 @@ _moma_render_title_sub() {
     local message="${4:-}"
     local min_width="${5:-30}"
     local no_color="${6:-false}"
+    local width="${7:-}"
+    local max_width="${8:-}"
 
     text="$(_moma_trim "$text")"
     detail="$(_moma_trim "$detail")"
@@ -141,7 +192,7 @@ _moma_render_title_sub() {
     if [[ -n "$detail" ]]; then
         combined_text+=" $detail"
     fi
-    box_width=$((${#combined_text} + 6 > min_width ? ${#combined_text} + 6 : min_width))
+    box_width="$(_moma_resolve_decor_width "$((${#combined_text} + 6))" "$min_width" "$width" "$max_width" 8)"
 
     printf '%b\n' "$resolved_color"
     if [[ -n "$detail" ]]; then
@@ -163,6 +214,8 @@ moma-title-sub() {
     local color="$MOMA_COLOR_PRIMARY"
     local message=""
     local min_width=30
+    local width=""
+    local max_width=""
     local no_color=false
     local -a positional=()
 
@@ -204,13 +257,37 @@ moma-title-sub() {
                 min_width="${1#*=}"
                 shift
                 ;;
+            --width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title-sub "$1"
+                    return 1
+                fi
+                width="$2"
+                shift 2
+                ;;
+            --width=*)
+                width="${1#*=}"
+                shift
+                ;;
+            --max-width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-title-sub "$1"
+                    return 1
+                fi
+                max_width="$2"
+                shift 2
+                ;;
+            --max-width=*)
+                max_width="${1#*=}"
+                shift
+                ;;
             --no-color)
                 no_color=true
                 shift
                 ;;
             --help | -h)
                 cat <<'EOF'
-Usage: moma-title-sub "<text>" ["detail"] [--color <color>] [--message <text>] [--min-width <n>] [--no-color]
+Usage: moma-title-sub "<text>" ["detail"] [--color <color>] [--message <text>] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
 EOF
                 return 0
                 ;;
@@ -232,5 +309,13 @@ EOF
 
     text="${positional[0]:-}"
     detail="${positional[1]:-}"
-    _moma_render_title_sub "$text" "$detail" "$color" "$message" "$min_width" "$no_color"
+    if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+        _moma_usage_error moma-title-sub "invalid width: $width"
+        return 2
+    fi
+    if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+        _moma_usage_error moma-title-sub "invalid max width: $max_width"
+        return 2
+    fi
+    _moma_render_title_sub "$text" "$detail" "$color" "$message" "$min_width" "$no_color" "$width" "$max_width"
 }

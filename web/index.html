@@ -74,7 +74,7 @@
             <span class="status status--stable">Stable</span>
           </header>
           <p class="api-entry__description">Primary identity block for the beginning of a script or major workflow.</p>
-          <code class="signature">moma-title "Moma" "Terminal UI library" [--primary color] [--accent color]</code>
+          <code class="signature">moma-title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]</code>
           <div class="wireframe" aria-label="moma-title output preview">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art terminal-art--pink">┌─────────────────────────────────────┐
@@ -89,7 +89,7 @@
             <span class="status status--stable">Stable</span>
           </header>
           <p class="api-entry__description">Secondary heading for stages nested inside the main workflow.</p>
-          <code class="signature">moma-title-sub "Deployment" "Production environment"</code>
+          <code class="signature">moma-title-sub "Deployment" "Production environment" [--width number] [--max-width number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art"><span class="terminal-art__pink">▪</span>  <span class="terminal-art__cyan">Deployment</span>  Production environment
@@ -166,13 +166,13 @@
           </div>
         </article>
 
-        <article class="api-entry" data-api="moma-box framed boxed notice emphasis success warning info error">
+        <article class="api-entry" data-api="moma-box framed boxed notice emphasis success warning info error width max-width MOMA_WIDTH MOMA_MAX_WIDTH">
           <header class="api-entry__header">
             <div><p class="api-entry__kind">Notice component</p><h3 class="api-entry__name">moma-box</h3></div>
             <span class="status status--variants">4 variants</span>
           </header>
-          <p class="api-entry__description">Framed notice for information that must stand apart from surrounding output.</p>
-          <code class="signature">moma-box "Configuration is ready." --success</code>
+          <p class="api-entry__description">Framed notice with automatic, fixed, or maximum width. Long content wraps inside the border.</p>
+          <code class="signature">moma-box "Configuration is ready." --success [--width number] [--max-width number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art terminal-art--green">┌────────────────────────────────┐
@@ -187,7 +187,7 @@
             <span class="status status--stable">Stable</span>
           </header>
           <p class="api-entry__description">Question lead-in used before confirmation or free-form interaction.</p>
-          <code class="signature">moma-prompt "Continue with the installation?" --color pink</code>
+          <code class="signature">moma-prompt "Continue with the installation?" --color pink [--width number] [--max-width number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art"><span class="terminal-art__pink">▪</span>  Continue with the installation?
@@ -201,7 +201,7 @@
             <span class="status status--variants">4 variants</span>
           </header>
           <p class="api-entry__description">Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.</p>
-          <code class="signature">moma-label "TEXT HERE" [--width number] [--color color] [--icon symbol]</code>
+          <code class="signature">moma-label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art"><span class="terminal-art__cyan">┌─ TEXT HERE ────────────────────────────┐</span></pre>
@@ -214,7 +214,7 @@
             <span class="status status--interactive">Interactive</span>
           </header>
           <p class="api-entry__description">Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.</p>
-          <code class="signature">moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value]</code>
+          <code class="signature">moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <pre class="terminal-art terminal-art--pink">┌─ Owner ────────────────────────────────┐

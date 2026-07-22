@@ -10,6 +10,32 @@ Repository: <https://github.com/Mgldvd/moma>
 source dist/moma
 ```
 
+## Consistent decoration widths
+
+Set `MOMA_WIDTH` once to give every horizontal decoration the same fixed inner
+width, regardless of its text length.
+
+```bash
+export MOMA_WIDTH=50
+moma-box "Your configuration is ready." --success
+moma-box "Back up your files before continuing." --warning
+```
+
+Use `MOMA_MAX_WIDTH` when decorations should remain automatic but never exceed
+a limit. Long content in boxes and static inputs wraps inside the border;
+embedded labels are shortened with an ellipsis when necessary.
+
+```bash
+unset MOMA_WIDTH
+export MOMA_MAX_WIDTH=50
+```
+
+Fixed width takes priority when both variables are set. The decorated
+components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
+`moma-label`, and `moma-input` also accept local `--width` and `--max-width`
+options. A local fixed width overrides the global setting. The minimum
+effective decoration width is 8 columns; box padding can require more.
+
 ## Visual components
 
 ### `moma-title`
@@ -17,7 +43,7 @@ source dist/moma
 Primary identity block for the beginning of a script or major workflow.
 
 ```text
-moma-title "Moma" "Terminal UI library" [--primary color] [--accent color]
+moma-title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]
 ```
 
 ```bash
@@ -38,7 +64,7 @@ moma-title "Backup" "Nightly job" --accent yellow --min-width 48
 Secondary heading for stages nested inside the main workflow.
 
 ```text
-moma-title-sub "Deployment" "Production environment"
+moma-title-sub "Deployment" "Production environment" [--width number] [--max-width number]
 ```
 
 ```bash
@@ -143,7 +169,7 @@ moma-list "Review logs" "Retry deployment" --marker "→" --color yellow
 Framed notice for information that must stand apart from surrounding output.
 
 ```text
-moma-box "Configuration is ready." --success
+moma-box "Configuration is ready." --success [--width number] [--max-width number]
 ```
 
 ```bash
@@ -155,6 +181,10 @@ moma-box "Review the deployment settings." --warning --width 48
 
 # Example 3
 moma-box "Build failed." --error --icon "✖" --padding 2
+
+# Same fixed width for multiple boxes
+moma-box "Configuration is ready." --success --width 50
+moma-box "Back up your files before continuing." --warning --width 50
 ```
 
 ![moma-box preview](../.img/moma-box.png)
@@ -164,7 +194,7 @@ moma-box "Build failed." --error --icon "✖" --padding 2
 Question lead-in used before confirmation or free-form interaction.
 
 ```text
-moma-prompt "Continue with the installation?" --color pink
+moma-prompt "Continue with the installation?" --color pink [--width number] [--max-width number]
 ```
 
 ```bash
@@ -185,7 +215,7 @@ moma-prompt "Deploy now?" --default "yes" --icon "?"
 Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.
 
 ```text
-moma-label "TEXT HERE" [--width number] [--color color] [--icon symbol]
+moma-label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]
 ```
 
 ```bash
@@ -229,7 +259,7 @@ moma-rabbit "Build needs attention" --warning --icon "!"
 Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.
 
 ```text
-moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value]
+moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]
 ```
 
 ```bash

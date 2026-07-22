@@ -8,6 +8,7 @@ _moma_render_input() {
     local color="$6"
     local icon="$7"
     local no_color="$8"
+    local max_width="${9:-}"
 
     local label="$title"
     if [[ -n "$icon" && -n "$label" ]]; then
@@ -25,24 +26,19 @@ _moma_render_input() {
         display_value="$placeholder"
     fi
 
-    if ! _moma_is_uint "$width"; then
-        printf 'moma-input: invalid width: %s\n' "$width" >&2
-        return 1
-    fi
-    if ((width < 20)); then
-        width=20
-    fi
-
     local label_width=${#label}
     local display_width=${#display_value}
-    if ((label_width + 4 > width)); then
-        width=$((label_width + 4))
+    local natural_width=$((label_width + 4))
+    if ((display_width + 2 > natural_width)); then
+        natural_width=$((display_width + 2))
     fi
-    if ((display_width + 2 > width)); then
-        width=$((display_width + 2))
-    fi
+    width="$(_moma_resolve_decor_width "$natural_width" 40 "$width" "$max_width" 8)"
+    label="$(_moma_truncate_text "$label" "$((width - 4))")"
+    label_width=${#label}
 
-    local resolved_color reset dash_count value_space
+    local resolved_color reset dash_count value_space display_line
+    local -a display_lines=()
+    mapfile -t display_lines < <(_moma_wrap_text "$display_value" "$((width - 2))")
     resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
     reset="$(_moma_reset_color "$no_color")"
 
@@ -55,17 +51,15 @@ _moma_render_input() {
         dash_count=1
     fi
 
-    value_space=$((width - display_width - 2))
-    if ((value_space < 0)); then
-        value_space=0
-    fi
-
     if [[ -n "$label" ]]; then
         printf '%b  ┌─ %s %s┐%b\n' "$resolved_color" "$label" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
     else
         printf '%b  ┌%s┐%b\n' "$resolved_color" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
     fi
-    printf '%b  │ %s%s │%b\n' "$resolved_color" "$display_value" "$(printf '%*s' "$value_space" '')" "$reset"
+    for display_line in "${display_lines[@]}"; do
+        value_space=$((width - ${#display_line} - 2))
+        printf '%b  │ %s%s │%b\n' "$resolved_color" "$display_line" "$(printf '%*s' "$value_space" '')" "$reset"
+    done
     printf '%b  └%s┘%b\n\n' "$resolved_color" "$(_moma_repeat_char "─" "$width")" "$reset"
 }
 
@@ -79,6 +73,7 @@ _moma_render_input_open() {
     local icon="$7"
     local prompt_marker="$8"
     local no_color="$9"
+    local max_width="${10:-}"
 
     local label="$title"
     if [[ -n "$icon" && -n "$label" ]]; then
@@ -87,30 +82,17 @@ _moma_render_input_open() {
         label="$icon"
     fi
 
-    if ! _moma_is_uint "$width"; then
-        printf 'moma-input: invalid width: %s\n' "$width" >&2
-        return 1
-    fi
-    if ((width < 20)); then
-        width=20
-    fi
-
     local label_width=${#label}
     local placeholder_width=${#placeholder}
     local default_width=${#default_value}
     local value_width=${#value}
-    if ((label_width + 4 > width)); then
-        width=$((label_width + 4))
-    fi
-    if ((placeholder_width + 2 > width)); then
-        width=$((placeholder_width + 2))
-    fi
-    if ((default_width + 2 > width)); then
-        width=$((default_width + 2))
-    fi
-    if ((value_width + 2 > width)); then
-        width=$((value_width + 2))
-    fi
+    local natural_width=$((label_width + 4))
+    ((placeholder_width + 2 <= natural_width)) || natural_width=$((placeholder_width + 2))
+    ((default_width + 2 <= natural_width)) || natural_width=$((default_width + 2))
+    ((value_width + 2 <= natural_width)) || natural_width=$((value_width + 2))
+    width="$(_moma_resolve_decor_width "$natural_width" 40 "$width" "$max_width" 8)"
+    label="$(_moma_truncate_text "$label" "$((width - 4))")"
+    label_width=${#label}
 
     local resolved_color reset dash_count prompt_text
     resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
@@ -184,8 +166,13 @@ _moma_read_secret() {
 
 _moma_input_validate() {
     local width="$1"
-    if ! _moma_is_uint "$width"; then
+    local max_width="${2:-}"
+    if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
         printf 'moma-input: invalid width: %s\n' "$width" >&2
+        return 1
+    fi
+    if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+        printf 'moma-input: invalid max width: %s\n' "$max_width" >&2
         return 1
     fi
 }
@@ -221,7 +208,8 @@ moma-input() {
     local placeholder=""
     local default_value=""
     local value=""
-    local width=40
+    local width=""
+    local max_width=""
     local color="$MOMA_COLOR_PRIMARY"
     local icon=""
     local prompt_marker="❯"
@@ -293,6 +281,18 @@ moma-input() {
                 ;;
             --width=*)
                 width="${1#*=}"
+                shift
+                ;;
+            --max-width)
+                if [[ $# -lt 2 ]]; then
+                    _moma_option_requires_value moma-input "$1"
+                    return 1
+                fi
+                max_width="$2"
+                shift 2
+                ;;
+            --max-width=*)
+                max_width="${1#*=}"
                 shift
                 ;;
             --color | -c)
@@ -385,6 +385,7 @@ Options:
   --default <text>
   --value <text>
   --width <number>
+  --max-width <number>
   --color, -c <color>
   --icon, -i <symbol>
   --prompt <symbol>
@@ -414,16 +415,16 @@ EOF
         esac
     done
 
-    _moma_input_validate "$width" || return $?
+    _moma_input_validate "$width" "$max_width" || return $?
 
     if ! $read_mode; then
-        _moma_render_input "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$no_color"
+        _moma_render_input "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$no_color" "$max_width"
         return $?
     fi
 
     local response result read_status
     while true; do
-        _moma_render_input_open "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$prompt_marker" "$no_color" || return 1
+        _moma_render_input_open "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$prompt_marker" "$no_color" "$max_width" || return 1
 
         if $secret; then
             if _moma_read_secret response "$secret_mask"; then

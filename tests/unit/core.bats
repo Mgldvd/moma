@@ -38,6 +38,22 @@ setup() {
     [ "$status" -ne 0 ]
 }
 
+@test "decoration width resolves fixed and maximum values" {
+    run _moma_resolve_decor_width 60 30 44 36 8
+    [ "$status" -eq 0 ]
+    [ "$output" = "44" ]
+
+    run _moma_resolve_decor_width 60 30 "" 36 8
+    [ "$status" -eq 0 ]
+    [ "$output" = "36" ]
+}
+
+@test "plain text wraps at word boundaries" {
+    run _moma_wrap_text "one two three" 7
+    [ "$status" -eq 0 ]
+    [ "$output" = $'one two\nthree' ]
+}
+
 @test "select transition wraps without a terminal" {
     run _moma_select_transition 0 3 up
     [ "$status" -eq 0 ]

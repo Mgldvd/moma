@@ -58,6 +58,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 
 - `-h`, `--help`: Show help.
 
+## Decoration width
+
+- `MOMA_WIDTH=<number>`: Give every horizontal decoration the same fixed inner width.
+- `MOMA_MAX_WIDTH=<number>`: Let decorations grow automatically, but not beyond this width.
+
+A fixed width takes priority over a maximum width. `moma-title`,
+`moma-title-sub`, `moma-box`, `moma-prompt`, `moma-label`, and `moma-input`
+also accept component-level `--width` and `--max-width` options. Long boxed
+content wraps inside the selected width. The minimum effective decoration
+width is 8 columns and box padding may require a larger value.
+
 ## Binary examples
 
 ```bash

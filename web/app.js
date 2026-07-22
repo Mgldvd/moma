@@ -40,7 +40,7 @@ const componentExamples = {
   'moma-box': [
     'moma-box "Configuration is ready." --success',
     'moma-box "Review the deployment settings." --warning --width 48',
-    'moma-box "Build failed." --error --icon "✖" --padding 2',
+    'moma-box "A long notice wraps inside its border." --info --max-width 32',
   ],
   'moma-prompt': [
     'moma-prompt "Continue with the installation?"',

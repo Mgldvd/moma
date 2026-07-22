@@ -53,6 +53,90 @@ label_spacing="$({
 })"
 [[ "$label_spacing" == *$'┐\n\nNEXT' ]]
 
+fixed_boxes="$({
+    NO_COLOR=1 MOMA_WIDTH=50 "$MOMA_DIST" box "Your configuration is ready." --success
+    NO_COLOR=1 MOMA_WIDTH=50 "$MOMA_DIST" box "Back up your files before continuing." --warning
+})"
+fixed_border='  ┌──────────────────────────────────────────────────┐'
+[[ "$(rg -Fxc "$fixed_border" <<<"$fixed_boxes")" == "2" ]]
+[[ "$fixed_boxes" == *'│ ✔ Your configuration is ready.                   │'* ]]
+[[ "$fixed_boxes" == *'│ ! Back up your files before continuing.          │'* ]]
+
+capped_box="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" box \
+    "This long notice wraps inside its border." --info)"
+[[ "$capped_box" == *'  ┌────────────────────────┐'* ]]
+[[ "$capped_box" == *$'│ → This long notice     │\n  │ wraps inside its       │'* ]]
+
+fixed_prompt="$(NO_COLOR=1 MOMA_WIDTH=46 "$MOMA_DIST" prompt "Short")"
+[[ "$fixed_prompt" == *'  └──────────────────────────────────────────────' ]]
+
+shared_width=46
+shared_rule='──────────────────────────────────────────────'
+fixed_title="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" title "Short")"
+[[ "$fixed_title" == *"  ┌${shared_rule}┐"* ]]
+[[ "$fixed_title" == *"  └${shared_rule}┘"* ]]
+
+fixed_title_sub="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" title-sub "Short")"
+[[ "$fixed_title_sub" == *"  └${shared_rule}"* ]]
+
+fixed_label="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" label "Short")"
+[[ "$fixed_label" == "  ┌─ Short ──────────────────────────────────────┐" ]]
+
+fixed_input="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" input --title "Short" --value "Value")"
+[[ "$fixed_input" == *"  └${shared_rule}┘"* ]]
+
+fixed_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
+    select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
+[[ "$fixed_select" == *"  └${shared_rule}"* ]]
+
+fixed_multi_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
+    multi-select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
+[[ "$fixed_multi_select" == *"  └${shared_rule}"* ]]
+
+fixed_confirm="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
+    confirm "Short" --answer yes 2>&1 >/dev/null)"
+[[ "$fixed_confirm" == *"  └${shared_rule}"* ]]
+
+local_width="$(NO_COLOR=1 MOMA_WIDTH=50 "$MOMA_DIST" box "Override" --width 20)"
+[[ "$local_width" == *'  ┌────────────────────┐'* ]]
+
+local_max_width="$(NO_COLOR=1 "$MOMA_DIST" box \
+    "Local maximum width wraps this notice." --max-width 24)"
+[[ "$local_max_width" == *'  ┌────────────────────────┐'* ]]
+
+minimum_width="$(NO_COLOR=1 MOMA_WIDTH=1 "$MOMA_DIST" box "Long value")"
+[[ "$minimum_width" == *'  ┌────────┐'* ]]
+[[ "$minimum_width" == *$'  │ Long   │\n  │ value  │'* ]]
+
+capped_rule='────────────────────────'
+capped_title="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    title "A title that is longer than the maximum")"
+[[ "$capped_title" == *"  ┌${capped_rule}┐"* ]]
+
+capped_prompt="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    prompt "A prompt longer than the maximum")"
+[[ "$capped_prompt" == *"  └${capped_rule}"* ]]
+
+capped_label="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    label "A label longer than the maximum")"
+[[ "$capped_label" == '  ┌─ A label longer than… ─┐' ]]
+
+capped_input="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    input --title "A long input title" --value "A value longer than the maximum width")"
+[[ "$capped_input" == *"  └${capped_rule}┘"* ]]
+
+capped_select="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    select One Two --title "A selector title longer than the maximum" --choose 1 2>&1 >/dev/null)"
+[[ "$capped_select" == *"  └${capped_rule}"* ]]
+
+capped_multi_select="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    multi-select One Two --title "A multi selector title longer than the maximum" --choose 1 2>&1 >/dev/null)"
+[[ "$capped_multi_select" == *"  └${capped_rule}"* ]]
+
+capped_confirm="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+    confirm "A confirmation question longer than the maximum" --answer yes 2>&1 >/dev/null)"
+[[ "$capped_confirm" == *"  └${capped_rule}"* ]]
+
 strict_output="$(NO_COLOR=1 bash -euo pipefail -c 'source "$1"; moma-msg "Strict mode" --success' _ "$MOMA_DIST")"
 [[ "$strict_output" == *"Strict mode"* ]]
 
