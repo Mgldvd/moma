@@ -9,12 +9,12 @@ MOMA_DIST="$ROOT_DIR/dist/moma"
 
 "$ROOT_DIR/build.sh" >/dev/null
 bash -n \
-    "$ROOT_DIR/build.sh" \
-    "$ROOT_DIR"/src/core/*.sh \
-    "$ROOT_DIR"/src/components/*.sh \
-    "$ROOT_DIR"/src/preview/*.sh \
-    "$ROOT_DIR"/src/cli/*.sh \
-    "$MOMA_DIST"
+  "$ROOT_DIR/build.sh" \
+  "$ROOT_DIR"/src/core/*.sh \
+  "$ROOT_DIR"/src/components/*.sh \
+  "$ROOT_DIR"/src/preview/*.sh \
+  "$ROOT_DIR"/src/cli/*.sh \
+  "$MOMA_DIST"
 
 deterministic_copy="$(mktemp "${TMPDIR:-/tmp}/moma-build.XXXXXX")"
 cp "$MOMA_DIST" "$deterministic_copy"
@@ -38,14 +38,14 @@ simple_output="$(NO_COLOR=1 "$MOMA_DIST" msg-simple "Package installed")"
 [[ "$simple_output" == "  ▪   Package installed" ]]
 
 simple_error_output="$(
-    env -u NO_COLOR \
-        "$MOMA_DIST" msg-simple "Package installation failed" --error
+  env -u NO_COLOR \
+    "$MOMA_DIST" msg-simple "Package installation failed" --error
 )"
 [[ "$simple_error_output" == *$'\033[31m▪\033[0m   Package installation failed' ]]
 
 list_output="$(
-    NO_COLOR=1 "$MOMA_DIST" list \
-        "Clone repository" "Install dependencies"
+  NO_COLOR=1 "$MOMA_DIST" list \
+    "Clone repository" "Install dependencies"
 )"
 [[ "$list_output" == $'  ▪   Clone repository\n  ▪   Install dependencies' ]]
 
@@ -53,21 +53,21 @@ label_output="$(NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE")"
 [[ "$label_output" == '  ┌─ TEXT HERE ────────────────────────────┐' ]]
 
 label_semantic_output="$(
-    env -u NO_COLOR "$MOMA_DIST" label "Deployment" --success
+  env -u NO_COLOR "$MOMA_DIST" label "Deployment" --success
 )"
 [[ "$label_semantic_output" == *$'\033[32m  ┌─ ✔ Deployment '* ]]
 
 label_spacing="$({
-    NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE"
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE"
+  printf 'NEXT'
 })"
 [[ "$label_spacing" == *$'┐\n\nNEXT' ]]
 
 fixed_boxes="$({
-    NO_COLOR=1 MOMA_WIDTH=50 \
-        "$MOMA_DIST" box "Your configuration is ready." --success
-    NO_COLOR=1 MOMA_WIDTH=50 \
-        "$MOMA_DIST" box "Back up your files before continuing." --warning
+  NO_COLOR=1 MOMA_WIDTH=50 \
+    "$MOMA_DIST" box "Your configuration is ready." --success
+  NO_COLOR=1 MOMA_WIDTH=50 \
+    "$MOMA_DIST" box "Back up your files before continuing." --warning
 })"
 fixed_border='  ┌──────────────────────────────────────────────────┐'
 [[ "$(rg -Fxc "$fixed_border" <<<"$fixed_boxes")" == "2" ]]
@@ -75,7 +75,7 @@ fixed_border='  ┌────────────────────�
 [[ "$fixed_boxes" == *'│ ! Back up your files before continuing.          │'* ]]
 
 capped_box="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" box \
-    "This long notice wraps inside its border." --info)"
+  "This long notice wraps inside its border." --info)"
 [[ "$capped_box" == *'  ┌────────────────────────┐'* ]]
 [[ "$capped_box" == *$'│ → This long notice     │\n  │ wraps inside its       │'* ]]
 
@@ -85,47 +85,47 @@ fixed_prompt="$(NO_COLOR=1 MOMA_WIDTH=46 "$MOMA_DIST" prompt "Short")"
 shared_width=46
 shared_rule='──────────────────────────────────────────────'
 fixed_title="$(
-    NO_COLOR=1 MOMA_WIDTH="$shared_width" \
-        "$MOMA_DIST" title "Short"
+  NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+    "$MOMA_DIST" title "Short"
 )"
 [[ "$fixed_title" == *"  ┌${shared_rule}┐"* ]]
 [[ "$fixed_title" == *"  └${shared_rule}┘"* ]]
 
 fixed_title_sub="$(
-    NO_COLOR=1 MOMA_WIDTH="$shared_width" \
-        "$MOMA_DIST" title-sub "Short"
+  NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+    "$MOMA_DIST" title-sub "Short"
 )"
 [[ "$fixed_title_sub" == *"  └${shared_rule}"* ]]
 
 fixed_label="$(
-    NO_COLOR=1 MOMA_WIDTH="$shared_width" \
-        "$MOMA_DIST" label "Short"
+  NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+    "$MOMA_DIST" label "Short"
 )"
 [[ "$fixed_label" == "  ┌─ Short ──────────────────────────────────────┐" ]]
 
 fixed_input="$(
-    NO_COLOR=1 MOMA_WIDTH="$shared_width" \
-        "$MOMA_DIST" input --title "Short" --value "Value"
+  NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+    "$MOMA_DIST" input --title "Short" --value "Value"
 )"
 [[ "$fixed_input" == *"  └${shared_rule}┘"* ]]
 
 fixed_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
-    select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
+  select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
 [[ "$fixed_select" == *"  └${shared_rule}"* ]]
 
 fixed_multi_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
-    multi-select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
+  multi-select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
 [[ "$fixed_multi_select" == *"  └${shared_rule}"* ]]
 
 fixed_confirm="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
-    confirm "Short" --answer yes 2>&1 >/dev/null)"
+  confirm "Short" --answer yes 2>&1 >/dev/null)"
 [[ "$fixed_confirm" == *"  └${shared_rule}"* ]]
 
 local_width="$(NO_COLOR=1 MOMA_WIDTH=50 "$MOMA_DIST" box "Override" --width 20)"
 [[ "$local_width" == *'  ┌────────────────────┐'* ]]
 
 local_max_width="$(NO_COLOR=1 "$MOMA_DIST" box \
-    "Local maximum width wraps this notice." --max-width 24)"
+  "Local maximum width wraps this notice." --max-width 24)"
 [[ "$local_max_width" == *'  ┌────────────────────────┐'* ]]
 
 minimum_width="$(NO_COLOR=1 MOMA_WIDTH=1 "$MOMA_DIST" box "Long value")"
@@ -134,43 +134,43 @@ minimum_width="$(NO_COLOR=1 MOMA_WIDTH=1 "$MOMA_DIST" box "Long value")"
 
 capped_rule='────────────────────────'
 capped_title="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    title "A title that is longer than the maximum")"
+  title "A title that is longer than the maximum")"
 [[ "$capped_title" == *"  ┌${capped_rule}┐"* ]]
 
 capped_prompt="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    prompt "A prompt longer than the maximum")"
+  prompt "A prompt longer than the maximum")"
 [[ "$capped_prompt" == *"  └${capped_rule}"* ]]
 
 capped_label="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    label "A label longer than the maximum")"
+  label "A label longer than the maximum")"
 [[ "$capped_label" == '  ┌─ A label longer than… ─┐' ]]
 
 capped_input="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    input --title "A long input title" \
-    --value "A value longer than the maximum width")"
+  input --title "A long input title" \
+  --value "A value longer than the maximum width")"
 [[ "$capped_input" == *"  └${capped_rule}┘"* ]]
 
 capped_select="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    select One Two \
-    --title "A selector title longer than the maximum" \
-    --choose 1 2>&1 >/dev/null)"
+  select One Two \
+  --title "A selector title longer than the maximum" \
+  --choose 1 2>&1 >/dev/null)"
 [[ "$capped_select" == *"  └${capped_rule}"* ]]
 
 capped_multi_select="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    multi-select One Two \
-    --title "A multi selector title longer than the maximum" \
-    --choose 1 2>&1 >/dev/null)"
+  multi-select One Two \
+  --title "A multi selector title longer than the maximum" \
+  --choose 1 2>&1 >/dev/null)"
 [[ "$capped_multi_select" == *"  └${capped_rule}"* ]]
 
 capped_confirm="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-    confirm "A confirmation question longer than the maximum" \
-    --answer yes 2>&1 >/dev/null)"
+  confirm "A confirmation question longer than the maximum" \
+  --answer yes 2>&1 >/dev/null)"
 [[ "$capped_confirm" == *"  └${capped_rule}"* ]]
 
 strict_output="$(
-    NO_COLOR=1 bash -euo pipefail \
-        -c 'source "$1"; moma-msg "Strict mode" --success' \
-        _ "$MOMA_DIST"
+  NO_COLOR=1 bash -euo pipefail \
+    -c 'source "$1"; moma-msg "Strict mode" --success' \
+    _ "$MOMA_DIST"
 )"
 [[ "$strict_output" == *"Strict mode"* ]]
 
@@ -204,62 +204,62 @@ bash -c '
 ' _ "$MOMA_DIST"
 
 input_output="$(
-    printf '  project  \n' |
-        NO_COLOR=1 "$MOMA_DIST" input \
-            --title "Project" --read --trim 2>/dev/null
+  printf '  project  \n' |
+    NO_COLOR=1 "$MOMA_DIST" input \
+      --title "Project" --read --trim 2>/dev/null
 )"
 [[ "$input_output" == "project" ]]
 
 input_display_spacing="$(
-    NO_COLOR=1 "$MOMA_DIST" input --title "Owner" --value "asdf"
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" input --title "Owner" --value "asdf"
+  printf 'NEXT'
 )"
 [[ "$input_display_spacing" == *$'┘\n\nNEXT' ]]
 
 input_read_spacing="$(
-    printf 'asdf\n' |
-        NO_COLOR=1 "$MOMA_DIST" input \
-            --title "Owner" --read 2>&1 >/dev/null
-    printf 'NEXT'
+  printf 'asdf\n' |
+    NO_COLOR=1 "$MOMA_DIST" input \
+      --title "Owner" --read 2>&1 >/dev/null
+  printf 'NEXT'
 )"
 [[ "$input_read_spacing" == *$'│❯ \n\nNEXT' ]]
 
 select_output="$(
-    NO_COLOR=1 "$MOMA_DIST" select \
-        Development Staging Production \
-        --title Environment --choose 2 2>/dev/null
+  NO_COLOR=1 "$MOMA_DIST" select \
+    Development Staging Production \
+    --title Environment --choose 2 2>/dev/null
 )"
 [[ "$select_output" == "Staging" ]]
 
 select_visual="$(
-    NO_COLOR=1 "$MOMA_DIST" select \
-        Development Staging Production \
-        --title Environment --choose 2 2>&1 >/dev/null
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" select \
+    Development Staging Production \
+    --title Environment --choose 2 2>&1 >/dev/null
+  printf 'NEXT'
 )"
 [[ "$select_visual" == $'  ▪  Environment\n  └──────────────────────────────\n    Development\n  ▪ Staging\n    Production\n  ↑/↓ move · Enter select · q cancel\n\nNEXT' ]]
 
 multi_select_output="$(
-    NO_COLOR=1 "$MOMA_DIST" multi-select \
-        Docker CI Tests --title Features --choose 1,3 2>/dev/null
+  NO_COLOR=1 "$MOMA_DIST" multi-select \
+    Docker CI Tests --title Features --choose 1,3 2>/dev/null
 )"
 [[ "$multi_select_output" == $'Docker\nTests' ]]
 
 multi_select_visual="$(
-    NO_COLOR=1 "$MOMA_DIST" multi-select \
-        Docker CI Tests --title Features --choose 1,3 2>&1 >/dev/null
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" multi-select \
+    Docker CI Tests --title Features --choose 1,3 2>&1 >/dev/null
+  printf 'NEXT'
 )"
 [[ "$multi_select_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › ▣ Docker\n    ▢ CI\n    ▣ Tests\n  ↑/↓ move · Space toggle · Enter confirm · q cancel\n\nNEXT' ]]
 
 prompt_visual="$(
-    NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
+  NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
 )"
 [[ "$prompt_visual" == $'\n  ▪  Choose the target environment\n  └───────────────────────────────────' ]]
 
 prompt_composition="$({
-    NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
+  printf 'NEXT'
 })"
 [[ "$prompt_composition" == *$'└───────────────────────────────────\nNEXT' ]]
 
@@ -267,96 +267,96 @@ rabbit_visual="$(NO_COLOR=1 "$MOMA_DIST" rabbit "Ready")"
 [[ "$rabbit_visual" == *$'\n  | Ready\n  /⎺⎺⎺⎺⎺⎺⎺⎺\n\n    (\\(\\\n    (-.-)\n  o_(\")(")' ]]
 
 compact_message_composition="$({
-    NO_COLOR=1 "$MOMA_DIST" msg-simple "First"
-    NO_COLOR=1 "$MOMA_DIST" msg-simple "Second"
+  NO_COLOR=1 "$MOMA_DIST" msg-simple "First"
+  NO_COLOR=1 "$MOMA_DIST" msg-simple "Second"
 })"
 [[ "$compact_message_composition" == $'  ▪   First\n  ▪   Second' ]]
 
 secret_output="$(
-    printf 'secret-value\n' |
-        NO_COLOR=1 "$MOMA_DIST" input \
-            --title "Secret" --read --secret 2>/dev/null
+  printf 'secret-value\n' |
+    NO_COLOR=1 "$MOMA_DIST" input \
+      --title "Secret" --read --secret 2>/dev/null
 )"
 [[ "$secret_output" == "secret-value" ]]
 
 if command -v script &>/dev/null; then
-    state_check="bash -c 'before=\"\$(stty -g)\"; "
-    state_check+="source \"$MOMA_DIST\"; "
-    state_check+="after=\"\$(stty -g)\"; "
-    state_check+="[[ \"\$before\" == \"\$after\" ]]'"
-    script -qec "$state_check" /dev/null >/dev/null
+  state_check="bash -c 'before=\"\$(stty -g)\"; "
+  state_check+="source \"$MOMA_DIST\"; "
+  state_check+="after=\"\$(stty -g)\"; "
+  state_check+="[[ \"\$before\" == \"\$after\" ]]'"
+  script -qec "$state_check" /dev/null >/dev/null
 
-    masked_output="$(
-        printf $'abc\177d\n' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' input --title Secret --read --secret" \
-                /dev/null
-    )"
-    [[ "$masked_output" == *'│❯ ***'* ]]
-    [[ "$masked_output" == *$'│❯ ***\r\n\r\n'* ]]
-    [[ "$masked_output" == *$'abd\r'* ]]
+  masked_output="$(
+    printf $'abc\177d\n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' input --title Secret --read --secret" \
+        /dev/null
+  )"
+  [[ "$masked_output" == *'│❯ ***'* ]]
+  [[ "$masked_output" == *$'│❯ ***\r\n\r\n'* ]]
+  [[ "$masked_output" == *$'abd\r'* ]]
 
-    select_tty_output="$(
-        printf $'\033[B\n' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' select Development Staging Production \
+  select_tty_output="$(
+    printf $'\033[B\n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' select Development Staging Production \
 --title Environment" /dev/null
-    )"
-    [[ "$select_tty_output" == *'▪ Staging'* ]]
-    [[ "$select_tty_output" == *'▪  Environment'* ]]
-    [[ "$select_tty_output" == *'└──────────────────────────────'* ]]
-    [[ "$select_tty_output" == *$'Staging\r'* ]]
+  )"
+  [[ "$select_tty_output" == *'▪ Staging'* ]]
+  [[ "$select_tty_output" == *'▪  Environment'* ]]
+  [[ "$select_tty_output" == *'└──────────────────────────────'* ]]
+  [[ "$select_tty_output" == *$'Staging\r'* ]]
 
-    multi_select_tty_output="$(
-        printf $' \033[B \n' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' multi-select Docker CI Tests \
+  multi_select_tty_output="$(
+    printf $' \033[B \n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' multi-select Docker CI Tests \
 --title Features --required" /dev/null
-    )"
-    [[ "$multi_select_tty_output" == *'▪  Features'* ]]
-    [[ "$multi_select_tty_output" == *'└──────────────────────────────'* ]]
-    [[ "$multi_select_tty_output" == *'▣ Docker'* ]]
-    [[ "$multi_select_tty_output" == *'▣ CI'* ]]
-    [[ "$multi_select_tty_output" == *$'Docker\r\nCI\r'* ]]
+  )"
+  [[ "$multi_select_tty_output" == *'▪  Features'* ]]
+  [[ "$multi_select_tty_output" == *'└──────────────────────────────'* ]]
+  [[ "$multi_select_tty_output" == *'▣ Docker'* ]]
+  [[ "$multi_select_tty_output" == *'▣ CI'* ]]
+  [[ "$multi_select_tty_output" == *$'Docker\r\nCI\r'* ]]
 
-    set +e
-    confirm_arrow_output="$(
-        printf $'\033[B\n' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
-                /dev/null
-    )"
-    confirm_arrow_status=$?
-    set -e
-    [[ "$confirm_arrow_status" -eq 1 ]]
-    [[ "$confirm_arrow_output" == *$'  ▪  Create this project? [no]'* ]]
-    [[ "$confirm_arrow_output" == *$'  └────────────────────────────────'* ]]
-    [[ "$confirm_arrow_output" == *'▪ No'* ]]
+  set +e
+  confirm_arrow_output="$(
+    printf $'\033[B\n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
+        /dev/null
+  )"
+  confirm_arrow_status=$?
+  set -e
+  [[ "$confirm_arrow_status" -eq 1 ]]
+  [[ "$confirm_arrow_output" == *$'  ▪  Create this project? [no]'* ]]
+  [[ "$confirm_arrow_output" == *$'  └────────────────────────────────'* ]]
+  [[ "$confirm_arrow_output" == *'▪ No'* ]]
 
-    confirm_y_output="$(
-        printf 'y' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
-                /dev/null
-    )"
-    [[ "$confirm_y_output" == *'▪  Create this project? [yes]'* ]]
+  confirm_y_output="$(
+    printf 'y' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
+        /dev/null
+  )"
+  [[ "$confirm_y_output" == *'▪  Create this project? [yes]'* ]]
 
-    set +e
-    confirm_n_output="$(
-        printf 'n' |
-            script -qec \
-                "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
-                /dev/null
-    )"
-    confirm_n_status=$?
-    set -e
-    [[ "$confirm_n_status" -eq 1 ]]
-    [[ "$confirm_n_output" == *'▪  Create this project? [no]'* ]]
+  set +e
+  confirm_n_output="$(
+    printf 'n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' confirm 'Create this project?'" \
+        /dev/null
+  )"
+  confirm_n_status=$?
+  set -e
+  [[ "$confirm_n_status" -eq 1 ]]
+  [[ "$confirm_n_output" == *'▪  Create this project? [no]'* ]]
 fi
 
 confirm_yes_output="$(
-    NO_COLOR=1 "$MOMA_DIST" confirm \
-        "Continue?" --default yes --answer yes 2>&1
+  NO_COLOR=1 "$MOMA_DIST" confirm \
+    "Continue?" --default yes --answer yes 2>&1
 )"
 [[ "$confirm_yes_output" == *$'  ▪  Continue? [yes]'* ]]
 [[ "$confirm_yes_output" == *$'  └──────────────────────────────'* ]]
@@ -364,20 +364,20 @@ confirm_yes_output="$(
 [[ "$confirm_yes_output" == *"y yes · n no"* ]]
 
 confirm_spacing_output="$(
-    NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" --answer yes 2>&1
-    printf 'NEXT'
+  NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" --answer yes 2>&1
+  printf 'NEXT'
 )"
 [[ "$confirm_spacing_output" == *$'y yes · n no\n\nNEXT' ]]
 
 confirm_piped_spacing_output="$(
-    printf 'yes\n' | NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" 2>&1
-    printf 'NEXT'
+  printf 'yes\n' | NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" 2>&1
+  printf 'NEXT'
 )"
 [[ "$confirm_piped_spacing_output" == *$'  y/n: \n\nNEXT' ]]
 
 set +e
 confirm_no_output="$(
-    NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" --answer no 2>&1
+  NO_COLOR=1 "$MOMA_DIST" confirm "Continue?" --answer no 2>&1
 )"
 confirm_no_status=$?
 set -e
@@ -388,8 +388,8 @@ set -e
 sleep 0.02 &
 spinner_pid=$!
 spinner_output="$(
-    NO_COLOR=1 "$MOMA_DIST" spinner \
-        "$spinner_pid" "Finished" --delay 0.01
+  NO_COLOR=1 "$MOMA_DIST" spinner \
+    "$spinner_pid" "Finished" --delay 0.01
 )"
 [[ "$spinner_output" == *"Finished"* ]]
 
@@ -422,30 +422,30 @@ moma-title-sub
 EOF
 
 mapfile -t actual_functions < <(
-    bash -c 'source "$1"; compgen -A function | LC_ALL=C sort' _ "$MOMA_DIST" |
-        rg '^moma-'
+  bash -c 'source "$1"; compgen -A function | LC_ALL=C sort' _ "$MOMA_DIST" |
+    rg '^moma-'
 )
 [[ "${actual_functions[*]}" == "${expected_functions[*]}" ]]
 
 mapfile -t registered_functions < <(
-    bash -c 'source "$1"; _moma_command_registry' _ "$MOMA_DIST" |
-        cut -f 2 |
-        LC_ALL=C sort
+  bash -c 'source "$1"; _moma_command_registry' _ "$MOMA_DIST" |
+    cut -f 2 |
+    LC_ALL=C sort
 )
 [[ "${registered_functions[*]}" == "${expected_functions[*]}" ]]
 
 for public_function in "${expected_functions[@]}"; do
-    bash -c \
-        'source "$1"; declare -F "$2" >/dev/null' \
-        _ "$MOMA_DIST" "$public_function"
-    rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/web/index.html"
-    rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
-    rg -q "\\b$public_function\\b" "$ROOT_DIR/example.sh"
+  bash -c \
+    'source "$1"; declare -F "$2" >/dev/null' \
+    _ "$MOMA_DIST" "$public_function"
+  rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/web/index.html"
+  rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
+  rg -q "\\b$public_function\\b" "$ROOT_DIR/example.sh"
 done
 
 example_output="$(
-    printf 'demo-project\nteam@example.com\nsuper-secret\nyes\n' |
-        NO_COLOR=1 "$ROOT_DIR/example.sh" 2>&1
+  printf 'demo-project\nteam@example.com\nsuper-secret\nyes\n' |
+    NO_COLOR=1 "$ROOT_DIR/example.sh" 2>&1
 )"
 [[ "$example_output" == *"Component showcase"* ]]
 [[ "$example_output" == *"All required commands are available."* ]]
@@ -475,8 +475,8 @@ EOF
 chmod +x "$fake_bin/glow"
 
 glow_help="$(
-    PATH="$fake_bin:/usr/bin:/bin" \
-        MOMA_HELP_WIDTH=72 "$MOMA_DIST" help
+  PATH="$fake_bin:/usr/bin:/bin" \
+    MOMA_HELP_WIDTH=72 "$MOMA_DIST" help
 )"
 [[ "$glow_help" == *"glow arguments: -w 72 -"* ]]
 [[ "$glow_help" == *"# Moma"* ]]
@@ -522,8 +522,8 @@ multi_select_heading="### \`moma-multi-select\`"
 [[ "$markdown_preview" == *"./dist/moma preview web"* ]]
 
 glow_preview="$(
-    PATH="$fake_bin:/usr/bin:/bin" \
-        MOMA_PREVIEW_WIDTH=76 "$MOMA_DIST" preview md
+  PATH="$fake_bin:/usr/bin:/bin" \
+    MOMA_PREVIEW_WIDTH=76 "$MOMA_DIST" preview md
 )"
 [[ "$glow_preview" == *"glow arguments: -w 76 -"* ]]
 
@@ -537,7 +537,7 @@ rg -Fq '<span class="quick-start__label">Load</span>' "$ROOT_DIR/web/index.html"
 rg -Fq 'source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)' "$ROOT_DIR/web/index.html"
 rg -Fq 'moma-msg "Ready" --success' "$ROOT_DIR/web/index.html"
 if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
-    exit 1
+  exit 1
 fi
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"

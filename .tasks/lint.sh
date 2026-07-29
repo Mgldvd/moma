@@ -12,10 +12,10 @@ source "${SCRIPT_DIR}/common.sh"
 bash -n "${TASKS_SHELL_FILES[@]}" "${TASKS_REPO_ROOT}/dist/moma"
 
 if command -v shellcheck >/dev/null 2>&1; then
-    shellcheck -x "${TASKS_SHELL_FILES[@]}"
-    shellcheck -s bash "${TASKS_BATS_FILES[@]}"
+  shellcheck -x "${TASKS_SHELL_FILES[@]}"
+  shellcheck -s bash "${TASKS_BATS_FILES[@]}"
 else
-    printf '%s\n' 'ShellCheck not installed; skipped lint.'
+  printf '%s\n' 'ShellCheck not installed; skipped lint.'
 fi
 
 shfmt_bin="$("${SCRIPT_DIR}/ensure_shfmt.sh")"

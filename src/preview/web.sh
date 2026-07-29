@@ -1,27 +1,27 @@
 # Embedded browser preview server.
 # Materialize embedded web assets and serve them from a temporary directory.
 _moma_preview_web() {
-    local port="${MOMA_PREVIEW_PORT:-4173}"
+  local port="${MOMA_PREVIEW_PORT:-4173}"
 
-    if [[ ! "$port" =~ ^[0-9]+$ ]] || ((port < 1 || port > 65535)); then
-        printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
-        return 1
-    fi
-    if ! command -v python3 &>/dev/null; then
-        printf 'moma preview web: python3 is required\n' >&2
-        return 1
-    fi
+  if [[ ! "$port" =~ ^[0-9]+$ ]] || ((port < 1 || port > 65535)); then
+    printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
+    return 1
+  fi
+  if ! command -v python3 &>/dev/null; then
+    printf 'moma preview web: python3 is required\n' >&2
+    return 1
+  fi
 
-    local preview_dir
-    preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
-    _moma_preview_web_index >"$preview_dir/index.html"
-    _moma_preview_web_styles >"$preview_dir/styles.css"
-    _moma_preview_web_script >"$preview_dir/app.js"
+  local preview_dir
+  preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
+  _moma_preview_web_index >"$preview_dir/index.html"
+  _moma_preview_web_styles >"$preview_dir/styles.css"
+  _moma_preview_web_script >"$preview_dir/app.js"
 
-    (
-        trap 'rm -rf "$preview_dir"' EXIT
-        cd "$preview_dir" || exit 1
-        python3 - "$port" <<'PY'
+  (
+    trap 'rm -rf "$preview_dir"' EXIT
+    cd "$preview_dir" || exit 1
+    python3 - "$port" <<'PY'
 import errno
 import http.server
 import sys
@@ -67,5 +67,5 @@ except KeyboardInterrupt:
 finally:
     server.server_close()
 PY
-    )
+  )
 }

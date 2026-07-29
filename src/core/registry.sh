@@ -1,7 +1,7 @@
 # command<TAB>function<TAB>description
 # Print the canonical public command registry.
 _moma_command_registry() {
-    cat <<'EOF'
+  cat <<'EOF'
 title	moma-title	Print a title and subtitle.
 title-sub	moma-title-sub	Print a secondary title.
 section	moma-section	Print a section heading.
@@ -23,13 +23,13 @@ EOF
 
 # Resolve a command name to its public function name.
 _moma_command_function() {
-    local requested="$1"
-    local command function _description
-    while IFS=$'\t' read -r command function _description; do
-        if [[ "$command" == "$requested" ]]; then
-            printf '%s' "$function"
-            return 0
-        fi
-    done < <(_moma_command_registry)
-    return 1
+  local requested="$1"
+  local command function _description
+  while IFS=$'\t' read -r command function _description; do
+    if [[ "$command" == "$requested" ]]; then
+      printf '%s' "$function"
+      return 0
+    fi
+  done < <(_moma_command_registry)
+  return 1
 }
