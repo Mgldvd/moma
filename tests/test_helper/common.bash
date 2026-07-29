@@ -5,5 +5,5 @@ MOMA_DIST="$MOMA_ROOT/dist/moma"
 
 # Build the generated Moma artifact for a Bats suite.
 build_moma() {
-    "$MOMA_ROOT/build.sh" >/dev/null
+  "$MOMA_ROOT/build.sh" >/dev/null
 }

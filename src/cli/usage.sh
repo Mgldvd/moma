@@ -1,7 +1,7 @@
 # CLI help rendering.
 # Print plain-text CLI help.
 _moma_usage_plain() {
-    cat <<'EOF'
+  cat <<'EOF'
 Moma - terminal UI components for Bash
 
 Usage:
@@ -10,11 +10,11 @@ Usage:
 
 Commands:
 EOF
-    local command _function description
-    while IFS=$'\t' read -r command _function description; do
-        printf '  %-15s %s\n' "$command" "$description"
-    done < <(_moma_command_registry)
-    cat <<'EOF'
+  local command _function description
+  while IFS=$'\t' read -r command _function description; do
+    printf '  %-15s %s\n' "$command" "$description"
+  done < <(_moma_command_registry)
+  cat <<'EOF'
   preview         Show terminal, Markdown, or browser previews.
 
 Options:
@@ -31,17 +31,17 @@ EOF
 
 # Render embedded help with Glow or fall back to plain text.
 _moma_usage() {
-    local width="${MOMA_HELP_WIDTH:-${COLUMNS:-100}}"
+  local width="${MOMA_HELP_WIDTH:-${COLUMNS:-100}}"
 
-    if [[ ! "$width" =~ ^[0-9]+$ ]] || ((width < 20)); then
-        width=100
+  if [[ ! "$width" =~ ^[0-9]+$ ]] || ((width < 20)); then
+    width=100
+  fi
+
+  if command -v glow &>/dev/null; then
+    if _moma_help_markdown | glow -w "$width" -; then
+      return 0
     fi
+  fi
 
-    if command -v glow &>/dev/null; then
-        if _moma_help_markdown | glow -w "$width" -; then
-            return 0
-        fi
-    fi
-
-    _moma_usage_plain
+  _moma_usage_plain
 }

@@ -12,7 +12,7 @@ source "${SCRIPT_DIR}/common.sh"
 "${TASKS_REPO_ROOT}/tests/smoke.sh"
 
 if command -v bats >/dev/null 2>&1; then
-    bats "${TASKS_BATS_FILES[@]}"
+  bats "${TASKS_BATS_FILES[@]}"
 else
-    printf '%s\n' 'Bats not installed; skipped Bats suites.'
+  printf '%s\n' 'Bats not installed; skipped Bats suites.'
 fi

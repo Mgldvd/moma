@@ -15,53 +15,53 @@ PREVIEW_CSS="$ROOT_DIR/web/styles.css"
 PREVIEW_JS="$ROOT_DIR/web/app.js"
 
 modules=(
-    core/version.sh
-    core/errors.sh
-    core/string.sh
-    core/validation.sh
-    core/color.sh
-    core/semantic.sh
-    core/terminal.sh
-    core/registry.sh
-    components/title.sh
-    components/section-message.sh
-    components/simple-list.sh
-    components/box-prompt.sh
-    components/label.sh
-    components/input.sh
-    components/select.sh
-    components/rabbit.sh
-    components/interaction.sh
-    components/command-check.sh
-    preview/web.sh
-    preview/markdown.sh
-    preview/main.sh
-    cli/usage.sh
-    cli/main.sh
+  core/version.sh
+  core/errors.sh
+  core/string.sh
+  core/validation.sh
+  core/color.sh
+  core/semantic.sh
+  core/terminal.sh
+  core/registry.sh
+  components/title.sh
+  components/section-message.sh
+  components/simple-list.sh
+  components/box-prompt.sh
+  components/label.sh
+  components/input.sh
+  components/select.sh
+  components/rabbit.sh
+  components/interaction.sh
+  components/command-check.sh
+  preview/web.sh
+  preview/markdown.sh
+  preview/main.sh
+  cli/usage.sh
+  cli/main.sh
 )
 
 if [[ ! -f "$HELP_MARKDOWN" ]]; then
-    printf 'build: missing help document: %s\n' "$HELP_MARKDOWN" >&2
-    exit 1
+  printf 'build: missing help document: %s\n' "$HELP_MARKDOWN" >&2
+  exit 1
 fi
 
 for required_asset in \
-    "$DOCS_MARKDOWN" \
-    "$PREVIEW_HTML" \
-    "$PREVIEW_CSS" \
-    "$PREVIEW_JS"; do
-    if [[ ! -f "$required_asset" ]]; then
-        printf 'build: missing preview asset: %s\n' "$required_asset" >&2
-        exit 1
-    fi
+  "$DOCS_MARKDOWN" \
+  "$PREVIEW_HTML" \
+  "$PREVIEW_CSS" \
+  "$PREVIEW_JS"; do
+  if [[ ! -f "$required_asset" ]]; then
+    printf 'build: missing preview asset: %s\n' "$required_asset" >&2
+    exit 1
+  fi
 done
 
 for module in "${modules[@]}"; do
-    module_path="$SOURCE_DIR/$module"
-    if [[ ! -f "$module_path" ]]; then
-        printf 'build: missing module: %s\n' "$module_path" >&2
-        exit 1
-    fi
+  module_path="$SOURCE_DIR/$module"
+  if [[ ! -f "$module_path" ]]; then
+    printf 'build: missing module: %s\n' "$module_path" >&2
+    exit 1
+  fi
 done
 
 mkdir -p "$OUTPUT_DIR"
@@ -137,9 +137,9 @@ MOMA_PREVIEW_JS_EOF
 PREVIEW_JS_FOOTER
 
 for module in "${modules[@]}"; do
-    module_path="$SOURCE_DIR/$module"
-    printf '\n# module: src/%s\n' "$module" >>"$tmp_file"
-    cat "$module_path" >>"$tmp_file"
+  module_path="$SOURCE_DIR/$module"
+  printf '\n# module: src/%s\n' "$module" >>"$tmp_file"
+  cat "$module_path" >>"$tmp_file"
 done
 
 cat >>"$tmp_file" <<'FOOTER'
@@ -155,7 +155,7 @@ mv "$tmp_file" "$OUTPUT"
 trap - EXIT
 
 if [[ "$OUTPUT" == "$ROOT_DIR/dist/moma" ]]; then
-    rm -f "$ROOT_DIR/moma.sh"
+  rm -f "$ROOT_DIR/moma.sh"
 fi
 
 printf 'Built %s\n' "$OUTPUT"
