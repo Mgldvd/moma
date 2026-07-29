@@ -1,0 +1,42 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Build the standalone Moma artifact.
+    cmds:
+      - ./.tasks/build.sh
+
+  build:
+    desc: Build the standalone Moma artifact.
+    cmds:
+      - ./.tasks/build.sh
+
+  test:
+    desc: Run the smoke suite and all available Bats suites.
+    cmds:
+      - ./.tasks/test.sh
+
+  test-bats:
+    desc: Run the Bats suites and fail when Bats is unavailable.
+    cmds:
+      - ./.tasks/test_bats.sh
+
+  lint:
+    desc: Build and check Bash syntax, ShellCheck, and formatting.
+    cmds:
+      - ./.tasks/lint.sh
+
+  format:
+    desc: Format all Shell and Bats source files.
+    cmds:
+      - ./.tasks/format.sh
+
+  check:
+    desc: Run lint and test workflows.
+    cmds:
+      - ./.tasks/check.sh
+
+  clean:
+    desc: Remove the generated standalone artifact.
+    cmds:
+      - ./.tasks/clean.sh
