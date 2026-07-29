@@ -1,4 +1,5 @@
 # Title components.
+# Render a primary title from normalized arguments.
 _moma_render_title() {
     local title="$1"
     local subtitle="${2:-}"
@@ -16,8 +17,12 @@ _moma_render_title() {
     fi
 
     local primary_color accent_color reset
-    primary_color="$(_moma_resolve_color "$primary" "$MOMA_COLOR_PRIMARY" "$no_color")"
-    accent_color="$(_moma_resolve_color "$accent" "$MOMA_COLOR_ACCENT" "$no_color")"
+    primary_color="$(
+        _moma_resolve_color "$primary" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
+    accent_color="$(
+        _moma_resolve_color "$accent" "$MOMA_COLOR_ACCENT" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     local text_length=${#title}
@@ -26,7 +31,10 @@ _moma_render_title() {
     fi
 
     local box_width
-    box_width="$(_moma_resolve_decor_width "$((text_length + 6))" "$min_width" "$width" "$max_width" 8)"
+    box_width="$(
+        _moma_resolve_decor_width \
+            "$((text_length + 6))" "$min_width" "$width" "$max_width" 8
+    )"
     local padding=$((box_width - text_length - 4))
 
     printf '%b\n' "$primary_color"
@@ -36,7 +44,9 @@ _moma_render_title() {
         local wrapped_line wrapped_padding
         local -a wrapped_lines=()
         [[ -z "$subtitle" ]] || combined_text+=" $subtitle"
-        mapfile -t wrapped_lines < <(_moma_wrap_text "$combined_text" "$((box_width - 4))")
+        mapfile -t wrapped_lines < <(
+            _moma_wrap_text "$combined_text" "$((box_width - 4))"
+        )
         for wrapped_line in "${wrapped_lines[@]}"; do
             wrapped_padding=$((box_width - ${#wrapped_line} - 4))
             printf '  ▪  %b%s%b%s  ▪\n' \
@@ -56,6 +66,7 @@ _moma_render_title() {
     printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$box_width")" "$reset"
 }
 
+# Parse title options and print a primary title component.
 moma-title() {
     local title=""
     local subtitle=""
@@ -165,9 +176,12 @@ EOF
         _moma_usage_error moma-title "invalid max width: $max_width"
         return 2
     fi
-    _moma_render_title "$title" "$subtitle" "$primary" "$accent" "$min_width" "$no_color" "$width" "$max_width"
+    _moma_render_title \
+        "$title" "$subtitle" "$primary" "$accent" \
+        "$min_width" "$no_color" "$width" "$max_width"
 }
 
+# Render a secondary title from normalized arguments.
 _moma_render_title_sub() {
     local text="$1"
     local detail="${2:-}"
@@ -186,13 +200,19 @@ _moma_render_title_sub() {
     fi
 
     local resolved_color reset combined_text box_width
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
     combined_text="$text"
     if [[ -n "$detail" ]]; then
         combined_text+=" $detail"
     fi
-    box_width="$(_moma_resolve_decor_width "$((${#combined_text} + 6))" "$min_width" "$width" "$max_width" 8)"
+    box_width="$(
+        _moma_resolve_decor_width \
+            "$((${#combined_text} + 6))" \
+            "$min_width" "$width" "$max_width" 8
+    )"
 
     printf '%b\n' "$resolved_color"
     if [[ -n "$detail" ]]; then
@@ -208,6 +228,7 @@ _moma_render_title_sub() {
     printf '%b\n' "$reset"
 }
 
+# Parse title options and print a secondary title component.
 moma-title-sub() {
     local text=""
     local detail=""
@@ -317,5 +338,7 @@ EOF
         _moma_usage_error moma-title-sub "invalid max width: $max_width"
         return 2
     fi
-    _moma_render_title_sub "$text" "$detail" "$color" "$message" "$min_width" "$no_color" "$width" "$max_width"
+    _moma_render_title_sub \
+        "$text" "$detail" "$color" "$message" \
+        "$min_width" "$no_color" "$width" "$max_width"
 }

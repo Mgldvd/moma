@@ -18,10 +18,12 @@ MOMA_COLOR_PRIMARY="${MOMA_COLOR_PRIMARY:-$MOMA_COLOR_CYAN}"
 MOMA_COLOR_ACCENT="${MOMA_COLOR_ACCENT:-$MOMA_COLOR_YELLOW}"
 MOMA_COLOR_MUTED="${MOMA_COLOR_MUTED:-$MOMA_COLOR_GRAY}"
 
+# Return success when colored output is enabled.
 _moma_color_enabled() {
     [[ "${1:-false}" != "true" && -z "${NO_COLOR:-}" ]]
 }
 
+# Resolve a named or literal color while honoring color suppression.
 _moma_resolve_color() {
     local candidate="${1:-}"
     local fallback="${2:-$MOMA_COLOR_RESET}"
@@ -47,6 +49,7 @@ _moma_resolve_color() {
     esac
 }
 
+# Print the reset sequence when colored output is enabled.
 _moma_reset_color() {
     if _moma_color_enabled "${1:-false}"; then
         printf '%s' "$MOMA_COLOR_RESET"

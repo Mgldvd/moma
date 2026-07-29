@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
+#
+# Demonstrate Moma's public terminal UI components in one workflow.
 
 set -euo pipefail
 

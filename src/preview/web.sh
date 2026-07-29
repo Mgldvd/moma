@@ -1,4 +1,5 @@
 # Embedded browser preview server.
+# Materialize embedded web assets and serve them from a temporary directory.
 _moma_preview_web() {
     local port="${MOMA_PREVIEW_PORT:-4173}"
 
@@ -51,7 +52,8 @@ if server is None:
 selected_port = server.server_address[1]
 if selected_port != requested_port:
     print(
-        f"Port {requested_port} is already in use; using {selected_port} instead.",
+        f"Port {requested_port} is already in use; "
+        f"using {selected_port} instead.",
         flush=True,
     )
 

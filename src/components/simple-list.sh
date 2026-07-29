@@ -1,4 +1,5 @@
 # Compact message and list components.
+# Render one compact marker-and-text line.
 _moma_render_dot_line() {
     local text="${1:-}"
     local marker="${2:-▪}"
@@ -11,6 +12,7 @@ _moma_render_dot_line() {
     printf '  %b%s%b   %s\n' "$color_code" "$marker" "$reset" "$text"
 }
 
+# Resolve and validate a compact component's semantic color.
 _moma_dot_semantic_color() {
     local function_name="$1"
     local variant="$2"
@@ -24,6 +26,7 @@ _moma_dot_semantic_color() {
     printf '%s' "$semantic_color"
 }
 
+# Parse compact-message options and print one message.
 moma-msg-simple() {
     local color="$MOMA_COLOR_PRIMARY"
     local marker="▪"
@@ -33,7 +36,9 @@ moma-msg-simple() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --success | --error | --warning | --info)
-                color="$(_moma_dot_semantic_color moma-msg-simple "${1#--}")" || return 1
+                color="$(
+                    _moma_dot_semantic_color moma-msg-simple "${1#--}"
+                )" || return 1
                 shift
                 ;;
             --color | -c)
@@ -93,6 +98,7 @@ EOF
     _moma_render_dot_line "${message[*]}" "$marker" "$color" "$no_color"
 }
 
+# Parse list options and print each item with a marker.
 moma-list() {
     local color="$MOMA_COLOR_PRIMARY"
     local marker="▪"

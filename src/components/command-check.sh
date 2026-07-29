@@ -1,4 +1,5 @@
 # Command availability component.
+# Check commands and print semantic availability messages.
 moma-command-check() {
     local quiet=false
     local no_color=false
@@ -49,9 +50,13 @@ EOF
         local -a message_args=()
         $no_color && message_args+=(--no-color)
         if command -v "$command" &>/dev/null; then
-            $quiet || moma-msg-simple "$command is available" --success "${message_args[@]}"
+            $quiet ||
+                moma-msg-simple \
+                    "$command is available" --success "${message_args[@]}"
         else
-            $quiet || moma-msg-simple "$command is missing" --error "${message_args[@]}"
+            $quiet ||
+                moma-msg-simple \
+                    "$command is missing" --error "${message_args[@]}"
             status=1
         fi
     done

@@ -51,3 +51,4 @@ creds.js
 node_modules/
 
 .tmp
+.tasks/bin/

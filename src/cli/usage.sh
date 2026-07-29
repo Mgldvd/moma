@@ -1,4 +1,5 @@
 # CLI help rendering.
+# Print plain-text CLI help.
 _moma_usage_plain() {
     cat <<'EOF'
 Moma - terminal UI components for Bash
@@ -28,6 +29,7 @@ Binary example:
 EOF
 }
 
+# Render embedded help with Glow or fall back to plain text.
 _moma_usage() {
     local width="${MOMA_HELP_WIDTH:-${COLUMNS:-100}}"
 

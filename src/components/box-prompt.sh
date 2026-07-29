@@ -1,4 +1,5 @@
 # Box and prompt components.
+# Render a framed message from normalized box arguments.
 _moma_render_box() {
     local text="$1"
     local color="${2:-$MOMA_COLOR_PRIMARY}"
@@ -30,18 +31,23 @@ _moma_render_box() {
     left_pad="$(_moma_repeat_char " " "$padding")"
 
     local resolved_color reset
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     printf '%b' "$resolved_color"
     printf '  ┌%s┐\n' "$(_moma_repeat_char "─" "$content_width")"
     for line in "${lines[@]}"; do
-        right_pad="$(_moma_repeat_char " " "$((content_width - ${#line} - padding))")"
+        right_pad="$(
+            _moma_repeat_char " " "$((content_width - ${#line} - padding))"
+        )"
         printf '  │%s%s%s│\n' "$left_pad" "$line" "$right_pad"
     done
     printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$content_width")" "$reset"
 }
 
+# Parse box options and print a framed message.
 moma-box() {
     local text=""
     local color="$MOMA_COLOR_PRIMARY"
@@ -156,9 +162,11 @@ EOF
         _moma_usage_error moma-box "invalid max width: $max_width"
         return 2
     fi
-    _moma_render_box "$text" "$color" "$icon" "$width" "$padding" "$no_color" "$max_width"
+    _moma_render_box \
+        "$text" "$color" "$icon" "$width" "$padding" "$no_color" "$max_width"
 }
 
+# Render a prompt from normalized prompt arguments.
 _moma_render_prompt() {
     local question="$1"
     local color="${2:-$MOMA_COLOR_WARNING}"
@@ -169,19 +177,25 @@ _moma_render_prompt() {
     local max_width="${7:-}"
 
     local resolved_color reset prompt_text box_width
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
     prompt_text="$question"
     if [[ -n "$default_value" ]]; then
         prompt_text+=" [$default_value]"
     fi
-    box_width="$(_moma_resolve_decor_width "$((${#prompt_text} + 6))" 30 "$width" "$max_width" 8)"
+    box_width="$(
+        _moma_resolve_decor_width \
+            "$((${#prompt_text} + 6))" 30 "$width" "$max_width" 8
+    )"
 
     printf '%b\n' "$resolved_color"
     printf '  %s  %b%s%b\n' "$icon" "$reset" "$prompt_text" "$resolved_color"
     printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
 }
 
+# Parse prompt options and print a question lead-in.
 moma-prompt() {
     local question=""
     local color="$MOMA_COLOR_WARNING"
@@ -289,6 +303,8 @@ EOF
         _moma_usage_error moma-prompt "invalid max width: $max_width"
         return 2
     fi
-    _moma_render_prompt "$question" "$color" "$icon" "$default_value" "$no_color" "$width" "$max_width"
+    _moma_render_prompt \
+        "$question" "$color" "$icon" "$default_value" \
+        "$no_color" "$width" "$max_width"
     printf '%b' "$(_moma_reset_color "$no_color")"
 }

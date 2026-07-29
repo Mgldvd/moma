@@ -27,13 +27,13 @@ setup_file() {
         rm -f "$capture"
     ' _ "$MOMA_DIST"
 
-    [ "$status" -eq 0 ]
+    [[ "$status" -eq 0 ]]
 }
 
 @test "sourcing does not execute the CLI" {
     run bash -c 'source "$1"' _ "$MOMA_DIST"
-    [ "$status" -eq 0 ]
-    [ -z "$output" ]
+    [[ "$status" -eq 0 ]]
+    [[ -z "$output" ]]
 }
 
 @test "registry and public API contain the same component functions" {
@@ -43,7 +43,7 @@ setup_file() {
         public="$(compgen -A function | rg "^moma-" | LC_ALL=C sort)"
         [[ "$registry" == "$public" ]]
     ' _ "$MOMA_DIST"
-    [ "$status" -eq 0 ]
+    [[ "$status" -eq 0 ]]
 }
 
 @test "spinner leaves a consumer trap unchanged" {
@@ -55,5 +55,5 @@ setup_file() {
         NO_COLOR=1 moma-spinner "$!" Done --delay 0.005 >/dev/null
         [[ "$(trap -p INT)" == "$before" ]]
     ' _ "$MOMA_DIST"
-    [ "$status" -eq 0 ]
+    [[ "$status" -eq 0 ]]
 }

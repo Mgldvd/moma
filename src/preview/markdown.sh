@@ -1,4 +1,5 @@
 # Embedded Markdown preview rendering.
+# Reject positional arguments that a preview format does not accept.
 _moma_preview_reject_extra_args() {
     local format="$1"
     shift
@@ -8,6 +9,7 @@ _moma_preview_reject_extra_args() {
     fi
 }
 
+# Render embedded Markdown with Glow when available.
 _moma_preview_markdown() {
     local width="${MOMA_PREVIEW_WIDTH:-${COLUMNS:-100}}"
 

@@ -1,4 +1,5 @@
 # Single and multiple selection components.
+# Render a single-selection menu from normalized arguments.
 _moma_render_select() {
     local title="$1"
     local selected_index="$2"
@@ -10,7 +11,9 @@ _moma_render_select() {
     local marker="▪"
 
     local active_color reset header_width
-    active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    active_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
     header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
 
@@ -22,13 +25,17 @@ _moma_render_select() {
     printf '  %b▪%b  %s\n' "$active_color" "$reset" "$title" >&2
 
     if $redraw; then _moma_term_clear_line; fi
-    printf '  %b└%s%b\n' "$active_color" "$(_moma_repeat_char "─" "$header_width")" "$reset" >&2
+    printf '  %b└%s%b\n' \
+        "$active_color" "$(_moma_repeat_char "─" "$header_width")" \
+        "$reset" >&2
 
     local index
     for index in "${!options[@]}"; do
         if $redraw; then _moma_term_clear_line; fi
         if ((index == selected_index)); then
-            printf '  %b%s%b %s\n' "$active_color" "$marker" "$reset" "${options[$index]}" >&2
+            printf '  %b%s%b %s\n' \
+                "$active_color" "$marker" "$reset" \
+                "${options[$index]}" >&2
         else
             printf '    %s\n' "${options[$index]}" >&2
         fi
@@ -38,6 +45,7 @@ _moma_render_select() {
     printf '  ↑/↓ move · Enter select · q cancel\n' >&2
 }
 
+# Resolve a single-selection keyboard event to its next state.
 _moma_select_transition() {
     local selected_index="$1"
     local option_count="$2"
@@ -45,7 +53,9 @@ _moma_select_transition() {
     local result=continue
 
     case "$event" in
-        up | k) selected_index=$(((selected_index - 1 + option_count) % option_count)) ;;
+        up | k)
+            selected_index=$(((selected_index - 1 + option_count) % option_count))
+            ;;
         down | j) selected_index=$(((selected_index + 1) % option_count)) ;;
         enter) result=confirm ;;
         cancel) result=cancel ;;
@@ -54,6 +64,7 @@ _moma_select_transition() {
     printf '%s\t%s\n' "$selected_index" "$result"
 }
 
+# Parse selection options and return the chosen value on stdout.
 moma-select() {
     local title="Select an option"
     local color="$MOMA_COLOR_PRIMARY"
@@ -149,7 +160,8 @@ EOF
         printf 'moma-select: invalid initial option: %s\n' "$initial" >&2
         return 2
     fi
-    if [[ -n "$choose" ]] && ! _moma_is_index_in_range "$choose" "${#options[@]}"; then
+    if [[ -n "$choose" ]] &&
+        ! _moma_is_index_in_range "$choose" "${#options[@]}"; then
         printf 'moma-select: invalid chosen option: %s\n' "$choose" >&2
         return 2
     fi
@@ -157,18 +169,24 @@ EOF
     local selected_index=$((initial - 1))
     if [[ -n "$choose" ]]; then
         selected_index=$((choose - 1))
-        _moma_render_select "$title" "$selected_index" "$color" "$no_color" false "${options[@]}"
+        _moma_render_select \
+            "$title" "$selected_index" "$color" "$no_color" \
+            false "${options[@]}"
         printf '\n' >&2
         printf '%s\n' "${options[$selected_index]}"
         return 0
     fi
 
     if [[ ! -t 0 || ! -t 2 ]]; then
-        printf 'moma-select: interactive input requires a terminal; use --choose <number> for automation\n' >&2
+        printf '%s%s\n' \
+            'moma-select: interactive input requires a terminal; ' \
+            'use --choose <number> for automation' >&2
         return 2
     fi
 
-    _moma_render_select "$title" "$selected_index" "$color" "$no_color" false "${options[@]}"
+    _moma_render_select \
+        "$title" "$selected_index" "$color" "$no_color" \
+        false "${options[@]}"
 
     local event transition transition_status
     while true; do
@@ -177,7 +195,9 @@ EOF
             return 130
         fi
 
-        transition="$(_moma_select_transition "$selected_index" "${#options[@]}" "$event")"
+        transition="$(
+            _moma_select_transition "$selected_index" "${#options[@]}" "$event"
+        )"
         selected_index="${transition%%$'\t'*}"
         transition_status="${transition#*$'\t'}"
         case "$transition_status" in
@@ -192,10 +212,13 @@ EOF
                 ;;
         esac
 
-        _moma_render_select "$title" "$selected_index" "$color" "$no_color" true "${options[@]}"
+        _moma_render_select \
+            "$title" "$selected_index" "$color" "$no_color" \
+            true "${options[@]}"
     done
 }
 
+# Render a multiple-selection menu from normalized arguments.
 _moma_render_multi_select() {
     local title="$1"
     local active_index="$2"
@@ -207,7 +230,9 @@ _moma_render_multi_select() {
     local -a options=("$@")
 
     local active_color reset checkbox pointer header_width
-    active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    active_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
     header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
 
@@ -219,7 +244,9 @@ _moma_render_multi_select() {
     printf '  %b▪%b  %s\n' "$active_color" "$reset" "$title" >&2
 
     if $redraw; then _moma_term_clear_line; fi
-    printf '  %b└%s%b\n' "$active_color" "$(_moma_repeat_char "─" "$header_width")" "$reset" >&2
+    printf '  %b└%s%b\n' \
+        "$active_color" "$(_moma_repeat_char "─" "$header_width")" \
+        "$reset" >&2
 
     local index
     for index in "${!options[@]}"; do
@@ -230,7 +257,9 @@ _moma_render_multi_select() {
         ((index != active_index)) || pointer="›"
 
         if ((index == active_index)); then
-            printf '  %b%s %s %s%b\n' "$active_color" "$pointer" "$checkbox" "${options[$index]}" "$reset" >&2
+            printf '  %b%s %s %s%b\n' \
+                "$active_color" "$pointer" "$checkbox" \
+                "${options[$index]}" "$reset" >&2
         else
             printf '  %s %s %s\n' "$pointer" "$checkbox" "${options[$index]}" >&2
         fi
@@ -240,6 +269,7 @@ _moma_render_multi_select() {
     printf '  ↑/↓ move · Space toggle · Enter confirm · q cancel\n' >&2
 }
 
+# Print selected multiple-choice values on stdout.
 _moma_emit_multi_select() {
     local selected_state="$1"
     shift
@@ -253,12 +283,14 @@ _moma_emit_multi_select() {
     done
 }
 
+# Return success when an index exists in a selected-state list.
 _moma_multi_is_selected() {
     local selected_state="$1"
     local index="$2"
     [[ ",$selected_state," == *",$index,"* ]]
 }
 
+# Toggle an index in a selected-state list and print the new list.
 _moma_multi_toggle() {
     local selected_state="$1"
     local target_index="$2"
@@ -281,6 +313,7 @@ _moma_multi_toggle() {
     printf '%s' "$result"
 }
 
+# Resolve a multiple-selection keyboard event to its next state.
 _moma_multi_select_transition() {
     local active_index="$1"
     local selected_state="$2"
@@ -289,9 +322,15 @@ _moma_multi_select_transition() {
     local result=continue
 
     case "$event" in
-        up | k) active_index=$(((active_index - 1 + option_count) % option_count)) ;;
+        up | k)
+            active_index=$(((active_index - 1 + option_count) % option_count))
+            ;;
         down | j) active_index=$(((active_index + 1) % option_count)) ;;
-        space) selected_state="$(_moma_multi_toggle "$selected_state" "$active_index")" ;;
+        space)
+            selected_state="$(
+                _moma_multi_toggle "$selected_state" "$active_index"
+            )"
+            ;;
         enter) result=confirm ;;
         cancel) result=cancel ;;
     esac
@@ -299,6 +338,7 @@ _moma_multi_select_transition() {
     printf '%s\t%s\t%s\n' "$active_index" "$selected_state" "$result"
 }
 
+# Parse multiple-selection options and return chosen values on stdout.
 moma-multi-select() {
     local title="Select options"
     local color="$MOMA_COLOR_PRIMARY"
@@ -427,7 +467,8 @@ EOF
         for requested_index in "${requested_indices[@]}"; do
             normalized_index="$(_moma_trim "$requested_index")"
             if ! _moma_is_index_in_range "$normalized_index" "${#options[@]}"; then
-                printf 'moma-multi-select: invalid option number: %s\n' "$requested_index" >&2
+                printf 'moma-multi-select: invalid option number: %s\n' \
+                    "$requested_index" >&2
                 return 2
             fi
             normalized_index=$((normalized_index - 1))
@@ -443,18 +484,24 @@ EOF
             printf 'moma-multi-select: select at least one option\n' >&2
             return 2
         fi
-        _moma_render_multi_select "$title" "$active_index" "$selected_state" "$color" "$no_color" false "${options[@]}"
+        _moma_render_multi_select \
+            "$title" "$active_index" "$selected_state" "$color" \
+            "$no_color" false "${options[@]}"
         printf '\n' >&2
         _moma_emit_multi_select "$selected_state" "${options[@]}"
         return 0
     fi
 
     if [[ ! -t 0 || ! -t 2 ]]; then
-        printf 'moma-multi-select: interactive input requires a terminal; use --choose <numbers> for automation\n' >&2
+        printf '%s%s\n' \
+            'moma-multi-select: interactive input requires a terminal; ' \
+            'use --choose <numbers> for automation' >&2
         return 2
     fi
 
-    _moma_render_multi_select "$title" "$active_index" "$selected_state" "$color" "$no_color" false "${options[@]}"
+    _moma_render_multi_select \
+        "$title" "$active_index" "$selected_state" "$color" \
+        "$no_color" false "${options[@]}"
 
     local event transition remainder transition_status
     while true; do
@@ -463,7 +510,10 @@ EOF
             return 130
         fi
 
-        transition="$(_moma_multi_select_transition "$active_index" "$selected_state" "${#options[@]}" "$event")"
+        transition="$(
+            _moma_multi_select_transition \
+                "$active_index" "$selected_state" "${#options[@]}" "$event"
+        )"
         active_index="${transition%%$'\t'*}"
         remainder="${transition#*$'\t'}"
         selected_state="${remainder%%$'\t'*}"
@@ -484,6 +534,8 @@ EOF
                 ;;
         esac
 
-        _moma_render_multi_select "$title" "$active_index" "$selected_state" "$color" "$no_color" true "${options[@]}"
+        _moma_render_multi_select \
+            "$title" "$active_index" "$selected_state" "$color" \
+            "$no_color" true "${options[@]}"
     done
 }

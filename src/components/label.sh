@@ -1,4 +1,5 @@
 # Label component.
+# Render a decorated label from normalized arguments.
 _moma_render_label() {
     local text="$1"
     local width="${2:-}"
@@ -14,18 +15,24 @@ _moma_render_label() {
         label="$icon"
     fi
 
-    width="$(_moma_resolve_decor_width "$((${#label} + 4))" 40 "$width" "$max_width" 8)"
+    width="$(
+        _moma_resolve_decor_width \
+            "$((${#label} + 4))" 40 "$width" "$max_width" 8
+    )"
     label="$(_moma_truncate_text "$label" "$((width - 4))")"
 
     local dash_count resolved_color reset
     dash_count=$((width - ${#label} - 3))
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     printf '%b  ┌─ %s %s┐%b\n\n' \
         "$resolved_color" "$label" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
 }
 
+# Parse label options and print a decorated label.
 moma-label() {
     local text=""
     local width=""

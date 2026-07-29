@@ -1,4 +1,5 @@
 # command<TAB>function<TAB>description
+# Print the canonical public command registry.
 _moma_command_registry() {
     cat <<'EOF'
 title	moma-title	Print a title and subtitle.
@@ -20,6 +21,7 @@ command-check	moma-command-check	Check executable dependencies.
 EOF
 }
 
+# Resolve a command name to its public function name.
 _moma_command_function() {
     local requested="$1"
     local command function _description

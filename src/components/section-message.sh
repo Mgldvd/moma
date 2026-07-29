@@ -1,4 +1,5 @@
 # Section and message components.
+# Render a semantic section heading from normalized arguments.
 _moma_render_section() {
     local text="$1"
     local color="${2:-$MOMA_COLOR_PRIMARY}"
@@ -6,7 +7,9 @@ _moma_render_section() {
     local no_color="${4:-false}"
 
     local resolved_color reset
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     printf '%b\n' "$resolved_color"
@@ -19,6 +22,7 @@ _moma_render_section() {
     printf '  └ %b\n' "$reset"
 }
 
+# Parse section options and print a semantic heading.
 moma-section() {
     local text=""
     local color="$MOMA_COLOR_PRIMARY"
@@ -89,6 +93,7 @@ EOF
     _moma_render_section "$text" "$color" "$icon" "$no_color"
 }
 
+# Render a semantic message from normalized arguments.
 _moma_render_msg() {
     local text="$1"
     local color="${2:-$MOMA_COLOR_PRIMARY}"
@@ -97,7 +102,9 @@ _moma_render_msg() {
     local no_color="${5:-false}"
 
     local resolved_color reset
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     case "$variant" in
@@ -110,7 +117,9 @@ _moma_render_msg() {
             ;;
         *)
             if [[ -n "$icon" ]]; then
-                printf '%b  ▪ %s %b%s %b %s %b\n' "$resolved_color" "$icon" "$reset" "$text" "$resolved_color" "$icon" "$reset"
+                printf '%b  ▪ %s %b%s %b %s %b\n' \
+                    "$resolved_color" "$icon" "$reset" "$text" \
+                    "$resolved_color" "$icon" "$reset"
             else
                 printf '%b  ▪ %b%s%b\n' "$resolved_color" "$reset" "$text" "$reset"
             fi
@@ -118,6 +127,7 @@ _moma_render_msg() {
     esac
 }
 
+# Parse message options and print a semantic message.
 moma-msg() {
     local text=""
     local color="$MOMA_COLOR_PRIMARY"

@@ -1,4 +1,5 @@
 # Bash runtime compatibility.
+# Verify that the running Bash version meets a requested minimum.
 _moma_require_bash_version() {
     local required_major="${1:-4}"
     local required_minor="${2:-0}"

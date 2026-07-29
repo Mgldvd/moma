@@ -117,8 +117,9 @@ produce identical artifact bytes.
 - `tests/unit/` covers pure validation, semantic, and state-transition helpers.
 - `tests/integration/` covers CLI/library equivalence and stdout/stderr routing.
 - `tests/contract/` covers public API metadata and safe `source` behavior.
-- `make test`, `make lint`, `make format`, and `make check` are development
-  entrypoints. Bats-core, ShellCheck, and shfmt are development-only tools.
+- `task test`, `task lint`, `task format`, and `task check` are development
+  entrypoints. Bats-core and ShellCheck are optional development-only tools.
+  Formatting tasks download a pinned, verified shfmt binary when needed.
 - ShellCheck runs on source modules and test scripts. The concatenated artifact
   is syntax-checked instead because cross-function local names in one generated
   file produce false array/scalar warnings that do not occur in separate source
