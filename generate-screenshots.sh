@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
+#
+# Generate browser-preview screenshots for every public Moma component.
 
 set -euo pipefail
 
@@ -9,8 +11,12 @@ SCREENSHOT_WIDTH="${SCREENSHOT_WIDTH:-1200}"
 SCREENSHOT_HEIGHT="${SCREENSHOT_HEIGHT:-664}"
 SCREENSHOT_TIMEOUT="${SCREENSHOT_TIMEOUT:-30}"
 
-if [[ ! "$SCREENSHOT_WIDTH" =~ ^[1-9][0-9]*$ ]] || [[ ! "$SCREENSHOT_HEIGHT" =~ ^[1-9][0-9]*$ ]] || [[ ! "$SCREENSHOT_TIMEOUT" =~ ^[1-9][0-9]*$ ]]; then
-    printf 'generate-screenshots: width, height, and timeout must be positive integers\n' >&2
+if [[ ! "$SCREENSHOT_WIDTH" =~ ^[1-9][0-9]*$ ]] ||
+    [[ ! "$SCREENSHOT_HEIGHT" =~ ^[1-9][0-9]*$ ]] ||
+    [[ ! "$SCREENSHOT_TIMEOUT" =~ ^[1-9][0-9]*$ ]]; then
+    printf '%s%s\n' \
+        'generate-screenshots: width, height, and timeout ' \
+        'must be positive integers' >&2
     exit 1
 fi
 
@@ -22,7 +28,12 @@ fi
 if [[ -n "${CHROMIUM_BIN:-}" ]]; then
     chromium_bin="$CHROMIUM_BIN"
 else
-    chromium_bin="$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)"
+    chromium_bin="$(
+        command -v chromium ||
+            command -v chromium-browser ||
+            command -v google-chrome ||
+            true
+    )"
 fi
 
 if [[ -z "$chromium_bin" ]] || [[ ! -x "$chromium_bin" ]]; then
@@ -31,12 +42,14 @@ if [[ -z "$chromium_bin" ]] || [[ ! -x "$chromium_bin" ]]; then
 fi
 
 if ! command -v python3 &>/dev/null; then
-    printf 'generate-screenshots: python3 is required to validate PNG dimensions\n' >&2
+    printf '%s\n' \
+        'generate-screenshots: python3 is required to validate PNG dimensions' >&2
     exit 1
 fi
 
 if ! command -v timeout &>/dev/null; then
-    printf 'generate-screenshots: timeout is required to limit Chromium runs\n' >&2
+    printf '%s\n' \
+        'generate-screenshots: timeout is required to limit Chromium runs' >&2
     exit 1
 fi
 
@@ -47,13 +60,21 @@ mapfile -t components < <(
 )
 
 if ((${#components[@]} == 0)); then
-    printf 'generate-screenshots: no API components found in %s\n' "$WEB_INDEX" >&2
+    printf 'generate-screenshots: no API components found in %s\n' \
+        "$WEB_INDEX" >&2
     exit 1
 fi
 
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd)"
-page_url="$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve().as_uri())' "$WEB_INDEX")"
+page_url="$(
+    python3 - "$WEB_INDEX" <<'PY'
+from pathlib import Path
+import sys
+
+print(Path(sys.argv[1]).resolve().as_uri())
+PY
+)"
 browser_profile="$(mktemp -d "${TMPDIR:-/tmp}/moma-screenshots.XXXXXX")"
 browser_log="$browser_profile/chromium.log"
 trap 'rm -rf "$browser_profile"' EXIT
@@ -61,7 +82,11 @@ trap 'rm -rf "$browser_profile"' EXIT
 for component in "${components[@]}"; do
     output_file="$OUTPUT_DIR/$component.png"
 
-    if ! timeout --signal=TERM --kill-after=5 "$SCREENSHOT_TIMEOUT" "$chromium_bin" \
+    if ! timeout \
+        --signal=TERM \
+        --kill-after=5 \
+        "$SCREENSHOT_TIMEOUT" \
+        "$chromium_bin" \
         --headless=new \
         --disable-dev-shm-usage \
         --disable-extensions \
@@ -86,7 +111,9 @@ for component in "${components[@]}"; do
 import struct
 import sys
 
-path, expected_width, expected_height = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+path = sys.argv[1]
+expected_width = int(sys.argv[2])
+expected_height = int(sys.argv[3])
 with open(path, "rb") as png_file:
     header = png_file.read(24)
 
@@ -102,7 +129,9 @@ if actual_size != expected_size:
     )
 PY
 
-    printf 'Generated %s (%sx%s)\n' "$output_file" "$SCREENSHOT_WIDTH" "$SCREENSHOT_HEIGHT"
+    printf 'Generated %s (%sx%s)\n' \
+        "$output_file" "$SCREENSHOT_WIDTH" "$SCREENSHOT_HEIGHT"
 done
 
-printf 'Generated %d component screenshots in %s\n' "${#components[@]}" "$OUTPUT_DIR"
+printf 'Generated %d component screenshots in %s\n' \
+    "${#components[@]}" "$OUTPUT_DIR"

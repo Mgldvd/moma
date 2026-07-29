@@ -15,7 +15,7 @@ setup_file() {
         library="$(moma-msg "Ready" --success)"
         [[ "$cli" == "$library" ]]
     ' _ "$MOMA_DIST"
-    [ "$status" -eq 0 ]
+    [[ "$status" -eq 0 ]]
 }
 
 @test "interactive automation keeps controls on stderr and data on stdout" {
@@ -25,12 +25,12 @@ setup_file() {
     NO_COLOR=1 "$MOMA_DIST" select Development Staging --choose 2 \
         >"$stdout_file" 2>"$stderr_file"
 
-    [ "$(<"$stdout_file")" = "Staging" ]
+    [[ "$(<"$stdout_file")" == "Staging" ]]
     [[ "$(<"$stderr_file")" == *"Enter select"* ]]
 }
 
 @test "unknown CLI commands retain status 1" {
     run "$MOMA_DIST" does-not-exist
-    [ "$status" -eq 1 ]
+    [[ "$status" -eq 1 ]]
     [[ "$output" == *"unknown command"* ]]
 }

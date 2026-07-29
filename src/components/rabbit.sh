@@ -1,4 +1,5 @@
 # Rabbit component.
+# Render the Moma rabbit and its semantic message.
 _moma_render_rabbit() {
     local message="$1"
     local color="${2:-}"
@@ -46,11 +47,14 @@ _moma_render_rabbit() {
     fi
 
     local resolved_color reset
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
     printf '%b%s\n%b' "$resolved_color" "$output" "$reset"
 }
 
+# Parse rabbit options and print the Moma rabbit component.
 moma-rabbit() {
     local color=""
     local icon=""

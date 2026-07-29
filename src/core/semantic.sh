@@ -4,6 +4,7 @@ MOMA_COLOR_ERROR="${MOMA_COLOR_ERROR:-$MOMA_COLOR_RED}"
 MOMA_COLOR_WARNING="${MOMA_COLOR_WARNING:-$MOMA_COLOR_YELLOW}"
 MOMA_COLOR_INFO="${MOMA_COLOR_INFO:-$MOMA_COLOR_CYAN}"
 
+# Resolve a semantic variant to its configured color.
 _moma_semantic_color() {
     case "${1:-}" in
         success) printf '%s' "$MOMA_COLOR_SUCCESS" ;;
@@ -14,6 +15,7 @@ _moma_semantic_color() {
     esac
 }
 
+# Resolve a semantic variant to its display icon.
 _moma_semantic_icon() {
     case "${1:-}" in
         success) printf '✔' ;;
@@ -24,6 +26,7 @@ _moma_semantic_icon() {
     esac
 }
 
+# Apply a semantic variant to color and icon variables by name.
 _moma_apply_semantic_style() {
     local semantic="${1:-}"
     local color icon

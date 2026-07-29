@@ -1,4 +1,5 @@
 # Confirmation and spinner components.
+# Render a confirmation selector from normalized arguments.
 _moma_render_confirm() {
     local question="$1"
     local selected_index="$2"
@@ -7,9 +8,15 @@ _moma_render_confirm() {
     local redraw="$5"
 
     local active_color reset selected_answer prompt_text box_width
-    active_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color")"
+    active_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
-    if ((selected_index == 0)); then selected_answer=yes; else selected_answer=no; fi
+    if ((selected_index == 0)); then
+        selected_answer=yes
+    else
+        selected_answer=no
+    fi
     prompt_text="$question [$selected_answer]"
     box_width="$(_moma_resolve_decor_width "$((${#prompt_text} + 6))" 30 "" "" 8)"
 
@@ -41,6 +48,7 @@ _moma_render_confirm() {
     printf '  ↑/↓ move · Enter confirm · y yes · n no\n' >&2
 }
 
+# Resolve a confirmation keyboard event to its next state.
 _moma_confirm_transition() {
     local selected_index="$1"
     local event="$2"
@@ -63,6 +71,7 @@ _moma_confirm_transition() {
     printf '%s\t%s\n' "$selected_index" "$result"
 }
 
+# Parse confirmation options and return the selected answer as a status.
 moma-confirm() {
     local question=""
     local default_answer="yes"
@@ -162,7 +171,8 @@ EOF
                 return 2
                 ;;
         esac
-        _moma_render_confirm "$question" "$selected_index" "$color" "$no_color" false
+        _moma_render_confirm \
+            "$question" "$selected_index" "$color" "$no_color" false
         printf '\n' >&2
         return "$selected_index"
     fi
@@ -203,7 +213,8 @@ EOF
         transition_status="${transition#*$'\t'}"
         case "$transition_status" in
             confirm)
-                _moma_render_confirm "$question" "$selected_index" "$color" "$no_color" true
+                _moma_render_confirm \
+                    "$question" "$selected_index" "$color" "$no_color" true
                 printf '\n' >&2
                 return "$selected_index"
                 ;;
@@ -217,6 +228,7 @@ EOF
     done
 }
 
+# Follow a process and update an interactive spinner.
 _moma_spinner_follow() (
     local pid="$1"
     local message="$2"
@@ -226,7 +238,10 @@ _moma_spinner_follow() (
     local frame=0
     local color reset
 
-    color="$(_moma_resolve_color "$MOMA_COLOR_WARNING" "$MOMA_COLOR_WARNING" "$no_color")"
+    color="$(
+        _moma_resolve_color \
+            "$MOMA_COLOR_WARNING" "$MOMA_COLOR_WARNING" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     trap '_moma_term_show_cursor' EXIT
@@ -235,7 +250,8 @@ _moma_spinner_follow() (
 
     while kill -0 "$pid" 2>/dev/null; do
         if _moma_term_is_tty 2; then
-            printf '\r  %b[%s]%b %s' "$color" "${frames:$frame:1}" "$reset" "$message" >&2
+            printf '\r  %b[%s]%b %s' \
+                "$color" "${frames:$frame:1}" "$reset" "$message" >&2
             frame=$(((frame + 1) % ${#frames}))
         fi
         sleep "$delay" || return 1
@@ -246,6 +262,7 @@ _moma_spinner_follow() (
     fi
 )
 
+# Parse spinner options and report a process's completion state.
 moma-spinner() {
     local pid=""
     local message="Working"
@@ -331,7 +348,8 @@ EOF
     local allowed_positional=$message_index
     $message_set || allowed_positional=$((allowed_positional + 1))
     if ((${#positional[@]} > allowed_positional)); then
-        printf 'moma-spinner: unexpected argument: %s\n' "${positional[$allowed_positional]}" >&2
+        printf 'moma-spinner: unexpected argument: %s\n' \
+            "${positional[$allowed_positional]}" >&2
         return 1
     fi
 
@@ -345,7 +363,8 @@ EOF
     fi
 
     local follow_status=0
-    _moma_spinner_follow "$pid" "$message" "$delay" "$no_color" || follow_status=$?
+    _moma_spinner_follow \
+        "$pid" "$message" "$delay" "$no_color" || follow_status=$?
     if ((follow_status == 130)); then
         printf '\n' >&2
         return 130

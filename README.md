@@ -167,26 +167,28 @@ larger width.
 - `enhancement.md`: Future component backlog.
 - `web/`: Embedded browser documentation.
 - `build.sh`: Standalone-file builder.
+- `.tasks/`: Task workflow scripts.
+- `Taskfile.yml`: Build, test, lint, format, check, and clean entrypoints.
 - `dist/moma`: Generated library and executable.
 - `tests/smoke.sh`: API and behavior checks.
 - `tests/{unit,integration,contract}/`: Bats development suites.
-- `Makefile`: Build, test, lint, format, check, and clean entrypoints.
 
 Edit the source modules. Do not edit `dist/moma` directly.
 
 ## Requirements
 
 - Bash 4.0 or newer.
+- Task 3 for development workflows.
 - Python 3 only for `preview web`.
 - Glow optionally for rendered help and Markdown previews.
 - `tput` optionally for the interactive spinner.
 
 ## Build
 
-1. Run the builder.
+1. Run the build task.
 
 ```bash
-./build.sh
+task build
 ```
 
 2. Check the generated file help.
@@ -197,21 +199,21 @@ Edit the source modules. Do not edit `dist/moma` directly.
 
 ## Test
 
-1. Run the smoke tests.
+1. Run all available test suites.
 
 ```bash
-./tests/smoke.sh
+task test
 ```
 
-2. Run all available test suites.
+2. Run the required Bats suites.
 
 ```bash
-make test
+task test-bats
 ```
 
 Install Bats-core to enable the unit, integration, and contract suites. Install
-ShellCheck and shfmt to use `make lint` and `make format`. These tools are only
-development dependencies.
+ShellCheck to enable its optional `task lint` checks. The tasks download a
+pinned, verified shfmt binary into `.tasks/bin/` when shfmt is unavailable.
 
 ## Architecture
 
@@ -221,10 +223,10 @@ output channels, exit statuses, terminal lifecycle, and build flow. Read
 
 ## Run the example
 
-1. Build the standalone file.
+1. Run the build task.
 
 ```bash
-./build.sh
+task build
 ```
 
 2. Run the interactive component showcase.

@@ -1,9 +1,12 @@
-# Terminal operations. Every helper is a no-op when the selected channel is not a TTY.
+# Terminal operations.
+# Every helper is a no-op when the selected channel is not a TTY.
+# Return success when a file descriptor is attached to a terminal.
 _moma_term_is_tty() {
     local fd="${1:-2}"
     [[ -t "$fd" ]]
 }
 
+# Print the terminal width or a supplied fallback width.
 _moma_term_width() {
     local fallback="${1:-80}"
     local width="${COLUMNS:-}"
@@ -15,21 +18,25 @@ _moma_term_width() {
     printf '%s' "$width"
 }
 
+# Hide the cursor on a terminal output channel.
 _moma_term_hide_cursor() {
     _moma_term_is_tty 2 || return 0
     printf '\033[?25l' >&2
 }
 
+# Restore the cursor on a terminal output channel.
 _moma_term_show_cursor() {
     _moma_term_is_tty 2 || return 0
     printf '\033[?25h' >&2
 }
 
+# Clear the current terminal line.
 _moma_term_clear_line() {
     _moma_term_is_tty 2 || return 0
     printf '\033[2K\r' >&2
 }
 
+# Move the cursor upward by a requested number of terminal lines.
 _moma_term_move_up() {
     local count="${1:-1}"
     _moma_term_is_tty 2 || return 0
@@ -37,6 +44,7 @@ _moma_term_move_up() {
     printf '\033[%dA' "$count" >&2
 }
 
+# Read one normalized keyboard event from a terminal.
 _moma_term_read_key() {
     local target_var="$1"
     local raw=""

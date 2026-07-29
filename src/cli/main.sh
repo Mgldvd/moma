@@ -1,4 +1,5 @@
 # Explicit CLI dispatcher.
+# Dispatch one CLI command without evaluating registry data.
 _moma_main() {
     local command="${1:-}"
     local registered_function=""
@@ -43,7 +44,9 @@ _moma_main() {
         spinner) moma-spinner "$@" ;;
         command-check) moma-command-check "$@" ;;
         *)
-            _moma_runtime_error moma "registered command has no dispatcher: $registered_function"
+            _moma_runtime_error \
+                moma \
+                "registered command has no dispatcher: $registered_function"
             ;;
     esac
 }

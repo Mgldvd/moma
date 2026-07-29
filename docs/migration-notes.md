@@ -18,8 +18,10 @@
   cursor restoration through an `EXIT` trap, and moved animation to stderr.
 - Hardened `build.sh` to validate all inputs before generation and syntax-check
   the temporary artifact before atomic publication.
-- Added Bats unit, integration, and contract suites, a Makefile, EditorConfig,
-  and ShellCheck configuration.
+- Added Bats unit, integration, and contract suites, EditorConfig, and
+  ShellCheck configuration.
+- Replaced the Makefile with a compact `Taskfile.yml` backed by scripts in
+  `.tasks/`.
 
 ## Compatibility Preserved
 
@@ -45,8 +47,8 @@
 - Visual width calculations count Bash characters rather than terminal display
   cells, so combining characters and some wide Unicode glyphs can still produce
   alignment differences.
-- Bats-core, ShellCheck, and shfmt must be installed separately; they are not
-  runtime dependencies and were unavailable on the refactor host.
+- Bats-core and ShellCheck must be installed separately; they are optional
+  development dependencies. Formatting tasks bootstrap shfmt when needed.
 - Pseudo-TTY tests still depend on the system `script` command and are skipped
   when it is unavailable.
 - Static Markdown and web presentation still require cross-file contract checks

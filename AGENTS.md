@@ -10,7 +10,7 @@
 
 - Run `./tests/smoke.sh` for the full verification. It rebuilds `dist/moma`, runs Bash syntax checks, and exercises library, CLI, interactive, documentation, and standalone behavior.
 - The smoke suite requires `rg`. TTY-specific checks run only when the system `script` command is available.
-- Bats suites under `tests/{unit,integration,contract}` provide focused coverage when Bats-core is installed. For a quick syntax/build check, run `make build && make lint` before the full smoke suite.
+- Bats suites under `tests/{unit,integration,contract}` provide focused coverage when Bats-core is installed. For a quick syntax/build check, run `task build && task lint` before the full smoke suite.
 
 ## Cross-File Contracts
 

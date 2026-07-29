@@ -1,4 +1,5 @@
 # Input component.
+# Render a completed input field from normalized arguments.
 _moma_render_input() {
     local title="$1"
     local placeholder="$2"
@@ -32,14 +33,21 @@ _moma_render_input() {
     if ((display_width + 2 > natural_width)); then
         natural_width=$((display_width + 2))
     fi
-    width="$(_moma_resolve_decor_width "$natural_width" 40 "$width" "$max_width" 8)"
+    width="$(
+        _moma_resolve_decor_width \
+            "$natural_width" 40 "$width" "$max_width" 8
+    )"
     label="$(_moma_truncate_text "$label" "$((width - 4))")"
     label_width=${#label}
 
     local resolved_color reset dash_count value_space display_line
     local -a display_lines=()
-    mapfile -t display_lines < <(_moma_wrap_text "$display_value" "$((width - 2))")
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    mapfile -t display_lines < <(
+        _moma_wrap_text "$display_value" "$((width - 2))"
+    )
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     if [[ -n "$label" ]]; then
@@ -52,17 +60,25 @@ _moma_render_input() {
     fi
 
     if [[ -n "$label" ]]; then
-        printf '%b  ┌─ %s %s┐%b\n' "$resolved_color" "$label" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
+        printf '%b  ┌─ %s %s┐%b\n' \
+            "$resolved_color" "$label" \
+            "$(_moma_repeat_char "─" "$dash_count")" "$reset"
     else
-        printf '%b  ┌%s┐%b\n' "$resolved_color" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
+        printf '%b  ┌%s┐%b\n' \
+            "$resolved_color" \
+            "$(_moma_repeat_char "─" "$dash_count")" "$reset"
     fi
     for display_line in "${display_lines[@]}"; do
         value_space=$((width - ${#display_line} - 2))
-        printf '%b  │ %s%s │%b\n' "$resolved_color" "$display_line" "$(printf '%*s' "$value_space" '')" "$reset"
+        printf '%b  │ %s%s │%b\n' \
+            "$resolved_color" "$display_line" \
+            "$(printf '%*s' "$value_space" '')" "$reset"
     done
-    printf '%b  └%s┘%b\n\n' "$resolved_color" "$(_moma_repeat_char "─" "$width")" "$reset"
+    printf '%b  └%s┘%b\n\n' \
+        "$resolved_color" "$(_moma_repeat_char "─" "$width")" "$reset"
 }
 
+# Render an open input field before reading a value.
 _moma_render_input_open() {
     local title="$1"
     local placeholder="$2"
@@ -87,15 +103,21 @@ _moma_render_input_open() {
     local default_width=${#default_value}
     local value_width=${#value}
     local natural_width=$((label_width + 4))
-    ((placeholder_width + 2 <= natural_width)) || natural_width=$((placeholder_width + 2))
+    ((placeholder_width + 2 <= natural_width)) ||
+        natural_width=$((placeholder_width + 2))
     ((default_width + 2 <= natural_width)) || natural_width=$((default_width + 2))
     ((value_width + 2 <= natural_width)) || natural_width=$((value_width + 2))
-    width="$(_moma_resolve_decor_width "$natural_width" 40 "$width" "$max_width" 8)"
+    width="$(
+        _moma_resolve_decor_width \
+            "$natural_width" 40 "$width" "$max_width" 8
+    )"
     label="$(_moma_truncate_text "$label" "$((width - 4))")"
     label_width=${#label}
 
     local resolved_color reset dash_count prompt_text
-    resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+    resolved_color="$(
+        _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
     reset="$(_moma_reset_color "$no_color")"
 
     if [[ -n "$label" ]]; then
@@ -114,13 +136,18 @@ _moma_render_input_open() {
     fi
 
     if [[ -n "$label" ]]; then
-        printf '%b  ┌─ %s %s┐%b\n' "$resolved_color" "$label" "$(_moma_repeat_char "─" "$dash_count")" "$reset" >&2
+        printf '%b  ┌─ %s %s┐%b\n' \
+            "$resolved_color" "$label" \
+            "$(_moma_repeat_char "─" "$dash_count")" "$reset" >&2
     else
-        printf '%b  ┌%s┐%b\n' "$resolved_color" "$(_moma_repeat_char "─" "$dash_count")" "$reset" >&2
+        printf '%b  ┌%s┐%b\n' \
+            "$resolved_color" \
+            "$(_moma_repeat_char "─" "$dash_count")" "$reset" >&2
     fi
     printf '%b  │%s%b' "$resolved_color" "$prompt_text" "$reset" >&2
 }
 
+# Read a masked value from the active terminal.
 _moma_read_secret() {
     local target_var="$1"
     local mask="${2:-*}"
@@ -164,6 +191,7 @@ _moma_read_secret() {
     printf -v "$target_var" '%s' "$secret_value"
 }
 
+# Validate an input value against public input constraints.
 _moma_input_validate() {
     local width="$1"
     local max_width="${2:-}"
@@ -177,6 +205,7 @@ _moma_input_validate() {
     fi
 }
 
+# Resolve the final input value from response and fallback values.
 _moma_input_resolve_result() {
     local response="$1"
     local default_value="$2"
@@ -199,10 +228,12 @@ _moma_input_resolve_result() {
     printf '%s' "$result"
 }
 
+# Emit an input result on the component's stdout return channel.
 _moma_input_emit_result() {
     printf '%s\n' "$1"
 }
 
+# Parse input options, render the field, and optionally read a value.
 moma-input() {
     local title=""
     local placeholder=""
@@ -418,13 +449,18 @@ EOF
     _moma_input_validate "$width" "$max_width" || return $?
 
     if ! $read_mode; then
-        _moma_render_input "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$no_color" "$max_width"
+        _moma_render_input \
+            "$title" "$placeholder" "$default_value" "$value" \
+            "$width" "$color" "$icon" "$no_color" "$max_width"
         return $?
     fi
 
     local response result read_status
     while true; do
-        _moma_render_input_open "$title" "$placeholder" "$default_value" "$value" "$width" "$color" "$icon" "$prompt_marker" "$no_color" "$max_width" || return 1
+        _moma_render_input_open \
+            "$title" "$placeholder" "$default_value" "$value" \
+            "$width" "$color" "$icon" "$prompt_marker" \
+            "$no_color" "$max_width" || return 1
 
         if $secret; then
             if _moma_read_secret response "$secret_mask"; then
@@ -443,7 +479,10 @@ EOF
             printf '\n\n' >&2
         fi
 
-        result="$(_moma_input_resolve_result "$response" "$default_value" "$value" "$trim")"
+        result="$(
+            _moma_input_resolve_result \
+                "$response" "$default_value" "$value" "$trim"
+        )"
 
         if ! $required || [[ -n "$result" ]]; then
             _moma_input_emit_result "$result"

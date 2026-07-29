@@ -1,4 +1,5 @@
 # String helpers.
+# Remove leading and trailing ASCII whitespace from a string.
 _moma_trim() {
     local value="${1:-}"
     value="${value#"${value%%[!$' \t\r\n']*}"}"
@@ -6,6 +7,7 @@ _moma_trim() {
     printf '%s' "$value"
 }
 
+# Print a character a requested number of times.
 _moma_repeat_char() {
     local char="${1:-}"
     local count="${2:-0}"
@@ -22,6 +24,7 @@ _moma_repeat_char() {
 # Resolve the inner width used by terminal decorations. A component-specific
 # fixed width wins over the library-wide fixed width. Fixed widths win over
 # maximum widths so callers can override a global cap for one component.
+# Resolve fixed, maximum, natural, and minimum decoration widths.
 _moma_resolve_decor_width() {
     local natural_width="${1:-0}"
     local default_min_width="${2:-0}"
@@ -47,7 +50,8 @@ _moma_resolve_decor_width() {
 
     if _moma_is_positive_int "$fixed_width"; then
         resolved_width="$fixed_width"
-    elif _moma_is_positive_int "$max_width" && ((resolved_width > max_width)); then
+    elif _moma_is_positive_int "$max_width" &&
+        ((resolved_width > max_width)); then
         resolved_width="$max_width"
     fi
 
@@ -57,6 +61,7 @@ _moma_resolve_decor_width() {
     printf '%s' "$resolved_width"
 }
 
+# Truncate text to a width and append an ellipsis when needed.
 _moma_truncate_text() {
     local value="${1:-}"
     local max_width="${2:-0}"
@@ -73,6 +78,7 @@ _moma_truncate_text() {
 
 # Wrap plain text without external commands. It prefers word boundaries and
 # hard-wraps a single word only when that word is wider than the available row.
+# Wrap text to a requested width while preserving every word.
 _moma_wrap_text() {
     local value="${1:-}"
     local max_width="${2:-0}"
