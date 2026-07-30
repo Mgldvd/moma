@@ -659,6 +659,12 @@ _moma_preview_web_index () {
         <code class="quick-start__command">source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)</code>
         <code class="quick-start__command">moma-msg "Ready" --success</code>
       </div>
+      <div class="quick-start">
+        <span class="quick-start__label">Install</span>
+        <code class="quick-start__command">mkdir -p "$HOME/.local/bin"</code>
+        <code class="quick-start__command">curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma -o "$HOME/.local/bin/moma"</code>
+        <code class="quick-start__command">chmod 0755 "$HOME/.local/bin/moma"</code>
+      </div>
     </header>
 
     <section class="docs-index" aria-labelledby="index-title">
