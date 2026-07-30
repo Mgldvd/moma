@@ -13,9 +13,9 @@ src/components
 src/preview and src/cli
 ```
 
-- `src/core/` contains runtime checks, errors, strings, validation, palette,
-  semantics, terminal operations, and command metadata. It does not call public
-  components.
+- `src/core/` contains runtime checks, errors, strings, validation, declarative
+  theme configuration, palette, semantics, terminal operations, and command
+  metadata. It does not call public components.
 - `src/components/` implements the public `moma-*` functions. Components may
   call core helpers and other public components where composition is useful.
 - `src/preview/` consumes the public API to render examples and serve embedded
@@ -32,6 +32,8 @@ standalone artifact.
 - `_moma_*` functions are private and may change between releases.
 - `MOMA_COLOR_*` and `MOMA_STYLE_*` are documented theme inputs initialized at
   source time while preserving values already supplied by the consumer.
+- `MOMA_THEME` selects a theme parsed from `~/.config/momaui/moma.confg`.
+  Configuration data is parsed as assignments and is never evaluated as Bash.
 
 ## Public API
 

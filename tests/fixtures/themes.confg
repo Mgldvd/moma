@@ -1,0 +1,17 @@
+# Moma test color palette and themes.
+[colors]
+violet = \033[38;2;189;147;249m
+orange = \033[38;2;255;184;108m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+accent = orange

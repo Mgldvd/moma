@@ -51,6 +51,7 @@ source dist/moma
 | Command | Description |
 | --- | --- |
 | `help` | Show this help with Glow when available. |
+| `themes` | List configured color themes. |
 | `preview` | Show the terminal reference. |
 | `preview md` | Show the Markdown reference with Glow when available. |
 | `preview web` | Serve the browser reference. |
@@ -63,7 +64,40 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 
 ## Global options
 
+- `--theme <name>`: Use a configured color theme for this command.
 - `-h`, `--help`: Show help.
+
+## Color themes
+
+Create `~/.config/momaui/moma.confg` with a complete `[theme default]` section.
+Define reusable ANSI SGR colors in `[colors]` and additional themes in
+`[theme name]` sections.
+
+```ini
+[colors]
+violet = \033[38;2;189;147;249m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+```
+
+```bash
+moma themes
+moma --theme night msg "Ready"
+MOMA_THEME=night moma msg "Ready"
+```
+
+Additional themes inherit omitted roles from `default`. Set `MOMA_CONFIG_FILE`
+to load a different configuration file.
 
 ## Decoration width
 
@@ -86,6 +120,7 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma multi-select "Docker" "CI" "Tests" --choose 1,3
 ./dist/moma confirm "Create this project?" --default yes
 ./dist/moma command-check bash curl
+./dist/moma themes
 ./dist/moma preview
 ```
 
@@ -161,6 +196,44 @@ components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
 `moma-label`, and `moma-input` also accept local `--width` and `--max-width`
 options. A local fixed width overrides the global setting. The minimum
 effective decoration width is 8 columns; box padding can require more.
+
+## Color themes
+
+Moma loads `~/.config/momaui/moma.confg` when it exists. The file is
+declarative and requires a complete `[theme default]` section.
+
+```ini
+[colors]
+violet = \033[38;2;189;147;249m
+orange = \033[38;2;255;184;108m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+accent = orange
+```
+
+List or select themes with the standalone CLI.
+
+```bash
+moma themes
+moma --theme night msg "Ready"
+MOMA_THEME=night moma msg "Ready"
+```
+
+Export `MOMA_THEME` before sourcing the library to select a theme for public
+functions. Additional themes inherit omitted roles from `default`. Custom
+colors become valid component-level `--color` values. Set `MOMA_CONFIG_FILE`
+to load another path. Explicit `MOMA_COLOR_*` variables take priority over
+configured values.
 
 ## Visual components
 
@@ -602,7 +675,7 @@ _moma_preview_web_index () {
       <div class="index-links">
         <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">14</strong></a>
         <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">2</strong></a>
-        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">19</strong></a>
+        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">20</strong></a>
       </div>
     </section>
 
@@ -899,6 +972,7 @@ o_(")(")</span></pre>
         <div class="function-list">
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | multi-select | rabbit</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, and executable checks.</p><code class="function-row__signature">moma confirm | spinner | command-check</code></article>
+          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
         </div>
       </section>
@@ -2165,6 +2239,424 @@ _moma_is_delay() {
   [[ "${1:-}" =~ ^[0-9]+([.][0-9]+)?$ ]]
 }
 
+# module: src/core/config.sh
+# Theme configuration loading.
+_MOMA_CONFIG_COLOR_NAMES=()
+_MOMA_CONFIG_COLOR_VALUES=()
+_MOMA_CONFIG_THEME_KEYS=()
+_MOMA_CONFIG_THEME_VALUES=()
+_MOMA_CONFIG_THEME_SEEN=()
+_MOMA_CONFIG_THEME_ORDER=("default")
+
+_MOMA_CONFIG_PATH=""
+_MOMA_CONFIG_LOAD_ERROR=""
+_MOMA_CONFIG_ERROR=""
+
+_MOMA_ENV_COLOR_PRIMARY_SET="${MOMA_COLOR_PRIMARY+x}"
+_MOMA_ENV_COLOR_ACCENT_SET="${MOMA_COLOR_ACCENT+x}"
+_MOMA_ENV_COLOR_MUTED_SET="${MOMA_COLOR_MUTED+x}"
+_MOMA_ENV_COLOR_SUCCESS_SET="${MOMA_COLOR_SUCCESS+x}"
+_MOMA_ENV_COLOR_ERROR_SET="${MOMA_COLOR_ERROR+x}"
+_MOMA_ENV_COLOR_WARNING_SET="${MOMA_COLOR_WARNING+x}"
+_MOMA_ENV_COLOR_INFO_SET="${MOMA_COLOR_INFO+x}"
+
+# Reset parsed configuration while retaining the built-in default theme.
+_moma_config_reset() {
+  _MOMA_CONFIG_COLOR_NAMES=()
+  _MOMA_CONFIG_COLOR_VALUES=()
+  _MOMA_CONFIG_THEME_KEYS=()
+  _MOMA_CONFIG_THEME_VALUES=()
+  _MOMA_CONFIG_THEME_SEEN=()
+  _MOMA_CONFIG_THEME_ORDER=("default")
+  _MOMA_CONFIG_ERROR=""
+}
+
+# Resolve the user configuration path.
+_moma_config_path() {
+  if [[ -n "${MOMA_CONFIG_FILE:-}" ]]; then
+    printf '%s' "$MOMA_CONFIG_FILE"
+  elif [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
+    printf '%s/momaui/moma.confg' "$XDG_CONFIG_HOME"
+  elif [[ -n "${HOME:-}" ]]; then
+    printf '%s/.config/momaui/moma.confg' "$HOME"
+  else
+    return 1
+  fi
+}
+
+# Return success for a textual or expanded ANSI SGR sequence.
+_moma_config_is_sgr() {
+  local value="${1:-}"
+  local parameters=""
+
+  if [[ "${value:0:5}" == '\033[' && "${value: -1}" == "m" ]]; then
+    parameters="${value:5:${#value}-6}"
+  elif [[ "${value:0:2}" == $'\033[' && "${value: -1}" == "m" ]]; then
+    parameters="${value:2:${#value}-3}"
+  else
+    return 1
+  fi
+
+  [[ "$parameters" =~ ^[0-9]+(\;[0-9]+)*$ ]]
+}
+
+# Store a custom color by name.
+_moma_config_set_color() {
+  local name="$1"
+  local value="$2"
+  local index
+
+  for ((index = 0; index < ${#_MOMA_CONFIG_COLOR_NAMES[@]}; index++)); do
+    if [[ "${_MOMA_CONFIG_COLOR_NAMES[$index]}" == "$name" ]]; then
+      _MOMA_CONFIG_COLOR_VALUES[index]="$value"
+      return 0
+    fi
+  done
+
+  _MOMA_CONFIG_COLOR_NAMES+=("$name")
+  _MOMA_CONFIG_COLOR_VALUES+=("$value")
+}
+
+# Print a custom color value by name.
+_moma_config_color_value() {
+  local name="${1,,}"
+  local index
+
+  for ((index = 0; index < ${#_MOMA_CONFIG_COLOR_NAMES[@]}; index++)); do
+    if [[ "${_MOMA_CONFIG_COLOR_NAMES[$index]}" == "$name" ]]; then
+      printf '%s' "${_MOMA_CONFIG_COLOR_VALUES[$index]}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Return success for a built-in color name or alias.
+_moma_config_is_builtin_color() {
+  case "${1,,}" in
+    black | red | green | yellow | blue | purple | cyan | white | pink | \
+      gray | grey | muted | warning | warn | info | reset | default | none | \
+      no | false)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+# Return success for a built-in or configured color name.
+_moma_config_color_exists() {
+  _moma_config_is_builtin_color "$1" ||
+    _moma_config_color_value "$1" >/dev/null
+}
+
+# Return success when a theme section was parsed.
+_moma_config_theme_is_seen() {
+  local requested="$1"
+  local theme
+  for theme in "${_MOMA_CONFIG_THEME_SEEN[@]}"; do
+    if [[ "$theme" == "$requested" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Record a theme name once while retaining configuration-file order.
+_moma_config_add_theme() {
+  local name="$1"
+  if _moma_config_theme_is_seen "$name"; then
+    return 0
+  fi
+
+  _MOMA_CONFIG_THEME_SEEN+=("$name")
+  if [[ "$name" != "default" ]]; then
+    _MOMA_CONFIG_THEME_ORDER+=("$name")
+  fi
+}
+
+# Store a configured theme role.
+_moma_config_set_theme_value() {
+  local key="$1"
+  local value="$2"
+  local index
+
+  for ((index = 0; index < ${#_MOMA_CONFIG_THEME_KEYS[@]}; index++)); do
+    if [[ "${_MOMA_CONFIG_THEME_KEYS[$index]}" == "$key" ]]; then
+      _MOMA_CONFIG_THEME_VALUES[index]="$value"
+      return 0
+    fi
+  done
+
+  _MOMA_CONFIG_THEME_KEYS+=("$key")
+  _MOMA_CONFIG_THEME_VALUES+=("$value")
+}
+
+# Print a configured theme role.
+_moma_config_theme_value() {
+  local key="$1"
+  local index
+
+  for ((index = 0; index < ${#_MOMA_CONFIG_THEME_KEYS[@]}; index++)); do
+    if [[ "${_MOMA_CONFIG_THEME_KEYS[$index]}" == "$key" ]]; then
+      printf '%s' "${_MOMA_CONFIG_THEME_VALUES[$index]}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Store a parser error without writing during library initialization.
+_moma_config_fail() {
+  local line_number="$1"
+  local message="$2"
+  _MOMA_CONFIG_ERROR="${_MOMA_CONFIG_PATH}:${line_number}: ${message}"
+  return 1
+}
+
+# Validate all custom colors and theme roles after parsing.
+_moma_config_validate() {
+  local index key role value
+  local -a roles=(
+    primary
+    accent
+    muted
+    success
+    error
+    warning
+    info
+  )
+
+  if ! _moma_config_theme_is_seen default; then
+    _moma_config_fail 0 "missing required [theme default] section"
+    return 1
+  fi
+
+  for ((index = 0; index < ${#_MOMA_CONFIG_COLOR_NAMES[@]}; index++)); do
+    if ! _moma_config_is_sgr "${_MOMA_CONFIG_COLOR_VALUES[$index]}"; then
+      _moma_config_fail 0 \
+        "color '${_MOMA_CONFIG_COLOR_NAMES[$index]}' must be an ANSI SGR sequence"
+      return 1
+    fi
+  done
+
+  for role in "${roles[@]}"; do
+    key="default.$role"
+    if ! value="$(_moma_config_theme_value "$key")" ||
+      [[ -z "$value" ]]; then
+      _moma_config_fail 0 \
+        "theme 'default' is missing the '$role' role"
+      return 1
+    fi
+  done
+
+  for value in "${_MOMA_CONFIG_THEME_VALUES[@]}"; do
+    if ! _moma_config_color_exists "$value" &&
+      ! _moma_config_is_sgr "$value"; then
+      _moma_config_fail 0 \
+        "theme color '$value' is not defined"
+      return 1
+    fi
+  done
+}
+
+# Parse a declarative Moma color and theme configuration.
+_moma_load_config() {
+  local path="$1"
+  local raw_line line section="" name key value theme_name
+  local line_number=0
+  local saved_error=""
+
+  _moma_config_reset
+  _MOMA_CONFIG_PATH="$path"
+
+  if [[ ! -r "$path" ]]; then
+    _moma_config_fail 0 "configuration file is not readable"
+    return 1
+  fi
+
+  while IFS= read -r raw_line || [[ -n "$raw_line" ]]; do
+    line_number=$((line_number + 1))
+    line="$(_moma_trim "$raw_line")"
+
+    if [[ -z "$line" || "${line:0:1}" == "#" ]]; then
+      continue
+    fi
+
+    if [[ "$line" =~ ^\[(.*)\]$ ]]; then
+      section="$(_moma_trim "${BASH_REMATCH[1]}")"
+      if [[ "$section" == "colors" ]]; then
+        continue
+      fi
+      if [[ "$section" =~ ^theme[[:space:]]+([a-zA-Z0-9_-]+)$ ]]; then
+        theme_name="${BASH_REMATCH[1],,}"
+        section="theme:$theme_name"
+        _moma_config_add_theme "$theme_name"
+        continue
+      fi
+      _moma_config_fail "$line_number" "unknown section [$section]"
+      return 1
+    fi
+
+    if [[ "$line" != *=* ]]; then
+      _moma_config_fail "$line_number" "expected name = value"
+      return 1
+    fi
+
+    key="$(_moma_trim "${line%%=*}")"
+    value="$(_moma_trim "${line#*=}")"
+    if [[ -z "$key" || -z "$value" ]]; then
+      _moma_config_fail "$line_number" "name and value cannot be empty"
+      return 1
+    fi
+
+    case "$section" in
+      colors)
+        name="${key,,}"
+        if [[ ! "$name" =~ ^[a-z][a-z0-9_-]*$ ]]; then
+          _moma_config_fail "$line_number" "invalid color name '$key'"
+          return 1
+        fi
+        if _moma_config_is_builtin_color "$name"; then
+          _moma_config_fail "$line_number" \
+            "color name '$name' is reserved"
+          return 1
+        fi
+        _moma_config_set_color "$name" "$value"
+        ;;
+      theme:*)
+        theme_name="${section#theme:}"
+        key="${key,,}"
+        case "$key" in
+          primary | accent | muted | success | error | warning | info)
+            _moma_config_set_theme_value "$theme_name.$key" "$value"
+            ;;
+          *)
+            _moma_config_fail "$line_number" \
+              "unknown theme role '$key'"
+            return 1
+            ;;
+        esac
+        ;;
+      *)
+        _moma_config_fail "$line_number" \
+          "define values inside [colors] or [theme name]"
+        return 1
+        ;;
+    esac
+  done <"$path"
+
+  if ! _moma_config_validate; then
+    saved_error="$_MOMA_CONFIG_ERROR"
+    _moma_config_reset
+    _MOMA_CONFIG_ERROR="$saved_error"
+    return 1
+  fi
+}
+
+# Resolve one role from a selected theme with default-theme inheritance.
+_moma_theme_role() {
+  local theme="$1"
+  local role="$2"
+  local selected_key="$theme.$role"
+  local default_key="default.$role"
+  local value=""
+
+  if value="$(_moma_config_theme_value "$selected_key")"; then
+    printf '%s' "$value"
+    return 0
+  fi
+  _moma_config_theme_value "$default_key"
+}
+
+# Apply a configured theme while preserving explicit environment overrides.
+_moma_apply_theme() {
+  local theme="${1:-default}"
+  local primary accent muted success error warning info
+  theme="${theme,,}"
+
+  if [[ -n "$_MOMA_CONFIG_LOAD_ERROR" ]]; then
+    _MOMA_CONFIG_ERROR="$_MOMA_CONFIG_LOAD_ERROR"
+    return 1
+  fi
+  if [[ "$theme" != "default" ]] &&
+    ! _moma_config_theme_is_seen "$theme"; then
+    _MOMA_CONFIG_ERROR="theme '$theme' is not defined in $_MOMA_CONFIG_PATH"
+    return 1
+  fi
+
+  if _moma_config_theme_is_seen default; then
+    primary="$(_moma_theme_role "$theme" primary)"
+    accent="$(_moma_theme_role "$theme" accent)"
+    muted="$(_moma_theme_role "$theme" muted)"
+    success="$(_moma_theme_role "$theme" success)"
+    error="$(_moma_theme_role "$theme" error)"
+    warning="$(_moma_theme_role "$theme" warning)"
+    info="$(_moma_theme_role "$theme" info)"
+
+    if [[ -z "$_MOMA_ENV_COLOR_PRIMARY_SET" ]]; then
+      MOMA_COLOR_PRIMARY="$primary"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_ACCENT_SET" ]]; then
+      MOMA_COLOR_ACCENT="$accent"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_MUTED_SET" ]]; then
+      MOMA_COLOR_MUTED="$muted"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_SUCCESS_SET" ]]; then
+      MOMA_COLOR_SUCCESS="$success"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_ERROR_SET" ]]; then
+      MOMA_COLOR_ERROR="$error"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_WARNING_SET" ]]; then
+      MOMA_COLOR_WARNING="$warning"
+    fi
+    if [[ -z "$_MOMA_ENV_COLOR_INFO_SET" ]]; then
+      MOMA_COLOR_INFO="$info"
+    fi
+  fi
+
+  MOMA_THEME="$theme"
+  _MOMA_CONFIG_ERROR=""
+}
+
+# Print all available themes and mark the active selection.
+_moma_list_themes() {
+  local theme suffix
+  for theme in "${_MOMA_CONFIG_THEME_ORDER[@]}"; do
+    suffix=""
+    if [[ "$theme" == "${MOMA_THEME:-default}" ]]; then
+      suffix=" (active)"
+    fi
+    printf '%s%s\n' "$theme" "$suffix"
+  done
+}
+
+# Load the configuration without producing output when the library is sourced.
+_moma_initialize_config() {
+  local saved_error=""
+  MOMA_THEME="${MOMA_THEME:-default}"
+
+  if ! _MOMA_CONFIG_PATH="$(_moma_config_path)"; then
+    _MOMA_CONFIG_PATH="<home>/.config/momaui/moma.confg"
+  fi
+
+  if [[ -f "$_MOMA_CONFIG_PATH" ]]; then
+    if ! _moma_load_config "$_MOMA_CONFIG_PATH"; then
+      _MOMA_CONFIG_LOAD_ERROR="$_MOMA_CONFIG_ERROR"
+      return 1
+    fi
+  fi
+
+  if ! _moma_apply_theme "$MOMA_THEME"; then
+    saved_error="$_MOMA_CONFIG_ERROR"
+    _MOMA_CONFIG_ERROR="$saved_error"
+    return 1
+  fi
+}
+
+_moma_initialize_config || :
+
 # module: src/core/color.sh
 # Physical ANSI palette and component theme defaults.
 MOMA_COLOR_RESET="${MOMA_COLOR_RESET:-\033[0m}"
@@ -2196,11 +2688,14 @@ _moma_resolve_color() {
   local candidate="${1:-}"
   local fallback="${2:-$MOMA_COLOR_RESET}"
   local no_color="${3:-false}"
+  local normalized=""
+  local configured_color=""
 
   _moma_color_enabled "$no_color" || return 0
   [[ -n "$candidate" ]] || candidate="$fallback"
+  normalized="${candidate,,}"
 
-  case "${candidate,,}" in
+  case "$normalized" in
     black) printf '%s' "$MOMA_COLOR_BLACK" ;;
     red) printf '%s' "$MOMA_COLOR_RED" ;;
     green) printf '%s' "$MOMA_COLOR_GREEN" ;;
@@ -2213,7 +2708,13 @@ _moma_resolve_color() {
     gray | grey | muted) printf '%s' "$MOMA_COLOR_GRAY" ;;
     reset | default) printf '%s' "$MOMA_COLOR_RESET" ;;
     none | no | false) return 0 ;;
-    *) printf '%s' "$candidate" ;;
+    *)
+      if configured_color="$(_moma_config_color_value "$normalized")"; then
+        printf '%s' "$configured_color"
+      else
+        printf '%s' "$candidate"
+      fi
+      ;;
   esac
 }
 
@@ -5334,10 +5835,10 @@ _moma_preview_header() {
   printf '  Visual reference for the public terminal UI API\n'
   printf '%s\n\n' "$(_moma_preview_line '━')"
   printf '  Legend  %b● success%b  %b● error%b  %b● warning%b  %b● info%b\n\n' \
-    "$MOMA_COLOR_SUCCESS" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_ERROR" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_WARNING" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_INFO" "$MOMA_COLOR_RESET"
+    "$(_moma_resolve_color "$MOMA_COLOR_SUCCESS")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_ERROR")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_WARNING")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_INFO")" "$MOMA_COLOR_RESET"
 }
 
 # Print one numbered terminal-preview section heading.
@@ -5635,9 +6136,11 @@ EOF
     printf '  %-15s %s\n' "$command" "$description"
   done < <(_moma_command_registry)
   cat <<'EOF'
+  themes          List configured color themes.
   preview         Show terminal, Markdown, or browser previews.
 
 Options:
+  --theme NAME  Use a configured color theme.
   -h, --help    Show this help.
 
 Library example:
@@ -5672,6 +6175,29 @@ _moma_usage() {
 _moma_main() {
   local command="${1:-}"
   local registered_function=""
+  local theme_option=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --theme)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma "$1"
+          return $?
+        fi
+        theme_option="$2"
+        shift 2
+        ;;
+      --theme=*)
+        theme_option="${1#*=}"
+        shift
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  command="${1:-}"
   if [[ $# -gt 0 ]]; then
     shift
   fi
@@ -5681,11 +6207,33 @@ _moma_main() {
       _moma_usage
       return $?
       ;;
-    preview)
-      _moma_preview "$@"
-      return $?
-      ;;
   esac
+
+  if [[ -n "$_MOMA_CONFIG_LOAD_ERROR" ]]; then
+    _moma_runtime_error moma "$_MOMA_CONFIG_LOAD_ERROR"
+    return $?
+  fi
+
+  if [[ -n "$theme_option" ]] &&
+    ! _moma_apply_theme "$theme_option"; then
+    _moma_usage_error moma "$_MOMA_CONFIG_ERROR"
+    return $?
+  fi
+
+  if [[ -n "$_MOMA_CONFIG_ERROR" ]]; then
+    _moma_runtime_error moma "$_MOMA_CONFIG_ERROR"
+    return $?
+  fi
+
+  if [[ "$command" == "themes" ]]; then
+    _moma_list_themes
+    return $?
+  fi
+
+  if [[ "$command" == "preview" ]]; then
+    _moma_preview "$@"
+    return $?
+  fi
 
   if ! registered_function="$(_moma_command_function "$command")"; then
     printf 'moma: unknown command: %s\n\n' "$command" >&2

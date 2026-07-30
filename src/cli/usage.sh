@@ -15,9 +15,11 @@ EOF
     printf '  %-15s %s\n' "$command" "$description"
   done < <(_moma_command_registry)
   cat <<'EOF'
+  themes          List configured color themes.
   preview         Show terminal, Markdown, or browser previews.
 
 Options:
+  --theme NAME  Use a configured color theme.
   -h, --help    Show this help.
 
 Library example:

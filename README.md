@@ -84,6 +84,101 @@ the border. Embedded labels use an ellipsis when they cannot fit.
 The minimum effective decoration width is 8 columns. Box padding can require a
 larger width.
 
+## Colors
+
+Use the following names with the `--color` option.
+
+| Name | ANSI SGR sequence | Definition |
+| --- | --- | --- |
+| `black` | `\033[30m` | Standard terminal black |
+| `red` | `\033[31m` | Standard terminal red |
+| `green` | `\033[32m` | Standard terminal green |
+| `yellow` | `\033[33m` | Standard terminal yellow |
+| `blue` | `\033[34m` | Standard terminal blue |
+| `purple` | `\033[35m` | Standard terminal magenta |
+| `cyan` | `\033[36m` | Standard terminal cyan |
+| `white` | `\033[37m` | Standard terminal white |
+| `pink` | `\033[38;2;255;144;231m` | RGB `#ff90e7` |
+| `gray` | `\033[38;2;200;200;200m` | RGB `#c8c8c8` |
+
+The exact appearance of the standard colors depends on the terminal theme.
+Use `grey` or `muted` as aliases for `gray`, `warning` or `warn` as aliases for
+`yellow`, and `info` as an alias for `cyan`.
+
+The default theme assigns cyan to `MOMA_COLOR_PRIMARY`, yellow to
+`MOMA_COLOR_ACCENT`, and gray to `MOMA_COLOR_MUTED`. Semantic styles assign
+green to success, red to error, yellow to warning, and cyan to information.
+
+### Configure color themes
+
+1. Create the user configuration directory.
+
+```bash
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/momaui"
+```
+
+2. Install the example configuration.
+
+```bash
+install -m 0644 examples/moma.confg "${XDG_CONFIG_HOME:-$HOME/.config}/momaui/moma.confg"
+```
+
+3. Edit the installed configuration when needed.
+
+```ini
+[colors]
+violet = \033[38;2;189;147;249m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+accent = \033[38;2;255;184;108m
+muted = \033[38;2;98;114;164m
+success = \033[38;2;158;206;106m
+error = \033[38;2;247;118;142m
+warning = \033[38;2;224;175;104m
+info = \033[38;2;125;207;255m
+```
+
+4. List the configured themes.
+
+```bash
+moma themes
+```
+
+5. Select a theme for one command.
+
+```bash
+moma --theme night title "Moma" "Night theme"
+```
+
+6. Select a theme with an environment variable.
+
+```bash
+export MOMA_THEME=night
+```
+
+7. Load the selected theme with the library.
+
+```bash
+source dist/moma
+```
+
+Each theme role accepts a built-in name, a reusable name from `[colors]`, or an
+ANSI SGR sequence. Additional themes inherit omitted roles from `default`.
+Reusable custom colors also become valid values for component-level `--color`
+options. Use full-line `#` comments in the configuration file. Set
+`MOMA_CONFIG_FILE` to load another path. Explicit `MOMA_COLOR_*` environment
+variables take priority over configured theme roles.
+
 ## Components
 
 ### Visual components
