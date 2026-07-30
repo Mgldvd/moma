@@ -11,7 +11,7 @@ modules live in the layered directories under `src/`.
 
 | Layer or file | Responsibility | Public functions |
 | --- | --- | --- |
-| [`src/core/`](../core/) | Version, errors, strings, validation, palette, semantics, terminal, and registry. | None |
+| [`src/core/`](../core/) | Version, errors, strings, configuration, palette, semantics, terminal, and registry. | None |
 | [`src/components/title.sh`](../components/title.sh) | Primary and secondary headings. | `moma-title`, `moma-title-sub` |
 | [`src/components/section-message.sh`](../components/section-message.sh) | Semantic sections and messages. | `moma-section`, `moma-msg` |
 | [`src/components/simple-list.sh`](../components/simple-list.sh) | Dot messages and unordered lists. | `moma-msg-simple`, `moma-list` |
@@ -44,8 +44,10 @@ Fixed width takes priority over maximum width.
 
 ## `src/core/`
 
-Defines the namespaced ANSI palette, semantic theme values, option errors, text
-helpers, and color resolution shared by every component.
+Defines the namespaced ANSI palette, declarative theme configuration, semantic
+theme values, option errors, text helpers, and color resolution shared by every
+component. The configuration loader reads `~/.config/momaui/moma.confg`,
+requires `[theme default]`, and selects another theme through `MOMA_THEME`.
 
 ```text
 success → green + ✔

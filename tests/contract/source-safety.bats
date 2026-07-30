@@ -36,6 +36,17 @@ setup_file() {
   [[ -z "$output" ]]
 }
 
+@test "sourcing with a theme configuration remains silent" {
+  config="$MOMA_ROOT/tests/fixtures/themes.confg"
+
+  # The library path is expanded by the child Bash process.
+  # shellcheck disable=SC2016
+  run env MOMA_CONFIG_FILE="$config" MOMA_THEME=night \
+    bash -euo pipefail -c 'source "$1"' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ -z "$output" ]]
+}
+
 @test "registry and public API contain the same component functions" {
   run bash -c '
         source "$1"

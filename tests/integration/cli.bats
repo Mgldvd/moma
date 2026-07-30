@@ -34,3 +34,35 @@ setup_file() {
   [[ "$status" -eq 1 ]]
   [[ "$output" == *"unknown command"* ]]
 }
+
+@test "configured themes are listed and selected globally" {
+  config="$MOMA_ROOT/tests/fixtures/themes.confg"
+
+  run env MOMA_CONFIG_FILE="$config" "$MOMA_DIST" themes
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'default (active)\nnight' ]]
+
+  run env -u NO_COLOR MOMA_CONFIG_FILE="$config" \
+    "$MOMA_DIST" --theme night msg-simple Ready
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *$'\033[38;2;189;147;249m▪\033[0m'* ]]
+}
+
+@test "MOMA_THEME applies a configured theme at source time" {
+  config="$MOMA_ROOT/tests/fixtures/themes.confg"
+
+  # Positional parameters are expanded by the child Bash process.
+  # shellcheck disable=SC2016
+  run env -u NO_COLOR MOMA_CONFIG_FILE="$config" MOMA_THEME=night \
+    bash -c 'source "$1"; moma-msg-simple Ready' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == *$'\033[38;2;189;147;249m▪\033[0m'* ]]
+}
+
+@test "invalid theme configuration fails CLI commands" {
+  config="$MOMA_ROOT/tests/fixtures/invalid-themes.confg"
+
+  run env MOMA_CONFIG_FILE="$config" "$MOMA_DIST" msg Ready
+  [[ "$status" -eq 3 ]]
+  [[ "$output" == *"missing required [theme default] section"* ]]
+}

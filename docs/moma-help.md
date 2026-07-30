@@ -44,6 +44,7 @@ source dist/moma
 | Command | Description |
 | --- | --- |
 | `help` | Show this help with Glow when available. |
+| `themes` | List configured color themes. |
 | `preview` | Show the terminal reference. |
 | `preview md` | Show the Markdown reference with Glow when available. |
 | `preview web` | Serve the browser reference. |
@@ -56,7 +57,40 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 
 ## Global options
 
+- `--theme <name>`: Use a configured color theme for this command.
 - `-h`, `--help`: Show help.
+
+## Color themes
+
+Create `~/.config/momaui/moma.confg` with a complete `[theme default]` section.
+Define reusable ANSI SGR colors in `[colors]` and additional themes in
+`[theme name]` sections.
+
+```ini
+[colors]
+violet = \033[38;2;189;147;249m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+```
+
+```bash
+moma themes
+moma --theme night msg "Ready"
+MOMA_THEME=night moma msg "Ready"
+```
+
+Additional themes inherit omitted roles from `default`. Set `MOMA_CONFIG_FILE`
+to load a different configuration file.
 
 ## Decoration width
 
@@ -79,6 +113,7 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma multi-select "Docker" "CI" "Tests" --choose 1,3
 ./dist/moma confirm "Create this project?" --default yes
 ./dist/moma command-check bash curl
+./dist/moma themes
 ./dist/moma preview
 ```
 

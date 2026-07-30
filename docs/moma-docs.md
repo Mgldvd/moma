@@ -36,6 +36,44 @@ components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
 options. A local fixed width overrides the global setting. The minimum
 effective decoration width is 8 columns; box padding can require more.
 
+## Color themes
+
+Moma loads `~/.config/momaui/moma.confg` when it exists. The file is
+declarative and requires a complete `[theme default]` section.
+
+```ini
+[colors]
+violet = \033[38;2;189;147;249m
+orange = \033[38;2;255;184;108m
+
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+[theme night]
+primary = violet
+accent = orange
+```
+
+List or select themes with the standalone CLI.
+
+```bash
+moma themes
+moma --theme night msg "Ready"
+MOMA_THEME=night moma msg "Ready"
+```
+
+Export `MOMA_THEME` before sourcing the library to select a theme for public
+functions. Additional themes inherit omitted roles from `default`. Custom
+colors become valid component-level `--color` values. Set `MOMA_CONFIG_FILE`
+to load another path. Explicit `MOMA_COLOR_*` variables take priority over
+configured values.
+
 ## Visual components
 
 ### `moma-title`

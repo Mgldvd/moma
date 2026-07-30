@@ -58,10 +58,10 @@ _moma_preview_header() {
   printf '  Visual reference for the public terminal UI API\n'
   printf '%s\n\n' "$(_moma_preview_line '━')"
   printf '  Legend  %b● success%b  %b● error%b  %b● warning%b  %b● info%b\n\n' \
-    "$MOMA_COLOR_SUCCESS" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_ERROR" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_WARNING" "$MOMA_COLOR_RESET" \
-    "$MOMA_COLOR_INFO" "$MOMA_COLOR_RESET"
+    "$(_moma_resolve_color "$MOMA_COLOR_SUCCESS")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_ERROR")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_WARNING")" "$MOMA_COLOR_RESET" \
+    "$(_moma_resolve_color "$MOMA_COLOR_INFO")" "$MOMA_COLOR_RESET"
 }
 
 # Print one numbered terminal-preview section heading.

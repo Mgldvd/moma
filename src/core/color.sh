@@ -28,11 +28,14 @@ _moma_resolve_color() {
   local candidate="${1:-}"
   local fallback="${2:-$MOMA_COLOR_RESET}"
   local no_color="${3:-false}"
+  local normalized=""
+  local configured_color=""
 
   _moma_color_enabled "$no_color" || return 0
   [[ -n "$candidate" ]] || candidate="$fallback"
+  normalized="${candidate,,}"
 
-  case "${candidate,,}" in
+  case "$normalized" in
     black) printf '%s' "$MOMA_COLOR_BLACK" ;;
     red) printf '%s' "$MOMA_COLOR_RED" ;;
     green) printf '%s' "$MOMA_COLOR_GREEN" ;;
@@ -45,7 +48,13 @@ _moma_resolve_color() {
     gray | grey | muted) printf '%s' "$MOMA_COLOR_GRAY" ;;
     reset | default) printf '%s' "$MOMA_COLOR_RESET" ;;
     none | no | false) return 0 ;;
-    *) printf '%s' "$candidate" ;;
+    *)
+      if configured_color="$(_moma_config_color_value "$normalized")"; then
+        printf '%s' "$configured_color"
+      else
+        printf '%s' "$candidate"
+      fi
+      ;;
   esac
 }
 

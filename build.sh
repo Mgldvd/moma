@@ -19,6 +19,7 @@ modules=(
   core/errors.sh
   core/string.sh
   core/validation.sh
+  core/config.sh
   core/color.sh
   core/semantic.sh
   core/terminal.sh

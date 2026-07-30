@@ -29,6 +29,23 @@ setup() {
   [[ "$output" == "✔" ]]
 }
 
+@test "theme parser loads custom ANSI colors and inherited roles" {
+  config="$MOMA_ROOT/tests/fixtures/themes.confg"
+
+  _MOMA_CONFIG_LOAD_ERROR=""
+  _moma_load_config "$config"
+  _moma_apply_theme night
+
+  [[ "$MOMA_THEME" == "night" ]]
+  [[ "$MOMA_COLOR_PRIMARY" == "violet" ]]
+  [[ "$MOMA_COLOR_SUCCESS" == "green" ]]
+
+  unset NO_COLOR
+  run _moma_resolve_color violet
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == '\033[38;2;189;147;249m' ]]
+}
+
 @test "integer and delay validation are pure" {
   _moma_is_positive_int 3
   run _moma_is_positive_int 0

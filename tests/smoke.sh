@@ -6,6 +6,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MOMA_DIST="$ROOT_DIR/dist/moma"
+MOMA_CONFIG_FILE="$ROOT_DIR/tests/fixtures/not-present.confg"
+export MOMA_CONFIG_FILE
 
 "$ROOT_DIR/build.sh" >/dev/null
 bash -n \
@@ -42,6 +44,55 @@ simple_error_output="$(
     "$MOMA_DIST" msg-simple "Package installation failed" --error
 )"
 [[ "$simple_error_output" == *$'\033[31m▪\033[0m   Package installation failed' ]]
+
+theme_config="$ROOT_DIR/examples/moma.confg"
+theme_list="$(MOMA_CONFIG_FILE="$theme_config" "$MOMA_DIST" themes)"
+[[ "$theme_list" == $'default (active)\nnight' ]]
+
+config_home="$(mktemp -d "${TMPDIR:-/tmp}/moma-config.XXXXXX")"
+mkdir -p "$config_home/.config/momaui"
+cp "$theme_config" "$config_home/.config/momaui/moma.confg"
+default_path_output="$(
+  env -u NO_COLOR \
+    -u MOMA_CONFIG_FILE \
+    -u XDG_CONFIG_HOME \
+    HOME="$config_home" \
+    MOMA_THEME=night \
+    "$MOMA_DIST" msg-simple "Default path"
+)"
+rm -rf "$config_home"
+[[ "$default_path_output" == *$'\033[38;2;189;147;249m▪\033[0m   Default path' ]]
+
+night_output="$(
+  env -u NO_COLOR \
+    MOMA_CONFIG_FILE="$theme_config" \
+    MOMA_THEME=night \
+    "$MOMA_DIST" msg-simple "Night"
+)"
+[[ "$night_output" == *$'\033[38;2;189;147;249m▪\033[0m   Night' ]]
+
+theme_option_output="$(
+  env -u NO_COLOR \
+    MOMA_CONFIG_FILE="$theme_config" \
+    "$MOMA_DIST" --theme night msg-simple "Option"
+)"
+[[ "$theme_option_output" == *$'\033[38;2;189;147;249m▪\033[0m   Option' ]]
+
+custom_color_output="$(
+  env -u NO_COLOR \
+    MOMA_CONFIG_FILE="$theme_config" \
+    "$MOMA_DIST" msg-simple "Custom" --color orange
+)"
+[[ "$custom_color_output" == *$'\033[38;2;255;184;108m▪\033[0m   Custom' ]]
+
+override_output="$(
+  env -u NO_COLOR \
+    MOMA_CONFIG_FILE="$theme_config" \
+    MOMA_THEME=night \
+    MOMA_COLOR_PRIMARY='\033[34m' \
+    "$MOMA_DIST" msg-simple "Override"
+)"
+[[ "$override_output" == *$'\033[34m▪\033[0m   Override' ]]
 
 list_output="$(
   NO_COLOR=1 "$MOMA_DIST" list \

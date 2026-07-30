@@ -1,0 +1,24 @@
+# Reusable colors available to every theme and component --color option.
+[colors]
+violet = \033[38;2;189;147;249m
+orange = \033[38;2;255;184;108m
+
+# The default theme must define every role.
+[theme default]
+primary = cyan
+accent = yellow
+muted = gray
+success = green
+error = red
+warning = yellow
+info = cyan
+
+# Additional themes can use reusable names or direct ANSI SGR colors.
+[theme night]
+primary = violet
+accent = orange
+muted = \033[38;2;98;114;164m
+success = \033[38;2;158;206;106m
+error = \033[38;2;247;118;142m
+warning = \033[38;2;224;175;104m
+info = \033[38;2;125;207;255m
