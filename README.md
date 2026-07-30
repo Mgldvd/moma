@@ -1,18 +1,21 @@
 # Moma
 
 <div align="center">
-  <img src="./.img/moma.png" alt="moma logo" height="300px">
+  <img src="./.img/moma.png" alt="Moma logo" height="300px">
 </div>
 
 Moma is a standalone Bash library and executable for terminal UI components.
+It requires Bash 4.0 or newer and runs on macOS and Linux.
 
-## Preview with curl
+## Quick start
+
+### Preview from GitHub
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview
 ```
 
-## Install as a binary
+### Install the executable
 
 1. Create the local binary directory.
 
@@ -20,7 +23,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 mkdir -p "$HOME/.local/bin"
 ```
 
-2. Download Moma with curl.
+2. Download Moma.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma -o "$HOME/.local/bin/moma"
@@ -32,61 +35,115 @@ curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma -o "$H
 chmod 0755 "$HOME/.local/bin/moma"
 ```
 
-4. Add the local binary directory to the shell profile.
-
-```bash
-grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.profile" 2>/dev/null || printf '\nexport PATH="$HOME/.local/bin:$PATH"\n' >> "$HOME/.profile"
-```
-
-5. Add the local binary directory to the current shell.
+4. Add the binary directory to the current shell.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-6. Check the installation.
+5. Check the installation.
 
 ```bash
 moma --help
 ```
 
-## Consistent decoration widths
+Add the `PATH` export to the appropriate shell profile to keep it after the
+current session.
 
-1. Set one fixed inner width for every horizontal decoration.
+## Usage
+
+### Load as a library
+
+```bash
+source dist/moma
+
+moma-title "Moma" "Installer"
+moma-msg "Ready" --success
+moma-list "Clone repository" "Install dependencies"
+```
+
+Load the library directly from GitHub when a local copy is not available.
+
+```bash
+source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)
+```
+
+### Run as an executable
+
+```bash
+./dist/moma title "Moma" "Installer"
+./dist/moma msg "Ready" --success
+./dist/moma select "Development" "Staging" "Production"
+./dist/moma confirm "Create this project?" --default yes
+```
+
+### Run the component showcase
+
+```bash
+task build
+./example.sh
+```
+
+## Components
+
+| Category | Component | Purpose |
+| --- | --- | --- |
+| Visual | `moma-title` | Print a primary title and subtitle. |
+| Visual | `moma-title-sub` | Print a secondary title. |
+| Visual | `moma-section` | Print a semantic section heading. |
+| Visual | `moma-msg` | Print a styled semantic message. |
+| Visual | `moma-msg-simple` | Print a compact message. |
+| Visual | `moma-list` | Print an unordered list. |
+| Visual | `moma-box` | Print a framed notice. |
+| Visual | `moma-prompt` | Print a question lead-in. |
+| Visual | `moma-label` | Print a decorated label. |
+| Visual | `moma-rabbit` | Print the Moma activity component. |
+| Interactive | `moma-input` | Display or read an input value. |
+| Interactive | `moma-select` | Select one value. |
+| Interactive | `moma-multi-select` | Select multiple values. |
+| Interactive | `moma-confirm` | Select Yes or No. |
+| Workflow | `moma-spinner` | Follow a running process. |
+| Workflow | `moma-command-check` | Check executable dependencies. |
+
+Open the complete component reference locally.
+
+```bash
+./dist/moma preview
+```
+
+The source reference is available in
+[`docs/moma-docs.md`](docs/moma-docs.md).
+
+## Configuration
+
+### Decoration widths
+
+Set one fixed inner width for supported decorations.
 
 ```bash
 export MOMA_WIDTH=50
 ```
 
-2. Print components with the shared width.
-
-```bash
-moma box "Your configuration is ready." --success
-moma box "Back up your files before continuing." --warning
-```
-
-3. Use an automatic width with a maximum limit when needed.
+Set a maximum width while retaining automatic sizing.
 
 ```bash
 unset MOMA_WIDTH
 export MOMA_MAX_WIDTH=50
 ```
 
-4. Override the width for one supported component when needed.
+Override the width for one component when needed.
 
 ```bash
 moma box "Important notice" --width 60
 moma box "A long notice that may wrap" --max-width 40
 ```
 
-Fixed width takes priority over maximum width. Long boxed content wraps inside
-the border. Embedded labels use an ellipsis when they cannot fit.
-The minimum effective decoration width is 8 columns. Box padding can require a
-larger width.
+Fixed width takes priority over maximum width. The minimum effective decoration
+width is 8 columns.
 
-## Colors
+### Colors
 
-Use the following names with the `--color` option.
+Use these names with component color options.
 
 | Name | ANSI SGR sequence | Definition |
 | --- | --- | --- |
@@ -105,11 +162,9 @@ The exact appearance of the standard colors depends on the terminal theme.
 Use `grey` or `muted` as aliases for `gray`, `warning` or `warn` as aliases for
 `yellow`, and `info` as an alias for `cyan`.
 
-The default theme assigns cyan to `MOMA_COLOR_PRIMARY`, yellow to
-`MOMA_COLOR_ACCENT`, and gray to `MOMA_COLOR_MUTED`. Semantic styles assign
-green to success, red to error, yellow to warning, and cyan to information.
+Set `NO_COLOR=1` to disable ANSI colors globally.
 
-### Configure color themes
+### Color themes
 
 1. Create the user configuration directory.
 
@@ -160,263 +215,79 @@ moma themes
 moma --theme night title "Moma" "Night theme"
 ```
 
-6. Select a theme with an environment variable.
+6. Select a theme before loading the library.
 
 ```bash
 export MOMA_THEME=night
-```
-
-7. Load the selected theme with the library.
-
-```bash
 source dist/moma
 ```
 
 Each theme role accepts a built-in name, a reusable name from `[colors]`, or an
 ANSI SGR sequence. Additional themes inherit omitted roles from `default`.
-Reusable custom colors also become valid values for component-level `--color`
-options. Use full-line `#` comments in the configuration file. Set
-`MOMA_CONFIG_FILE` to load another path. Explicit `MOMA_COLOR_*` environment
-variables take priority over configured theme roles.
+Reusable custom colors also work with component-level `--color` options.
 
-## Components
+Moma loads `${XDG_CONFIG_HOME:-$HOME/.config}/momaui/moma.confg` by default.
+Set `MOMA_CONFIG_FILE` to load another path. Explicit `MOMA_COLOR_*` variables
+take priority over configured theme roles.
 
-### Visual components
+## Help and previews
 
-- `moma-title`: Print a primary title and subtitle.
+```bash
+./dist/moma help
+./dist/moma preview
+./dist/moma preview md
+./dist/moma preview web
+```
 
-  ![moma-title preview](.img/moma-title.png)
+The web preview starts at `http://127.0.0.1:4173`. Set `MOMA_PREVIEW_PORT` to
+change the starting port. Set `MOMA_HELP_WIDTH` or `MOMA_PREVIEW_WIDTH` to
+change Glow's render width.
 
-- `moma-title-sub`: Print a secondary title.
+## Development
 
-  ![moma-title-sub preview](.img/moma-title-sub.png)
-
-- `moma-section`: Print a semantic section heading.
-
-  ![moma-section preview](.img/moma-section.png)
-
-- `moma-msg`: Print a styled semantic message.
-
-  ![moma-msg preview](.img/moma-msg.png)
-
-- `moma-msg-simple`: Print a compact message with a dot marker.
-
-  ![moma-msg-simple preview](.img/moma-msg-simple.png)
-
-- `moma-list`: Print a list with consistent markers.
-
-  ![moma-list preview](.img/moma-list.png)
-
-- `moma-box`: Print a framed notice.
-
-  ![moma-box preview](.img/moma-box.png)
-
-- `moma-prompt`: Print a question or confirmation prompt.
-
-  ![moma-prompt preview](.img/moma-prompt.png)
-
-- `moma-label`: Print a decorated input label.
-
-  ![moma-label preview](.img/moma-label.png)
-
-- `moma-rabbit`: Print the Moma activity component.
-
-  ![moma-rabbit preview](.img/moma-rabbit.png)
-
-### Interactive components
-
-- `moma-input`: Display or read an input field.
-
-  ![moma-input preview](.img/moma-input.png)
-
-- `moma-select`: Select one value.
-
-  ![moma-select preview](.img/moma-select.png)
-
-- `moma-multi-select`: Select multiple values.
-
-  ![moma-multi-select preview](.img/moma-multi-select.png)
-
-- `moma-confirm`: Select a Yes or No answer.
-
-  ![moma-confirm preview](.img/moma-confirm.png)
-
-### Workflow components
-
-- `moma-spinner`: Follow a running process and print its result.
-
-  ![moma-spinner preview](.img/moma-spinner.png)
-
-- `moma-command-check`: Check whether commands are available.
-
-  ![moma-command-check preview](.img/moma-command-check.png)
-
-## Project structure
-
-- `src/core/`: Runtime, error, string, color, semantic, terminal, validation, and command-registry modules.
-- `src/components/`: Public terminal UI components.
-- `src/preview/`: Terminal, Markdown, and browser preview implementation.
-- `src/cli/`: Executable help and explicit command dispatcher.
-- `docs/`: Embedded Markdown help and reference.
-- `.img/`: Logos and component preview screenshots.
-- `enhancement.md`: Future component backlog.
-- `web/`: Embedded browser documentation.
-- `build.sh`: Standalone-file builder.
-- `.tasks/`: Task workflow scripts.
-- `Taskfile.yml`: Build, test, lint, format, check, and clean entrypoints.
-- `dist/moma`: Generated library and executable.
-- `tests/smoke.sh`: API and behavior checks.
-- `tests/{unit,integration,contract}/`: Bats development suites.
-
-Edit the source modules. Do not edit `dist/moma` directly.
-
-## Requirements
+### Requirements
 
 - Bash 4.0 or newer.
 - Task 3 for development workflows.
-- Python 3 only for `preview web`.
-- Glow optionally for rendered help and Markdown previews.
+- `rg` for the smoke suite.
+- Python 3 for `preview web`.
+- Bats-core and ShellCheck for the complete development checks.
+- Glow optionally for rendered Markdown.
 - `tput` optionally for the interactive spinner.
 
-## Build
+### Project structure
 
-1. Run the build task.
+| Path | Responsibility |
+| --- | --- |
+| `src/core/` | Runtime, configuration, color, terminal, and registry modules. |
+| `src/components/` | Public terminal UI components. |
+| `src/preview/` | Terminal, Markdown, and browser previews. |
+| `src/cli/` | Executable help and command dispatch. |
+| `docs/` | Embedded help, API reference, and architecture. |
+| `web/` | Embedded browser documentation. |
+| `examples/` | Installable configuration examples. |
+| `tests/` | Smoke, unit, integration, and contract tests. |
+| `dist/moma` | Generated library and executable. |
+
+Edit source modules and embedded assets. Do not edit `dist/moma` directly.
+
+### Build and verify
 
 ```bash
-task build
-```
-
-2. Check the generated file help.
-
-```bash
-./dist/moma --help
-```
-
-## Test
-
-1. Run all available test suites.
-
-```bash
+task format
+task lint
 task test
 ```
 
-2. Run the required Bats suites.
+Run the Bats suites as a required check when Bats-core is installed.
 
 ```bash
 task test-bats
 ```
 
-Install Bats-core to enable the unit, integration, and contract suites. Install
-ShellCheck to enable its optional `task lint` checks. The tasks download a
-pinned, verified shfmt binary into `.tasks/bin/` when shfmt is unavailable.
+The formatting task downloads a pinned shfmt binary when it is not available.
 
-## Architecture
+### Architecture
 
-Read [`docs/architecture.md`](docs/architecture.md) for the layer boundaries,
-output channels, exit statuses, terminal lifecycle, and build flow. Read
-[`docs/migration-notes.md`](docs/migration-notes.md) for compatibility details.
-
-## Run the example
-
-1. Run the build task.
-
-```bash
-task build
-```
-
-2. Run the interactive component showcase.
-
-```bash
-./example.sh
-```
-
-## Load as a library
-
-1. Source the generated file.
-
-```bash
-source dist/moma
-```
-
-2. Call a component.
-
-```bash
-moma-title "Moma" "Installer"
-moma-msg "Ready" --success
-moma-list "Clone repository" "Install dependencies"
-moma-label "TEXT HERE"
-moma-select "Development" "Staging" "Production"
-moma-multi-select "Docker" "CI" "Tests"
-moma-confirm "Create this project?"
-```
-
-## Load from GitHub
-
-1. Source the generated file from the Moma repository.
-
-```bash
-source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)
-```
-
-2. Call a component.
-
-```bash
-moma-msg "Ready" --success
-```
-
-## Run as an executable
-
-1. Run component commands.
-
-```bash
-./dist/moma title "Moma" "Installer"
-./dist/moma msg "Ready" --success
-./dist/moma msg-simple "Package installed" --error
-./dist/moma list "Clone repository" "Install dependencies"
-./dist/moma label "TEXT HERE"
-./dist/moma select "Development" "Staging" "Production"
-./dist/moma multi-select "Docker" "CI" "Tests"
-```
-
-2. Run helper commands.
-
-```bash
-./dist/moma confirm "Create this project?" --default yes
-./dist/moma command-check bash curl
-```
-
-## Open help and previews
-
-1. Open the library help.
-
-```bash
-./dist/moma help
-```
-
-2. Open the terminal component reference.
-
-```bash
-./dist/moma preview
-```
-
-3. Open the Markdown reference.
-
-```bash
-./dist/moma preview md
-```
-
-4. Start the browser reference.
-
-```bash
-./dist/moma preview web
-```
-
-5. Open the local URL.
-
-```text
-http://127.0.0.1:4173
-```
-
-Set `MOMA_PREVIEW_PORT` to change the starting web port. Moma selects the next
-available port when it is occupied. Set `MOMA_HELP_WIDTH` or `MOMA_PREVIEW_WIDTH`
-to change Glow's render width. Set `NO_COLOR=1` to disable ANSI colors.
+Read [`docs/architecture.md`](docs/architecture.md) for layer boundaries,
+output channels, exit statuses, terminal handling, and the build flow.
