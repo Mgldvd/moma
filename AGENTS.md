@@ -6,6 +6,15 @@
 - `build.sh` concatenates an explicit, ordered module list and embeds the docs and preview assets. Add or reorder a module in that list, not merely under `src/`.
 - Keep public functions named `moma-*`; `_moma_*` is the private namespace. The generated file must remain safe both to source under `set -euo pipefail` and to execute as a CLI.
 
+## Shell Style And Static Analysis
+
+- Follow the [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) for all new or generated Shell code and when modifying existing Shell code.
+- Write executable scripts for Bash with `#!/bin/bash`, use two-space indentation without tabs, keep lines at 80 characters when practical, and send error messages to stderr.
+- Quote variable and command substitutions, prefer `"${name}"` for named variables, use `$(command)` instead of backticks, use `[[ ... ]]` for tests, and use arrays for argument lists.
+- Run [ShellCheck](https://github.com/koalaman/shellcheck) on every new or modified Shell or Bats file. Fix all applicable findings before completing the change.
+- Add a narrow `# shellcheck disable=SCxxxx` directive only when the warning is intentionally inapplicable, and place a comment next to it explaining why when the reason is not obvious.
+- Run `task format` followed by `task lint` after generating or changing Shell code. Do not manually edit `dist/moma`; rebuild it from the validated source files.
+
 ## Verification
 
 - Run `./tests/smoke.sh` for the full verification. It rebuilds `dist/moma`, runs Bash syntax checks, and exercises library, CLI, interactive, documentation, and standalone behavior.
