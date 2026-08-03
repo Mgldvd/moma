@@ -12,7 +12,7 @@ Commands:
 EOF
   local command _function description
   while IFS=$'\t' read -r command _function description; do
-    printf '  %-15s %s\n' "$command" "$description"
+    printf '  %-22s %s\n' "$command" "$description"
   done < <(_moma_command_registry)
   cat <<'EOF'
   themes          List configured color themes.

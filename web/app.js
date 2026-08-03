@@ -62,15 +62,26 @@ const componentExamples = {
     'project="$(moma-input --title "Project name" --read --required --trim)"',
     'password="$(moma-input --title "Password" --read --secret --required)"',
   ],
+  'moma-single-select': [
+    'environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"',
+    'environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"',
+    'region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
+  ],
   'moma-select': [
     'environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"',
-    'environment="$(moma-select "Development" "Staging" "Production" --choose 2)"',
-    'region="$(moma-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
+  ],
+  'moma-single-select-groups': [
+    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy")"',
+    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy" --choose 4)"',
   ],
   'moma-multi-select': [
     'features="$(moma-multi-select "Docker" "CI" "Tests" --title "Features")"',
     'features="$(moma-multi-select "Docker" "CI" "Tests" --choose 1,3)"',
     'features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"',
+  ],
+  'moma-multi-select-groups': [
+    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
+    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru" --choose 1,3 --required)"',
   ],
   'moma-rabbit': [
     'moma-rabbit "Preparing workspace" --info',

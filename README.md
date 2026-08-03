@@ -91,6 +91,9 @@ source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/mo
 ./dist/moma title "Moma" "Installer"
 ./dist/moma msg "Ready" --success
 ./dist/moma select "Development" "Staging" "Production"
+./dist/moma single-select-groups --title "Features" \
+  --group "Docker" --option "Up" --option "Down" --option "Stop" \
+  --group "npm" --option "install" --option "run dev" --option "run deploy"
 ./dist/moma confirm "Create this project?" --default yes
 ```
 
@@ -116,8 +119,11 @@ task build
 | Visual | `moma-label` | Print a decorated label. |
 | Visual | `moma-rabbit` | Print the Moma activity component. |
 | Interactive | `moma-input` | Display or read an input value. |
-| Interactive | `moma-select` | Select one value. |
+| Interactive | `moma-select` | Select one value (alias for `moma-single-select`). |
+| Interactive | `moma-single-select` | Select one value. |
+| Interactive | `moma-single-select-groups` | Select one value from named groups. |
 | Interactive | `moma-multi-select` | Select multiple values. |
+| Interactive | `moma-multi-select-groups` | Select multiple values from named groups. |
 | Interactive | `moma-confirm` | Select Yes or No. |
 | Workflow | `moma-spinner` | Follow a running process. |
 | Workflow | `moma-command-check` | Check executable dependencies. |

@@ -23,7 +23,11 @@ Core helpers use the private `_moma_*` namespace. Theme inputs use
 | [`box-prompt.sh`](../components/box-prompt.sh) | `moma-box`, `moma-prompt` |
 | [`label.sh`](../components/label.sh) | `moma-label` |
 | [`input.sh`](../components/input.sh) | `moma-input` |
-| [`select.sh`](../components/select.sh) | `moma-select`, `moma-multi-select` |
+| [`select-common.sh`](../components/select-common.sh) | Private selection rendering, transition, and group-validation helpers |
+| [`single-select.sh`](../components/single-select.sh) | `moma-single-select`, `moma-select` (alias) |
+| [`single-select-groups.sh`](../components/single-select-groups.sh) | `moma-single-select-groups` |
+| [`multi-select.sh`](../components/multi-select.sh) | `moma-multi-select` |
+| [`multi-select-groups.sh`](../components/multi-select-groups.sh) | `moma-multi-select-groups` |
 | [`rabbit.sh`](../components/rabbit.sh) | `moma-rabbit` |
 | [`interaction.sh`](../components/interaction.sh) | `moma-confirm`, `moma-spinner` |
 | [`command-check.sh`](../components/command-check.sh) | `moma-command-check` |
