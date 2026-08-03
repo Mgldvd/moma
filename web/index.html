@@ -246,21 +246,55 @@
           </div>
         </article>
 
-        <article class="api-entry" data-api="moma-select interactive selection list arrows up down marker choice">
+        <article class="api-entry" data-api="moma-single-select interactive selection list arrows up down radio choice">
           <header class="api-entry__header">
-            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select</h3></div>
             <span class="status status--interactive">Interactive</span>
           </header>
           <p class="api-entry__description">Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.</p>
-          <code class="signature">moma-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
+          <code class="signature">moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <div class="select-list">
               <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Environment</span></p>
               <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__item"><span class="select-list__marker" aria-hidden="true"></span>Development</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__marker" aria-hidden="true">▪</span>Staging</p>
-              <p class="select-list__item"><span class="select-list__marker" aria-hidden="true"></span>Production</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Development</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Staging</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Production</p>
+              <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-select interactive selection alias compatibility single-select">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Documented compatibility alias for <code>moma-single-select</code>. Same arguments, same rendering, kept for existing scripts and the <code>select</code> CLI command.</p>
+          <code class="signature">moma-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
+        </article>
+
+        <article class="api-entry" data-api="moma-single-select-groups interactive selection list arrows up down radio choice groups headings">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select-groups</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Select one value organized under named, non-selectable group headings. Option numbers are one-based, count only options, and follow visual order across every group.</p>
+          <code class="signature">moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="select-list">
+              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
+              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
+              <p class="select-list__group">Docker</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Up</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Down</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Stop</p>
+              <p class="select-list__group">npm</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>install</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run dev</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run deploy</p>
               <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
             </div>
           </div>
@@ -279,8 +313,33 @@
               <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
               <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
               <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Docker</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">▢</span>CI</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>CI</p>
               <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Tests</p>
+              <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select-groups</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.</p>
+          <code class="signature">moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="select-list">
+              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
+              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
+              <p class="select-list__group">North America</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>United States</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Canada</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Mexico</p>
+              <p class="select-list__group">South America</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Colombia</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Argentina</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Peru</p>
               <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
             </div>
           </div>
@@ -400,7 +459,7 @@ o_(")(")</span></pre>
         </header>
 
         <div class="function-list">
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | multi-select | rabbit</code></article>
+          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>

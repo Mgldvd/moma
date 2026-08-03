@@ -83,6 +83,31 @@ setup() {
   [[ "$output" == $'1\t0,2,1\tcontinue' ]]
 }
 
+@test "select transition wraps across a flattened group boundary" {
+  # Grouped components flatten every option into one selectable list before
+  # calling this helper, so a six-option, two-group menu (three options per
+  # group) wraps and crosses group boundaries using plain modular arithmetic.
+  run _moma_select_transition 2 6 down
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'3\tcontinue' ]]
+
+  run _moma_select_transition 0 6 up
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'5\tcontinue' ]]
+}
+
+@test "group validation rejects a group with no options" {
+  run _moma_validate_groups moma-single-select-groups 2 0
+  [[ "$status" -eq 2 ]]
+  [[ "$output" == *"moma-single-select-groups: every group requires at least one --option"* ]]
+}
+
+@test "group validation accepts every non-empty group" {
+  run _moma_validate_groups moma-single-select-groups 3 2
+  [[ "$status" -eq 0 ]]
+  [[ -z "$output" ]]
+}
+
 @test "confirm transition preserves no as an expected negative result" {
   run _moma_confirm_transition 0 n
   [[ "$status" -eq 0 ]]

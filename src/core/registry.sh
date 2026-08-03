@@ -13,8 +13,11 @@ box	moma-box	Print a boxed message.
 prompt	moma-prompt	Print a prompt.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
-select	moma-select	Select one value.
+select	moma-select	Select one value (alias for single-select).
+single-select	moma-single-select	Select one value.
+single-select-groups	moma-single-select-groups	Select one value across named groups.
 multi-select	moma-multi-select	Select multiple values.
+multi-select-groups	moma-multi-select-groups	Select multiple values across named groups.
 rabbit	moma-rabbit	Print the Moma rabbit.
 confirm	moma-confirm	Select Yes or No.
 spinner	moma-spinner	Follow a process.

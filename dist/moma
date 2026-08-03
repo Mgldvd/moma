@@ -35,8 +35,11 @@ source dist/moma
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
-| `select` | Select one value with the arrow keys. |
+| `select` | Select one value with the arrow keys (alias for `single-select`). |
+| `single-select` | Select one value with the arrow keys. |
+| `single-select-groups` | Select one value from named groups with the arrow keys. |
 | `multi-select` | Select multiple values with the arrow keys and Space. |
+| `multi-select-groups` | Select multiple values from named groups with the arrow keys and Space. |
 | `rabbit` | Print the Moma rabbit component. |
 
 ## Helper commands
@@ -102,6 +105,20 @@ MOMA_THEME=night moma msg "Ready"
 Additional themes inherit omitted roles from `default`. Set `MOMA_CONFIG_FILE`
 to load a different configuration file.
 
+## Selection components
+
+`moma-select` is a documented compatibility alias for `moma-single-select`;
+both accept the same arguments and render identically. `moma-multi-select`
+keeps its existing arguments and behavior.
+
+`moma-single-select-groups` and `moma-multi-select-groups` organize options
+under repeated `--group <name>` and `--option <value>` pairs. Group headings
+are display-only: they never receive focus, are never toggled, are never
+counted as options, and are never printed on stdout. `--initial`, `--choose`,
+and `--selected` use one-based indexes that count only options, in visual
+order across every group. Up and down navigation skips headings and wraps
+between the first and last option across all groups.
+
 ## Decoration width
 
 - `MOMA_WIDTH=<number>`: Give every horizontal decoration the same fixed inner width.
@@ -121,7 +138,16 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma title "Moma" "Installer"
 ./dist/moma label "TEXT HERE"
 ./dist/moma select "Development" "Staging" "Production" --choose 2
+./dist/moma single-select "Up" "Down" "Stop" --choose 1
+./dist/moma single-select-groups --title "Features" \
+  --group "Docker" --option "Up" --option "Down" --option "Stop" \
+  --group "npm" --option "install" --option "run dev" --option "run deploy" \
+  --choose 4
 ./dist/moma multi-select "Docker" "CI" "Tests" --choose 1,3
+./dist/moma multi-select-groups --title "Features" \
+  --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+  --group "South America" --option "Colombia" --option "Argentina" --option "Peru" \
+  --choose 1,3
 ./dist/moma confirm "Create this project?" --default yes
 ./dist/moma command-check bash curl
 ./dist/moma themes
@@ -138,7 +164,16 @@ moma-title "Moma" "Installer"
 moma-msg "Ready" --success
 moma-label "TEXT HERE"
 moma-select "Development" "Staging" "Production"
+moma-single-select "Up" "Down" "Stop"
+moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy"
 moma-multi-select "Docker" "CI" "Tests"
+moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru"
 if moma-confirm "Create this project?"; then
     moma-msg "Project created" --success
 fi
@@ -512,30 +547,65 @@ password="$(moma-input --title "Password" --read --secret --required)"
 
 ![moma-input preview](../.img/moma-input.png)
 
-### `moma-select`
+### `moma-single-select`
 
-Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.
+Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls. Each row shows a radio indicator: `◉` for the focused selection and `○` for every other option.
 
 ```text
-moma-select "Development" "Staging" "Production" [--title text] [--initial number]
+moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]
 ```
 
 ```bash
 # Example 1
-environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"
+environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"
 
 # Example 2
-environment="$(moma-select "Development" "Staging" "Production" --choose 2)"
+environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"
 
 # Example 3
-region="$(moma-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
+region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
 ```
 
 ![moma-select preview](../.img/moma-select.png)
 
+### `moma-select`
+
+Documented compatibility alias for `moma-single-select`. It accepts the same arguments, renders identically, and remains available for existing scripts and the `select` CLI command.
+
+```bash
+environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"
+```
+
+### `moma-single-select-groups`
+
+Select one value organized under named, non-selectable group headings. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--initial` and `--choose` use one-based indexes that count only options, in visual order across every group.
+
+```text
+moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]
+```
+
+```bash
+# Example 1
+action="$(
+  moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy"
+)"
+
+# Example 2 (--choose 4 selects "install", the first option of the second group)
+action="$(
+  moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy" \
+    --choose 4
+)"
+```
+
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not.
 
 ```text
 moma-multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
@@ -553,6 +623,33 @@ features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
 ```
 
 ![moma-multi-select preview](../.img/moma-multi-select.png)
+
+### `moma-multi-select-groups`
+
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group.
+
+```text
+moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
+```
+
+```bash
+# Example 1
+countries="$(
+  moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru"
+)"
+
+# Example 2
+countries="$(
+  moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru" \
+    --choose 1,3 --required
+)"
+```
 
 ### `moma-confirm`
 
@@ -914,21 +1011,55 @@ _moma_preview_web_index () {
           </div>
         </article>
 
-        <article class="api-entry" data-api="moma-select interactive selection list arrows up down marker choice">
+        <article class="api-entry" data-api="moma-single-select interactive selection list arrows up down radio choice">
           <header class="api-entry__header">
-            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select</h3></div>
             <span class="status status--interactive">Interactive</span>
           </header>
           <p class="api-entry__description">Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.</p>
-          <code class="signature">moma-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
+          <code class="signature">moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
           <div class="wireframe">
             <p class="wireframe__label">Output</p>
             <div class="select-list">
               <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Environment</span></p>
               <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__item"><span class="select-list__marker" aria-hidden="true"></span>Development</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__marker" aria-hidden="true">▪</span>Staging</p>
-              <p class="select-list__item"><span class="select-list__marker" aria-hidden="true"></span>Production</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Development</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Staging</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Production</p>
+              <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-select interactive selection alias compatibility single-select">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Documented compatibility alias for <code>moma-single-select</code>. Same arguments, same rendering, kept for existing scripts and the <code>select</code> CLI command.</p>
+          <code class="signature">moma-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
+        </article>
+
+        <article class="api-entry" data-api="moma-single-select-groups interactive selection list arrows up down radio choice groups headings">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select-groups</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Select one value organized under named, non-selectable group headings. Option numbers are one-based, count only options, and follow visual order across every group.</p>
+          <code class="signature">moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="select-list">
+              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
+              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
+              <p class="select-list__group">Docker</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Up</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Down</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Stop</p>
+              <p class="select-list__group">npm</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>install</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run dev</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run deploy</p>
               <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
             </div>
           </div>
@@ -947,8 +1078,33 @@ _moma_preview_web_index () {
               <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
               <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
               <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Docker</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">▢</span>CI</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>CI</p>
               <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Tests</p>
+              <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select-groups</h3></div>
+            <span class="status status--interactive">Interactive</span>
+          </header>
+          <p class="api-entry__description">Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.</p>
+          <code class="signature">moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="select-list">
+              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
+              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
+              <p class="select-list__group">North America</p>
+              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>United States</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Canada</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Mexico</p>
+              <p class="select-list__group">South America</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Colombia</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Argentina</p>
+              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Peru</p>
               <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
             </div>
           </div>
@@ -1068,7 +1224,7 @@ o_(")(")</span></pre>
         </header>
 
         <div class="function-list">
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | multi-select | rabbit</code></article>
+          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
@@ -1708,6 +1864,12 @@ html {
   color: #68e4ff;
 }
 
+.select-list__group {
+  margin: 0.9rem 0 0.2rem;
+  font-size: calc(0.8rem + 2px);
+  color: #777e8e;
+}
+
 .select-list__hint {
   margin-top: 0.65rem;
   color: #777e8e;
@@ -1901,6 +2063,7 @@ html {
 .page--screenshot .select-list__prompt,
 .page--screenshot .select-list__rule,
 .page--screenshot .select-list__item,
+.page--screenshot .select-list__group,
 .page--screenshot .select-list__hint {
   font-size: calc(1.05rem + 2px);
   line-height: 1.7;
@@ -1919,7 +2082,7 @@ html {
   .brand__label { display: inline; }
   .theme-toggle__text { display: inline; }
   .docs { width: min(100% - 3rem, 58rem); }
-  .terminal-art, .semantic-list__item, .terminal-lines__item, .dot-lines__item, .select-list__title, .select-list__prompt, .select-list__rule, .select-list__item, .select-list__hint { font-size: calc(0.9rem + 2px); }
+  .terminal-art, .semantic-list__item, .terminal-lines__item, .dot-lines__item, .select-list__title, .select-list__prompt, .select-list__rule, .select-list__item, .select-list__group, .select-list__hint { font-size: calc(0.9rem + 2px); }
 }
 
 @media (min-width: 768px) {
@@ -2011,15 +2174,26 @@ const componentExamples = {
     'project="$(moma-input --title "Project name" --read --required --trim)"',
     'password="$(moma-input --title "Password" --read --secret --required)"',
   ],
+  'moma-single-select': [
+    'environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"',
+    'environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"',
+    'region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
+  ],
   'moma-select': [
     'environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"',
-    'environment="$(moma-select "Development" "Staging" "Production" --choose 2)"',
-    'region="$(moma-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
+  ],
+  'moma-single-select-groups': [
+    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy")"',
+    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy" --choose 4)"',
   ],
   'moma-multi-select': [
     'features="$(moma-multi-select "Docker" "CI" "Tests" --title "Features")"',
     'features="$(moma-multi-select "Docker" "CI" "Tests" --choose 1,3)"',
     'features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"',
+  ],
+  'moma-multi-select-groups': [
+    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
+    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru" --choose 1,3 --required)"',
   ],
   'moma-rabbit': [
     'moma-rabbit "Preparing workspace" --info',
@@ -2155,7 +2329,7 @@ MOMA_PREVIEW_JS_EOF
 
 # module: src/core/version.sh
 # Bash runtime compatibility.
-MOMA_VERSION="1.0.0"
+MOMA_VERSION="1.1.0"
 MOMA_UPDATE_URL="${MOMA_UPDATE_URL:-https://github.com/Mgldvd/moma/releases/latest/download/moma}"
 
 # Verify that the running Bash version meets a requested minimum.
@@ -3022,8 +3196,11 @@ box	moma-box	Print a boxed message.
 prompt	moma-prompt	Print a prompt.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
-select	moma-select	Select one value.
+select	moma-select	Select one value (alias for single-select).
+single-select	moma-single-select	Select one value.
+single-select-groups	moma-single-select-groups	Select one value across named groups.
 multi-select	moma-multi-select	Select multiple values.
+multi-select-groups	moma-multi-select-groups	Select multiple values across named groups.
 rabbit	moma-rabbit	Print the Moma rabbit.
 confirm	moma-confirm	Select Yes or No.
 spinner	moma-spinner	Follow a process.
@@ -4914,29 +5091,23 @@ EOF
   done
 }
 
-# module: src/components/select.sh
-# Single and multiple selection components.
-# Render a single-selection menu from normalized arguments.
-_moma_render_select() {
+# module: src/components/select-common.sh
+# Shared rendering, state, and validation helpers for the selection family:
+# moma-single-select, moma-single-select-groups, moma-multi-select, and
+# moma-multi-select-groups.
+# Render the shared title and horizontal rule above every selection menu.
+_moma_select_render_header() {
   local title="$1"
-  local selected_index="$2"
-  local color="$3"
-  local no_color="$4"
-  local redraw="$5"
-  shift 5
-  local -a options=("$@")
-  local marker="▪"
-
+  local color="$2"
+  local no_color="$3"
+  local redraw="$4"
   local active_color reset header_width
+
   active_color="$(
     _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
   )"
   reset="$(_moma_reset_color "$no_color")"
   header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
-
-  if $redraw; then
-    _moma_term_move_up "$((${#options[@]} + 3))"
-  fi
 
   if $redraw; then _moma_term_clear_line; fi
   printf '  %b▪%b  %s\n' "$active_color" "$reset" "$title" >&2
@@ -4945,24 +5116,59 @@ _moma_render_select() {
   printf '  %b└%s%b\n' \
     "$active_color" "$(_moma_repeat_char "─" "$header_width")" \
     "$reset" >&2
-
-  local index
-  for index in "${!options[@]}"; do
-    if $redraw; then _moma_term_clear_line; fi
-    if ((index == selected_index)); then
-      printf '  %b%s%b %s\n' \
-        "$active_color" "$marker" "$reset" \
-        "${options[$index]}" >&2
-    else
-      printf '    %s\n' "${options[$index]}" >&2
-    fi
-  done
-
-  if $redraw; then _moma_term_clear_line; fi
-  printf '  ↑/↓ move · Enter select · q cancel\n' >&2
 }
 
-# Resolve a single-selection keyboard event to its next state.
+# Render one selectable row with a focus pointer and a state glyph.
+_moma_select_render_row() {
+  local active="$1"
+  local glyph="$2"
+  local text="$3"
+  local color="$4"
+  local no_color="$5"
+  local redraw="$6"
+  local active_color reset pointer=" "
+
+  if $redraw; then _moma_term_clear_line; fi
+
+  if $active; then
+    pointer="›"
+    active_color="$(
+      _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+    )"
+    reset="$(_moma_reset_color "$no_color")"
+    printf '  %b%s %s %s%b\n' \
+      "$active_color" "$pointer" "$glyph" "$text" "$reset" >&2
+  else
+    printf '  %s %s %s\n' "$pointer" "$glyph" "$text" >&2
+  fi
+}
+
+# Render one blank separator line before a group heading.
+_moma_select_render_blank() {
+  local redraw="$1"
+  if $redraw; then _moma_term_clear_line; fi
+  printf '\n' >&2
+}
+
+# Render a non-selectable group heading line.
+_moma_select_render_group_heading() {
+  local name="$1"
+  local redraw="$2"
+  if $redraw; then _moma_term_clear_line; fi
+  printf '    %s\n' "$name" >&2
+}
+
+# Render the trailing keyboard-control hint line.
+_moma_select_render_footer() {
+  local text="$1"
+  local redraw="$2"
+  if $redraw; then _moma_term_clear_line; fi
+  printf '  %s\n' "$text" >&2
+}
+
+# Resolve a single-selection keyboard event to its next state. Reused by both
+# the flat and grouped single-selection components: grouped options are
+# already flattened into one selectable list before this helper ever runs.
 _moma_select_transition() {
   local selected_index="$1"
   local option_count="$2"
@@ -4981,223 +5187,30 @@ _moma_select_transition() {
   printf '%s\t%s\n' "$selected_index" "$result"
 }
 
-# Parse selection options and return the chosen value on stdout.
-moma-select() {
-  local title="Select an option"
-  local color="$MOMA_COLOR_PRIMARY"
-  local initial=1
-  local choose=""
-  local no_color=false
-  local -a options=()
+# Resolve a multiple-selection keyboard event to its next state. Reused by
+# both the flat and grouped multi-selection components for the same reason.
+_moma_multi_select_transition() {
+  local active_index="$1"
+  local selected_state="$2"
+  local option_count="$3"
+  local event="$4"
+  local result=continue
 
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --title)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-select "$1"
-          return 2
-        fi
-        title="$2"
-        shift 2
-        ;;
-      --title=*)
-        title="${1#*=}"
-        shift
-        ;;
-      --color | -c)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-select "$1"
-          return 2
-        fi
-        color="$2"
-        shift 2
-        ;;
-      --color=*)
-        color="${1#*=}"
-        shift
-        ;;
-      --initial)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-select "$1"
-          return 2
-        fi
-        initial="$2"
-        shift 2
-        ;;
-      --initial=*)
-        initial="${1#*=}"
-        shift
-        ;;
-      --choose)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-select "$1"
-          return 2
-        fi
-        choose="$2"
-        shift 2
-        ;;
-      --choose=*)
-        choose="${1#*=}"
-        shift
-        ;;
-      --no-color)
-        no_color=true
-        shift
-        ;;
-      --help | -h)
-        cat <<'EOF'
-Usage: moma-select "option"... [--title <text>] [--initial <number>] [--choose <number>] [--color <color>] [--no-color]
+  case "$event" in
+    up | k)
+      active_index=$(((active_index - 1 + option_count) % option_count))
+      ;;
+    down | j) active_index=$(((active_index + 1) % option_count)) ;;
+    space)
+      selected_state="$(
+        _moma_multi_toggle "$selected_state" "$active_index"
+      )"
+      ;;
+    enter) result=confirm ;;
+    cancel) result=cancel ;;
+  esac
 
-Use the up and down arrow keys to move, Enter to select, and q or Escape to cancel.
-Option numbers are one-based. --choose selects immediately for scripts and tests.
-EOF
-        return 0
-        ;;
-      --)
-        shift
-        options+=("$@")
-        break
-        ;;
-      -*)
-        _moma_unknown_option moma-select "$1"
-        return 2
-        ;;
-      *)
-        options+=("$1")
-        shift
-        ;;
-    esac
-  done
-
-  if [[ ${#options[@]} -eq 0 ]]; then
-    printf 'moma-select: provide at least one option\n' >&2
-    return 2
-  fi
-  if ! _moma_is_index_in_range "$initial" "${#options[@]}"; then
-    printf 'moma-select: invalid initial option: %s\n' "$initial" >&2
-    return 2
-  fi
-  if [[ -n "$choose" ]] &&
-    ! _moma_is_index_in_range "$choose" "${#options[@]}"; then
-    printf 'moma-select: invalid chosen option: %s\n' "$choose" >&2
-    return 2
-  fi
-
-  local selected_index=$((initial - 1))
-  if [[ -n "$choose" ]]; then
-    selected_index=$((choose - 1))
-    _moma_render_select \
-      "$title" "$selected_index" "$color" "$no_color" \
-      false "${options[@]}"
-    printf '\n' >&2
-    printf '%s\n' "${options[$selected_index]}"
-    return 0
-  fi
-
-  if [[ ! -t 0 || ! -t 2 ]]; then
-    printf '%s%s\n' \
-      'moma-select: interactive input requires a terminal; ' \
-      'use --choose <number> for automation' >&2
-    return 2
-  fi
-
-  _moma_render_select \
-    "$title" "$selected_index" "$color" "$no_color" \
-    false "${options[@]}"
-
-  local event transition transition_status
-  while true; do
-    if ! _moma_term_read_key event; then
-      printf '\n' >&2
-      return 130
-    fi
-
-    transition="$(
-      _moma_select_transition "$selected_index" "${#options[@]}" "$event"
-    )"
-    selected_index="${transition%%$'\t'*}"
-    transition_status="${transition#*$'\t'}"
-    case "$transition_status" in
-      confirm)
-        printf '\n' >&2
-        printf '%s\n' "${options[$selected_index]}"
-        return 0
-        ;;
-      cancel)
-        printf '\n' >&2
-        return 130
-        ;;
-    esac
-
-    _moma_render_select \
-      "$title" "$selected_index" "$color" "$no_color" \
-      true "${options[@]}"
-  done
-}
-
-# Render a multiple-selection menu from normalized arguments.
-_moma_render_multi_select() {
-  local title="$1"
-  local active_index="$2"
-  local selected_state="$3"
-  local color="$4"
-  local no_color="$5"
-  local redraw="$6"
-  shift 6
-  local -a options=("$@")
-
-  local active_color reset checkbox pointer header_width
-  active_color="$(
-    _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
-  )"
-  reset="$(_moma_reset_color "$no_color")"
-  header_width="$(_moma_resolve_decor_width "$((${#title} + 6))" 30 "" "" 8)"
-
-  if $redraw; then
-    _moma_term_move_up "$((${#options[@]} + 3))"
-  fi
-
-  if $redraw; then _moma_term_clear_line; fi
-  printf '  %b▪%b  %s\n' "$active_color" "$reset" "$title" >&2
-
-  if $redraw; then _moma_term_clear_line; fi
-  printf '  %b└%s%b\n' \
-    "$active_color" "$(_moma_repeat_char "─" "$header_width")" \
-    "$reset" >&2
-
-  local index
-  for index in "${!options[@]}"; do
-    if $redraw; then _moma_term_clear_line; fi
-    checkbox="▢"
-    _moma_multi_is_selected "$selected_state" "$index" && checkbox="▣"
-    pointer=" "
-    ((index != active_index)) || pointer="›"
-
-    if ((index == active_index)); then
-      printf '  %b%s %s %s%b\n' \
-        "$active_color" "$pointer" "$checkbox" \
-        "${options[$index]}" "$reset" >&2
-    else
-      printf '  %s %s %s\n' "$pointer" "$checkbox" "${options[$index]}" >&2
-    fi
-  done
-
-  if $redraw; then _moma_term_clear_line; fi
-  printf '  ↑/↓ move · Space toggle · Enter confirm · q cancel\n' >&2
-}
-
-# Print selected multiple-choice values on stdout.
-_moma_emit_multi_select() {
-  local selected_state="$1"
-  shift
-  local -a options=("$@")
-  local index
-
-  for index in "${!options[@]}"; do
-    if _moma_multi_is_selected "$selected_state" "$index"; then
-      printf '%s\n' "${options[$index]}"
-    fi
-  done
+  printf '%s\t%s\t%s\n' "$active_index" "$selected_state" "$result"
 }
 
 # Return success when an index exists in a selected-state list.
@@ -5230,29 +5243,513 @@ _moma_multi_toggle() {
   printf '%s' "$result"
 }
 
-# Resolve a multiple-selection keyboard event to its next state.
-_moma_multi_select_transition() {
-  local active_index="$1"
-  local selected_state="$2"
-  local option_count="$3"
-  local event="$4"
-  local result=continue
+# Print selected multiple-choice values on stdout, in original visual order.
+_moma_emit_multi_select() {
+  local selected_state="$1"
+  shift
+  local -a options=("$@")
+  local index
 
-  case "$event" in
-    up | k)
-      active_index=$(((active_index - 1 + option_count) % option_count))
-      ;;
-    down | j) active_index=$(((active_index + 1) % option_count)) ;;
-    space)
-      selected_state="$(
-        _moma_multi_toggle "$selected_state" "$active_index"
-      )"
-      ;;
-    enter) result=confirm ;;
-    cancel) result=cancel ;;
-  esac
+  for index in "${!options[@]}"; do
+    if _moma_multi_is_selected "$selected_state" "$index"; then
+      printf '%s\n' "${options[$index]}"
+    fi
+  done
+}
 
-  printf '%s\t%s\t%s\n' "$active_index" "$selected_state" "$result"
+# Validate that every already-declared group has at least one option. Callers
+# must confirm at least one group exists before calling this helper.
+_moma_validate_groups() {
+  local context="$1"
+  shift
+  local -a group_counts=("$@")
+  local count
+
+  for count in "${group_counts[@]}"; do
+    if ((count == 0)); then
+      printf '%s: every group requires at least one --option\n' \
+        "$context" >&2
+      return 2
+    fi
+  done
+}
+
+# module: src/components/single-select.sh
+# Single-selection component with radio-style indicators.
+# Render a single-selection menu from normalized arguments.
+_moma_render_single_select() {
+  local title="$1"
+  local selected_index="$2"
+  local color="$3"
+  local no_color="$4"
+  local redraw="$5"
+  shift 5
+  local -a options=("$@")
+
+  if $redraw; then
+    _moma_term_move_up "$((${#options[@]} + 3))"
+  fi
+
+  _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
+
+  local index glyph active
+  for index in "${!options[@]}"; do
+    glyph="○"
+    active=false
+    if ((index == selected_index)); then
+      glyph="◉"
+      active=true
+    fi
+    _moma_select_render_row \
+      "$active" "$glyph" "${options[$index]}" "$color" "$no_color" "$redraw"
+  done
+
+  _moma_select_render_footer \
+    "↑/↓ move · Enter select · q cancel" "$redraw"
+}
+
+# Parse single-selection options and return the chosen value on stdout.
+moma-single-select() {
+  local title="Select an option"
+  local color="$MOMA_COLOR_PRIMARY"
+  local initial=1
+  local choose=""
+  local no_color=false
+  local -a options=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select "$1"
+          return 2
+        fi
+        title="$2"
+        shift 2
+        ;;
+      --title=*)
+        title="${1#*=}"
+        shift
+        ;;
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select "$1"
+          return 2
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --initial)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select "$1"
+          return 2
+        fi
+        initial="$2"
+        shift 2
+        ;;
+      --initial=*)
+        initial="${1#*=}"
+        shift
+        ;;
+      --choose)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select "$1"
+          return 2
+        fi
+        choose="$2"
+        shift 2
+        ;;
+      --choose=*)
+        choose="${1#*=}"
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-single-select "option"... [--title <text>] [--initial <number>] [--choose <number>] [--color <color>] [--no-color]
+
+Use the up and down arrow keys to move, Enter to select, and q or Escape to cancel.
+Option numbers are one-based. --choose selects immediately for scripts and tests.
+EOF
+        return 0
+        ;;
+      --)
+        shift
+        options+=("$@")
+        break
+        ;;
+      -*)
+        _moma_unknown_option moma-single-select "$1"
+        return 2
+        ;;
+      *)
+        options+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ ${#options[@]} -eq 0 ]]; then
+    printf 'moma-single-select: provide at least one option\n' >&2
+    return 2
+  fi
+  if ! _moma_is_index_in_range "$initial" "${#options[@]}"; then
+    printf 'moma-single-select: invalid initial option: %s\n' "$initial" >&2
+    return 2
+  fi
+  if [[ -n "$choose" ]] &&
+    ! _moma_is_index_in_range "$choose" "${#options[@]}"; then
+    printf 'moma-single-select: invalid chosen option: %s\n' "$choose" >&2
+    return 2
+  fi
+
+  local selected_index=$((initial - 1))
+  if [[ -n "$choose" ]]; then
+    selected_index=$((choose - 1))
+    _moma_render_single_select \
+      "$title" "$selected_index" "$color" "$no_color" \
+      false "${options[@]}"
+    printf '\n' >&2
+    printf '%s\n' "${options[$selected_index]}"
+    return 0
+  fi
+
+  if [[ ! -t 0 || ! -t 2 ]]; then
+    printf '%s%s\n' \
+      'moma-single-select: interactive input requires a terminal; ' \
+      'use --choose <number> for automation' >&2
+    return 2
+  fi
+
+  _moma_render_single_select \
+    "$title" "$selected_index" "$color" "$no_color" \
+    false "${options[@]}"
+
+  local event transition transition_status
+  while true; do
+    if ! _moma_term_read_key event; then
+      printf '\n' >&2
+      return 130
+    fi
+
+    transition="$(
+      _moma_select_transition "$selected_index" "${#options[@]}" "$event"
+    )"
+    selected_index="${transition%%$'\t'*}"
+    transition_status="${transition#*$'\t'}"
+    case "$transition_status" in
+      confirm)
+        printf '\n' >&2
+        printf '%s\n' "${options[$selected_index]}"
+        return 0
+        ;;
+      cancel)
+        printf '\n' >&2
+        return 130
+        ;;
+    esac
+
+    _moma_render_single_select \
+      "$title" "$selected_index" "$color" "$no_color" \
+      true "${options[@]}"
+  done
+}
+
+# Legacy compatibility alias kept for existing scripts and the `select` CLI
+# command. Behavior, arguments, and rendering fully match moma-single-select.
+moma-select() {
+  moma-single-select "$@"
+}
+
+# module: src/components/single-select-groups.sh
+# Single-selection component split across named, non-selectable groups.
+# Render a single-selection menu split across named groups from normalized
+# arguments. Group headings are display-only and never receive focus.
+_moma_render_single_select_groups() {
+  local title="$1"
+  local selected_index="$2"
+  local color="$3"
+  local no_color="$4"
+  local redraw="$5"
+  local num_groups="$6"
+  shift 6
+  local -a group_names=("${@:1:$num_groups}")
+  shift "$num_groups"
+  local -a group_counts=("${@:1:$num_groups}")
+  shift "$num_groups"
+  local -a options=("$@")
+
+  if $redraw; then
+    _moma_term_move_up "$((${#options[@]} + num_groups * 2 + 3))"
+  fi
+
+  _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
+
+  local group_index offset=0 row glyph active flat_index
+  for group_index in "${!group_names[@]}"; do
+    _moma_select_render_blank "$redraw"
+    _moma_select_render_group_heading "${group_names[$group_index]}" "$redraw"
+
+    for ((row = 0; row < group_counts[group_index]; row++)); do
+      flat_index=$((offset + row))
+      glyph="○"
+      active=false
+      if ((flat_index == selected_index)); then
+        glyph="◉"
+        active=true
+      fi
+      _moma_select_render_row \
+        "$active" "$glyph" "${options[$flat_index]}" \
+        "$color" "$no_color" "$redraw"
+    done
+    offset=$((offset + group_counts[group_index]))
+  done
+
+  _moma_select_render_footer \
+    "↑/↓ move · Enter select · q cancel" "$redraw"
+}
+
+# Parse grouped single-selection options and return the chosen value on
+# stdout. Option numbers are one-based, global, and exclude group headings.
+moma-single-select-groups() {
+  local title="Select an option"
+  local color="$MOMA_COLOR_PRIMARY"
+  local initial=1
+  local choose=""
+  local no_color=false
+  local -a group_names=()
+  local -a group_counts=()
+  local -a options=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        title="$2"
+        shift 2
+        ;;
+      --title=*)
+        title="${1#*=}"
+        shift
+        ;;
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --initial)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        initial="$2"
+        shift 2
+        ;;
+      --initial=*)
+        initial="${1#*=}"
+        shift
+        ;;
+      --choose)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        choose="$2"
+        shift 2
+        ;;
+      --choose=*)
+        choose="${1#*=}"
+        shift
+        ;;
+      --group)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        group_names+=("$2")
+        group_counts+=(0)
+        shift 2
+        ;;
+      --group=*)
+        group_names+=("${1#*=}")
+        group_counts+=(0)
+        shift
+        ;;
+      --option)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-single-select-groups "$1"
+          return 2
+        fi
+        if ((${#group_names[@]} == 0)); then
+          printf 'moma-single-select-groups: %s\n' \
+            '--option must follow a --group' >&2
+          return 2
+        fi
+        options+=("$2")
+        group_counts[${#group_counts[@]} - 1]=$(( \
+          group_counts[${#group_counts[@]} - 1] + 1))
+        shift 2
+        ;;
+      --option=*)
+        if ((${#group_names[@]} == 0)); then
+          printf 'moma-single-select-groups: %s\n' \
+            '--option must follow a --group' >&2
+          return 2
+        fi
+        options+=("${1#*=}")
+        group_counts[${#group_counts[@]} - 1]=$(( \
+          group_counts[${#group_counts[@]} - 1] + 1))
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-single-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--choose <number>] [--color <color>] [--no-color]
+
+Use the up and down arrow keys to move, Enter to select, and q or Escape to cancel.
+Group headings are display-only: they never receive focus and are never printed on stdout.
+Option numbers are one-based, count only options, and follow visual order across every group.
+--choose selects immediately for scripts and tests.
+EOF
+        return 0
+        ;;
+      -*)
+        _moma_unknown_option moma-single-select-groups "$1"
+        return 2
+        ;;
+      *)
+        printf 'moma-single-select-groups: unexpected argument: %s\n' "$1" >&2
+        return 2
+        ;;
+    esac
+  done
+
+  if ((${#group_names[@]} == 0)); then
+    printf 'moma-single-select-groups: provide at least one --group\n' >&2
+    return 2
+  fi
+  _moma_validate_groups moma-single-select-groups "${group_counts[@]}" ||
+    return 2
+
+  local total_options="${#options[@]}"
+  if ! _moma_is_index_in_range "$initial" "$total_options"; then
+    printf 'moma-single-select-groups: invalid initial option: %s\n' \
+      "$initial" >&2
+    return 2
+  fi
+  if [[ -n "$choose" ]] &&
+    ! _moma_is_index_in_range "$choose" "$total_options"; then
+    printf 'moma-single-select-groups: invalid chosen option: %s\n' \
+      "$choose" >&2
+    return 2
+  fi
+
+  local selected_index=$((initial - 1))
+  if [[ -n "$choose" ]]; then
+    selected_index=$((choose - 1))
+    _moma_render_single_select_groups \
+      "$title" "$selected_index" "$color" "$no_color" false \
+      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "${options[@]}"
+    printf '\n' >&2
+    printf '%s\n' "${options[$selected_index]}"
+    return 0
+  fi
+
+  if [[ ! -t 0 || ! -t 2 ]]; then
+    printf '%s%s\n' \
+      'moma-single-select-groups: interactive input requires a terminal; ' \
+      'use --choose <number> for automation' >&2
+    return 2
+  fi
+
+  _moma_render_single_select_groups \
+    "$title" "$selected_index" "$color" "$no_color" false \
+    "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+    "${options[@]}"
+
+  local event transition transition_status
+  while true; do
+    if ! _moma_term_read_key event; then
+      printf '\n' >&2
+      return 130
+    fi
+
+    transition="$(
+      _moma_select_transition "$selected_index" "$total_options" "$event"
+    )"
+    selected_index="${transition%%$'\t'*}"
+    transition_status="${transition#*$'\t'}"
+    case "$transition_status" in
+      confirm)
+        printf '\n' >&2
+        printf '%s\n' "${options[$selected_index]}"
+        return 0
+        ;;
+      cancel)
+        printf '\n' >&2
+        return 130
+        ;;
+    esac
+
+    _moma_render_single_select_groups \
+      "$title" "$selected_index" "$color" "$no_color" true \
+      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "${options[@]}"
+  done
+}
+
+# module: src/components/multi-select.sh
+# Multiple-selection component with checkbox-style indicators.
+# Render a multiple-selection menu from normalized arguments.
+_moma_render_multi_select() {
+  local title="$1"
+  local active_index="$2"
+  local selected_state="$3"
+  local color="$4"
+  local no_color="$5"
+  local redraw="$6"
+  shift 6
+  local -a options=("$@")
+
+  if $redraw; then
+    _moma_term_move_up "$((${#options[@]} + 3))"
+  fi
+
+  _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
+
+  local index glyph active
+  for index in "${!options[@]}"; do
+    glyph="□"
+    _moma_multi_is_selected "$selected_state" "$index" && glyph="▣"
+    active=false
+    ((index != active_index)) || active=true
+    _moma_select_render_row \
+      "$active" "$glyph" "${options[$index]}" "$color" "$no_color" "$redraw"
+  done
+
+  _moma_select_render_footer \
+    "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
 }
 
 # Parse multiple-selection options and return chosen values on stdout.
@@ -5346,7 +5843,7 @@ Usage: moma-multi-select "option"... [--title <text>] [--initial <number>] [--se
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
 Number lists are one-based and comma-separated. --choose selects immediately for scripts and tests.
-Each selected value is printed on its own line.
+Each selected value is printed on its own line, in original visual order.
 EOF
         return 0
         ;;
@@ -5454,6 +5951,303 @@ EOF
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
       "$no_color" true "${options[@]}"
+  done
+}
+
+# module: src/components/multi-select-groups.sh
+# Multiple-selection component split across named, non-selectable groups.
+# Render a multiple-selection menu split across named groups from normalized
+# arguments. Group headings are display-only and never receive focus.
+_moma_render_multi_select_groups() {
+  local title="$1"
+  local active_index="$2"
+  local selected_state="$3"
+  local color="$4"
+  local no_color="$5"
+  local redraw="$6"
+  local num_groups="$7"
+  shift 7
+  local -a group_names=("${@:1:$num_groups}")
+  shift "$num_groups"
+  local -a group_counts=("${@:1:$num_groups}")
+  shift "$num_groups"
+  local -a options=("$@")
+
+  if $redraw; then
+    _moma_term_move_up "$((${#options[@]} + num_groups * 2 + 3))"
+  fi
+
+  _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
+
+  local group_index offset=0 row glyph active flat_index
+  for group_index in "${!group_names[@]}"; do
+    _moma_select_render_blank "$redraw"
+    _moma_select_render_group_heading "${group_names[$group_index]}" "$redraw"
+
+    for ((row = 0; row < group_counts[group_index]; row++)); do
+      flat_index=$((offset + row))
+      glyph="□"
+      _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
+      active=false
+      ((flat_index != active_index)) || active=true
+      _moma_select_render_row \
+        "$active" "$glyph" "${options[$flat_index]}" \
+        "$color" "$no_color" "$redraw"
+    done
+    offset=$((offset + group_counts[group_index]))
+  done
+
+  _moma_select_render_footer \
+    "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
+}
+
+# Parse grouped multiple-selection options and return chosen values on
+# stdout, in original visual order. Option numbers are one-based, global,
+# and exclude group headings.
+moma-multi-select-groups() {
+  local title="Select options"
+  local color="$MOMA_COLOR_PRIMARY"
+  local initial=1
+  local selected_spec=""
+  local choose_spec=""
+  local choose_set=false
+  local required=false
+  local no_color=false
+  local -a group_names=()
+  local -a group_counts=()
+  local -a options=()
+  local selected_state=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        title="$2"
+        shift 2
+        ;;
+      --title=*)
+        title="${1#*=}"
+        shift
+        ;;
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --initial)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        initial="$2"
+        shift 2
+        ;;
+      --initial=*)
+        initial="${1#*=}"
+        shift
+        ;;
+      --selected)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        selected_spec="$2"
+        shift 2
+        ;;
+      --selected=*)
+        selected_spec="${1#*=}"
+        shift
+        ;;
+      --choose)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        choose_spec="$2"
+        choose_set=true
+        shift 2
+        ;;
+      --choose=*)
+        choose_spec="${1#*=}"
+        choose_set=true
+        shift
+        ;;
+      --required)
+        required=true
+        shift
+        ;;
+      --group)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        group_names+=("$2")
+        group_counts+=(0)
+        shift 2
+        ;;
+      --group=*)
+        group_names+=("${1#*=}")
+        group_counts+=(0)
+        shift
+        ;;
+      --option)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        if ((${#group_names[@]} == 0)); then
+          printf 'moma-multi-select-groups: %s\n' \
+            '--option must follow a --group' >&2
+          return 2
+        fi
+        options+=("$2")
+        group_counts[${#group_counts[@]} - 1]=$(( \
+          group_counts[${#group_counts[@]} - 1] + 1))
+        shift 2
+        ;;
+      --option=*)
+        if ((${#group_names[@]} == 0)); then
+          printf 'moma-multi-select-groups: %s\n' \
+            '--option must follow a --group' >&2
+          return 2
+        fi
+        options+=("${1#*=}")
+        group_counts[${#group_counts[@]} - 1]=$(( \
+          group_counts[${#group_counts[@]} - 1] + 1))
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--color <color>] [--no-color]
+
+Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
+Group headings are display-only: they never receive focus and are never printed on stdout.
+Number lists are one-based, comma-separated, count only options, and follow visual order across every group.
+--choose selects immediately for scripts and tests. Each selected value is printed on its own line, in original visual order.
+EOF
+        return 0
+        ;;
+      -*)
+        _moma_unknown_option moma-multi-select-groups "$1"
+        return 2
+        ;;
+      *)
+        printf 'moma-multi-select-groups: unexpected argument: %s\n' "$1" >&2
+        return 2
+        ;;
+    esac
+  done
+
+  if ((${#group_names[@]} == 0)); then
+    printf 'moma-multi-select-groups: provide at least one --group\n' >&2
+    return 2
+  fi
+  _moma_validate_groups moma-multi-select-groups "${group_counts[@]}" ||
+    return 2
+
+  local total_options="${#options[@]}"
+  if ! _moma_is_index_in_range "$initial" "$total_options"; then
+    printf 'moma-multi-select-groups: invalid initial option: %s\n' \
+      "$initial" >&2
+    return 2
+  fi
+
+  local selection_spec="$selected_spec"
+  $choose_set && selection_spec="$choose_spec"
+  if [[ -n "$selection_spec" ]]; then
+    local -a requested_indices=()
+    local requested_index normalized_index
+    IFS=',' read -r -a requested_indices <<<"$selection_spec"
+    for requested_index in "${requested_indices[@]}"; do
+      normalized_index="$(_moma_trim "$requested_index")"
+      if ! _moma_is_index_in_range "$normalized_index" "$total_options"; then
+        printf 'moma-multi-select-groups: invalid option number: %s\n' \
+          "$requested_index" >&2
+        return 2
+      fi
+      normalized_index=$((normalized_index - 1))
+      if ! _moma_multi_is_selected "$selected_state" "$normalized_index"; then
+        selected_state+="${selected_state:+,}$normalized_index"
+      fi
+    done
+  fi
+
+  local active_index=$((initial - 1))
+  if $choose_set; then
+    if $required && [[ -z "$selected_state" ]]; then
+      printf 'moma-multi-select-groups: select at least one option\n' >&2
+      return 2
+    fi
+    _moma_render_multi_select_groups \
+      "$title" "$active_index" "$selected_state" "$color" "$no_color" false \
+      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "${options[@]}"
+    printf '\n' >&2
+    _moma_emit_multi_select "$selected_state" "${options[@]}"
+    return 0
+  fi
+
+  if [[ ! -t 0 || ! -t 2 ]]; then
+    printf '%s%s\n' \
+      'moma-multi-select-groups: interactive input requires a terminal; ' \
+      'use --choose <numbers> for automation' >&2
+    return 2
+  fi
+
+  _moma_render_multi_select_groups \
+    "$title" "$active_index" "$selected_state" "$color" "$no_color" false \
+    "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+    "${options[@]}"
+
+  local event transition remainder transition_status
+  while true; do
+    if ! _moma_term_read_key event; then
+      printf '\n' >&2
+      return 130
+    fi
+
+    transition="$(
+      _moma_multi_select_transition \
+        "$active_index" "$selected_state" "$total_options" "$event"
+    )"
+    active_index="${transition%%$'\t'*}"
+    remainder="${transition#*$'\t'}"
+    selected_state="${remainder%%$'\t'*}"
+    transition_status="${remainder#*$'\t'}"
+    case "$transition_status" in
+      confirm)
+        if $required && [[ -z "$selected_state" ]]; then
+          printf '\a' >&2
+          continue
+        fi
+        printf '\n' >&2
+        _moma_emit_multi_select "$selected_state" "${options[@]}"
+        return 0
+        ;;
+      cancel)
+        printf '\n' >&2
+        return 130
+        ;;
+    esac
+
+    _moma_render_multi_select_groups \
+      "$title" "$active_index" "$selected_state" "$color" "$no_color" true \
+      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "${options[@]}"
   done
 }
 
@@ -6294,9 +7088,21 @@ _moma_preview_render_inputs() {
 # Render the single-selection examples.
 _moma_preview_render_select() {
   {
-    moma-select \
+    moma-single-select \
       "Development" "Staging" "Production" \
       --title "Environment" --choose 2 >/dev/null
+  } 2>&1
+}
+
+# Render the grouped single-selection examples.
+_moma_preview_render_single_select_groups() {
+  {
+    moma-single-select-groups \
+      --title "Features" \
+      --group "Docker" --option "Up" --option "Down" --option "Stop" \
+      --group "npm" --option "install" --option "run dev" \
+      --option "run deploy" \
+      --choose 4 >/dev/null
   } 2>&1
 }
 
@@ -6306,6 +7112,19 @@ _moma_preview_render_multi_select() {
     moma-multi-select \
       "Docker" "CI" "Tests" \
       --title "Features" --choose 1,3 >/dev/null
+  } 2>&1
+}
+
+# Render the grouped multiple-selection examples.
+_moma_preview_render_multi_select_groups() {
+  {
+    moma-multi-select-groups \
+      --title "Features" \
+      --group "North America" \
+      --option "United States" --option "Canada" --option "Mexico" \
+      --group "South America" \
+      --option "Colombia" --option "Argentina" --option "Peru" \
+      --choose 1,3 >/dev/null
   } 2>&1
 }
 
@@ -6450,14 +7269,24 @@ _moma_preview() {
     'moma-input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
   _moma_preview_component \
-    "moma-select" "Arrow-key selection with one active dot marker." \
+    "moma-select" "Arrow-key selection with radio-style indicators." \
     'moma-select "Development" "Staging" "Production" --title "Environment"' \
     _moma_preview_render_select
+  _moma_preview_component \
+    "moma-single-select-groups" \
+    "Radio-style selection organized under named group headings." \
+    'moma-single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
+    _moma_preview_render_single_select_groups
   _moma_preview_component \
     "moma-multi-select" \
     "Toggle multiple choices with empty and filled square markers." \
     'moma-multi-select "Docker" "CI" "Tests"' \
     _moma_preview_render_multi_select
+  _moma_preview_component \
+    "moma-multi-select-groups" \
+    "Toggle multiple choices organized under named group headings." \
+    'moma-multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
+    _moma_preview_render_multi_select_groups
   _moma_preview_component \
     "moma-rabbit" "Branded activity and completion feedback." \
     'moma-rabbit "Preparing workspace" --info' \
@@ -6500,7 +7329,7 @@ Commands:
 EOF
   local command _function description
   while IFS=$'\t' read -r command _function description; do
-    printf '  %-15s %s\n' "$command" "$description"
+    printf '  %-22s %s\n' "$command" "$description"
   done < <(_moma_command_registry)
   cat <<'EOF'
   themes          List configured color themes.
@@ -6623,7 +7452,10 @@ _moma_main() {
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;
     select) moma-select "$@" ;;
+    single-select) moma-single-select "$@" ;;
+    single-select-groups) moma-single-select-groups "$@" ;;
     multi-select) moma-multi-select "$@" ;;
+    multi-select-groups) moma-multi-select-groups "$@" ;;
     rabbit) moma-rabbit "$@" ;;
     confirm) moma-confirm "$@" ;;
     spinner) moma-spinner "$@" ;;

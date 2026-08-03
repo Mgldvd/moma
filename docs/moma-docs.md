@@ -334,30 +334,65 @@ password="$(moma-input --title "Password" --read --secret --required)"
 
 ![moma-input preview](../.img/moma-input.png)
 
-### `moma-select`
+### `moma-single-select`
 
-Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.
+Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls. Each row shows a radio indicator: `◉` for the focused selection and `○` for every other option.
 
 ```text
-moma-select "Development" "Staging" "Production" [--title text] [--initial number]
+moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]
 ```
 
 ```bash
 # Example 1
-environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"
+environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"
 
 # Example 2
-environment="$(moma-select "Development" "Staging" "Production" --choose 2)"
+environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"
 
 # Example 3
-region="$(moma-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
+region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
 ```
 
 ![moma-select preview](../.img/moma-select.png)
 
+### `moma-select`
+
+Documented compatibility alias for `moma-single-select`. It accepts the same arguments, renders identically, and remains available for existing scripts and the `select` CLI command.
+
+```bash
+environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"
+```
+
+### `moma-single-select-groups`
+
+Select one value organized under named, non-selectable group headings. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--initial` and `--choose` use one-based indexes that count only options, in visual order across every group.
+
+```text
+moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]
+```
+
+```bash
+# Example 1
+action="$(
+  moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy"
+)"
+
+# Example 2 (--choose 4 selects "install", the first option of the second group)
+action="$(
+  moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy" \
+    --choose 4
+)"
+```
+
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not.
 
 ```text
 moma-multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
@@ -375,6 +410,33 @@ features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
 ```
 
 ![moma-multi-select preview](../.img/moma-multi-select.png)
+
+### `moma-multi-select-groups`
+
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group.
+
+```text
+moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
+```
+
+```bash
+# Example 1
+countries="$(
+  moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru"
+)"
+
+# Example 2
+countries="$(
+  moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru" \
+    --choose 1,3 --required
+)"
+```
 
 ### `moma-confirm`
 

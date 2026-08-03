@@ -36,7 +36,7 @@ plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"update"* ]]
 
 version_output="$("$MOMA_DIST" version)"
-[[ "$version_output" == "1.0.0" ]]
+[[ "$version_output" == "1.1.0" ]]
 
 binary_output="$(NO_COLOR=1 "$MOMA_DIST" msg "Ready" --success)"
 [[ "$binary_output" == *"Ready"* ]]
@@ -201,6 +201,16 @@ fixed_multi_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
   multi-select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
 [[ "$fixed_multi_select" == *"  └${shared_rule}"* ]]
 
+fixed_single_select_groups="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+  "$MOMA_DIST" single-select-groups --title "Short" \
+  --group G --option One --option Two --choose 1 2>&1 >/dev/null)"
+[[ "$fixed_single_select_groups" == *"  └${shared_rule}"* ]]
+
+fixed_multi_select_groups="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" \
+  "$MOMA_DIST" multi-select-groups --title "Short" \
+  --group G --option One --option Two --choose 1 2>&1 >/dev/null)"
+[[ "$fixed_multi_select_groups" == *"  └${shared_rule}"* ]]
+
 fixed_confirm="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
   confirm "Short" --answer yes 2>&1 >/dev/null)"
 [[ "$fixed_confirm" == *"  └${shared_rule}"* ]]
@@ -245,6 +255,20 @@ capped_multi_select="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
   --title "A multi selector title longer than the maximum" \
   --choose 1 2>&1 >/dev/null)"
 [[ "$capped_multi_select" == *"  └${capped_rule}"* ]]
+
+capped_single_select_groups="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+  single-select-groups \
+  --title "A grouped selector title longer than the maximum" \
+  --group G --option One --option Two \
+  --choose 1 2>&1 >/dev/null)"
+[[ "$capped_single_select_groups" == *"  └${capped_rule}"* ]]
+
+capped_multi_select_groups="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+  multi-select-groups \
+  --title "A grouped multi selector title longer than the maximum" \
+  --group G --option One --option Two \
+  --choose 1 2>&1 >/dev/null)"
+[[ "$capped_multi_select_groups" == *"  └${capped_rule}"* ]]
 
 capped_confirm="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
   confirm "A confirmation question longer than the maximum" \
@@ -321,7 +345,42 @@ select_visual="$(
     --title Environment --choose 2 2>&1 >/dev/null
   printf 'NEXT'
 )"
-[[ "$select_visual" == $'  ▪  Environment\n  └──────────────────────────────\n    Development\n  ▪ Staging\n    Production\n  ↑/↓ move · Enter select · q cancel\n\nNEXT' ]]
+[[ "$select_visual" == $'  ▪  Environment\n  └──────────────────────────────\n    ○ Development\n  › ◉ Staging\n    ○ Production\n  ↑/↓ move · Enter select · q cancel\n\nNEXT' ]]
+
+single_select_output="$(
+  NO_COLOR=1 "$MOMA_DIST" single-select \
+    Development Staging Production \
+    --title Environment --choose 2 2>/dev/null
+)"
+[[ "$single_select_output" == "$select_output" ]]
+
+single_select_visual="$(
+  NO_COLOR=1 "$MOMA_DIST" single-select \
+    Up Down Stop --title Features --choose 1 2>&1 >/dev/null
+)"
+[[ "$single_select_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › ◉ Up\n    ○ Down\n    ○ Stop\n  ↑/↓ move · Enter select · q cancel' ]]
+
+single_select_groups_output="$(
+  NO_COLOR=1 "$MOMA_DIST" single-select-groups \
+    --title Features \
+    --group Docker --option Up --option Down --option Stop \
+    --group npm --option install --option "run dev" --option "run deploy" \
+    --choose 4 2>/dev/null
+)"
+[[ "$single_select_groups_output" == "install" ]]
+
+single_select_groups_visual="$(
+  NO_COLOR=1 "$MOMA_DIST" single-select-groups \
+    --title Features \
+    --group Docker --option Up --option Down --option Stop \
+    --group npm --option install --option "run dev" --option "run deploy" \
+    --choose 1 2>&1 >/dev/null
+)"
+expected_single_groups=$'  ▪  Features\n  └──────────────────────────────\n\n'
+expected_single_groups+=$'    Docker\n  › ◉ Up\n    ○ Down\n    ○ Stop\n\n'
+expected_single_groups+=$'    npm\n    ○ install\n    ○ run dev\n    ○ run deploy\n'
+expected_single_groups+='  ↑/↓ move · Enter select · q cancel'
+[[ "$single_select_groups_visual" == "$expected_single_groups" ]]
 
 multi_select_output="$(
   NO_COLOR=1 "$MOMA_DIST" multi-select \
@@ -334,7 +393,93 @@ multi_select_visual="$(
     Docker CI Tests --title Features --choose 1,3 2>&1 >/dev/null
   printf 'NEXT'
 )"
-[[ "$multi_select_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › ▣ Docker\n    ▢ CI\n    ▣ Tests\n  ↑/↓ move · Space toggle · Enter confirm · q cancel\n\nNEXT' ]]
+[[ "$multi_select_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › ▣ Docker\n    □ CI\n    ▣ Tests\n  ↑/↓ move · Space toggle · Enter confirm · q cancel\n\nNEXT' ]]
+
+multi_select_groups_output="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --title Features \
+    --group "North America" --option "United States" --option Canada \
+    --option Mexico \
+    --group "South America" --option Colombia --option Argentina \
+    --option Peru \
+    --choose 1,3 2>/dev/null
+)"
+[[ "$multi_select_groups_output" == $'United States\nMexico' ]]
+
+[[ "$single_select_groups_output" != *"Docker"* ]]
+[[ "$single_select_groups_output" != *"npm"* ]]
+[[ "$multi_select_groups_output" != *"North America"* ]]
+[[ "$multi_select_groups_output" != *"South America"* ]]
+
+multi_select_groups_dedup_output="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --title Features \
+    --group "North America" --option "United States" --option Canada \
+    --option Mexico \
+    --group "South America" --option Colombia --option Argentina \
+    --option Peru \
+    --choose 3,1,3 2>/dev/null
+)"
+[[ "$multi_select_groups_dedup_output" == "$multi_select_groups_output" ]]
+
+multi_select_groups_visual="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --title Features \
+    --group "North America" --option "United States" --option Canada \
+    --option Mexico \
+    --group "South America" --option Colombia --option Argentina \
+    --option Peru \
+    --choose 1,3 2>&1 >/dev/null
+)"
+expected_multi_groups=$'  ▪  Features\n  └──────────────────────────────\n\n'
+expected_multi_groups+=$'    North America\n  › ▣ United States\n    □ Canada\n    ▣ Mexico\n\n'
+expected_multi_groups+=$'    South America\n    □ Colombia\n    □ Argentina\n    □ Peru\n'
+expected_multi_groups+='  ↑/↓ move · Space toggle · Enter confirm · q cancel'
+[[ "$multi_select_groups_visual" == "$expected_multi_groups" ]]
+
+set +e
+NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
+  --option Up >/dev/null 2>&1
+option_before_group_status=$?
+set -e
+[[ "$option_before_group_status" -eq 2 ]]
+
+set +e
+NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
+  --group Docker >/dev/null 2>&1
+empty_group_status=$?
+set -e
+[[ "$empty_group_status" -eq 2 ]]
+
+set +e
+NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features >/dev/null 2>&1
+no_group_status=$?
+set -e
+[[ "$no_group_status" -eq 2 ]]
+
+set +e
+NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
+  --group Docker --option >/dev/null 2>&1
+missing_option_value_status=$?
+set -e
+[[ "$missing_option_value_status" -eq 2 ]]
+
+set +e
+NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
+  --group Docker --option Up --choose 9 >/dev/null 2>&1
+out_of_range_status=$?
+set -e
+[[ "$out_of_range_status" -eq 2 ]]
+
+set +e
+multi_groups_required_output="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups --title Features \
+    --group Docker --option Up --required --choose "" 2>&1 >/dev/null
+)"
+multi_groups_required_status=$?
+set -e
+[[ "$multi_groups_required_status" -eq 2 ]]
+[[ "$multi_groups_required_output" == *"select at least one option"* ]]
 
 prompt_visual="$(
   NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
@@ -386,10 +531,47 @@ if [[ "${MOMA_TEST_TTY:-1}" == "1" ]] && command -v script &>/dev/null; then
         "NO_COLOR=1 '$MOMA_DIST' select Development Staging Production \
 --title Environment" /dev/null
   )"
-  [[ "$select_tty_output" == *'▪ Staging'* ]]
+  [[ "$select_tty_output" == *'◉ Staging'* ]]
   [[ "$select_tty_output" == *'▪  Environment'* ]]
   [[ "$select_tty_output" == *'└──────────────────────────────'* ]]
   [[ "$select_tty_output" == *$'Staging\r'* ]]
+
+  set +e
+  select_cancel_output="$(
+    printf 'q' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' select Development Staging Production \
+--title Environment" /dev/null
+  )"
+  select_cancel_status=$?
+  set -e
+  [[ "$select_cancel_status" -eq 130 ]]
+  [[ "$select_cancel_output" == *'Enter select'* ]]
+
+  single_select_groups_tty_output="$(
+    printf $'\033[B\033[B\033[B\n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' single-select-groups --title Features \
+--group Docker --option Up --option Down --option Stop \
+--group npm --option install --option 'run dev' --option 'run deploy'" \
+        /dev/null
+  )"
+  [[ "$single_select_groups_tty_output" == *'    Docker'* ]]
+  [[ "$single_select_groups_tty_output" == *'    npm'* ]]
+  [[ "$single_select_groups_tty_output" == *'◉ install'* ]]
+  [[ "$single_select_groups_tty_output" == *$'install\r'* ]]
+
+  multi_select_groups_tty_output="$(
+    printf $' \033[B\033[B \033[B\n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' multi-select-groups --title Features \
+--group Docker --option Up --option Down --option Stop \
+--group npm --option install --option 'run dev' --option 'run deploy' \
+--required" /dev/null
+  )"
+  [[ "$multi_select_groups_tty_output" == *'▣ Up'* ]]
+  [[ "$multi_select_groups_tty_output" == *'▣ Stop'* ]]
+  [[ "$multi_select_groups_tty_output" == *$'Up\r\nStop\r'* ]]
 
   multi_select_tty_output="$(
     printf $' \033[B \n' |
@@ -497,10 +679,13 @@ moma-list
 moma-msg
 moma-msg-simple
 moma-multi-select
+moma-multi-select-groups
 moma-prompt
 moma-rabbit
 moma-section
 moma-select
+moma-single-select
+moma-single-select-groups
 moma-spinner
 moma-title
 moma-title-sub
@@ -596,7 +781,9 @@ terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 [[ "$terminal_preview" == *"moma-header"* ]]
 [[ "$terminal_preview" == *"moma-title"* ]]
 [[ "$terminal_preview" == *"moma-select"* ]]
+[[ "$terminal_preview" == *"moma-single-select-groups"* ]]
 [[ "$terminal_preview" == *"moma-multi-select"* ]]
+[[ "$terminal_preview" == *"moma-multi-select-groups"* ]]
 [[ "$terminal_preview" == *"moma-label"* ]]
 [[ "$terminal_preview" == *"┌─ TEXT HERE"* ]]
 [[ "$terminal_preview" == *"▪  Continue with deployment? [yes]"* ]]
@@ -626,10 +813,16 @@ markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
 [[ "$markdown_preview" == *"# Moma Documentation"* ]]
 confirm_heading="### \`moma-confirm\`"
 select_heading="### \`moma-select\`"
+single_select_heading="### \`moma-single-select\`"
+single_select_groups_heading="### \`moma-single-select-groups\`"
 multi_select_heading="### \`moma-multi-select\`"
+multi_select_groups_heading="### \`moma-multi-select-groups\`"
 [[ "$markdown_preview" == *"$confirm_heading"* ]]
 [[ "$markdown_preview" == *"$select_heading"* ]]
+[[ "$markdown_preview" == *"$single_select_heading"* ]]
+[[ "$markdown_preview" == *"$single_select_groups_heading"* ]]
 [[ "$markdown_preview" == *"$multi_select_heading"* ]]
+[[ "$markdown_preview" == *"$multi_select_groups_heading"* ]]
 [[ "$markdown_preview" == *"./dist/moma preview web"* ]]
 
 glow_preview="$(
@@ -653,6 +846,6 @@ if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
 fi
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
-[[ "$api_count" == "19" ]]
+[[ "$api_count" == "22" ]]
 
 printf 'Smoke tests passed.\n'

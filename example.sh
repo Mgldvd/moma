@@ -54,6 +54,17 @@ if [[ ! -t 0 || ! -t 2 ]]; then
 fi
 environment="$(moma-select "${select_args[@]}")"
 
+moma-prompt "Choose the deployment command" --color pink
+single_group_args=(
+  --title "Deployment command"
+  --group "Docker" --option "Up" --option "Down" --option "Stop"
+  --group "npm" --option "install" --option "run dev" --option "run deploy"
+)
+if [[ ! -t 0 || ! -t 2 ]]; then
+  single_group_args+=(--choose 1)
+fi
+deploy_command="$(moma-single-select-groups "${single_group_args[@]}")"
+
 multi_select_args=(
   "Docker"
   "CI"
@@ -72,6 +83,33 @@ for feature in "${features[@]}"; do
   [[ -z "$features_summary" ]] || features_summary+=", "
   features_summary+="$feature"
 done
+
+moma-prompt "Choose the deployment regions" --color pink
+multi_group_args=(
+  --title "Deployment regions"
+  --group "North America" --option "United States" --option "Canada"
+  --option "Mexico"
+  --group "South America" --option "Colombia" --option "Argentina"
+  --option "Peru"
+  --required
+)
+if [[ ! -t 0 || ! -t 2 ]]; then
+  multi_group_args+=(--choose "1,4")
+fi
+selected_regions="$(moma-multi-select-groups "${multi_group_args[@]}")"
+mapfile -t regions <<<"$selected_regions"
+regions_summary=""
+for region in "${regions[@]}"; do
+  [[ -z "$regions_summary" ]] || regions_summary+=", "
+  regions_summary+="$region"
+done
+
+moma-prompt "Choose the log verbosity" --color pink
+log_level_args=("info" "debug" "warn" --title "Log level")
+if [[ ! -t 0 || ! -t 2 ]]; then
+  log_level_args+=(--choose 1)
+fi
+log_level="$(moma-single-select "${log_level_args[@]}")"
 
 moma-label "Ownership and credentials" --color yellow
 owner="$(
@@ -98,7 +136,10 @@ moma-section "Review" --warning
 moma-list \
   "Project: $project_name" \
   "Environment: $environment" \
+  "Command: $deploy_command" \
   "Features: $features_summary" \
+  "Regions: $regions_summary" \
+  "Log level: $log_level" \
   "Owner: $owner" \
   "Secret: $secret_mask"
 

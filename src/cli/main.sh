@@ -84,7 +84,10 @@ _moma_main() {
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;
     select) moma-select "$@" ;;
+    single-select) moma-single-select "$@" ;;
+    single-select-groups) moma-single-select-groups "$@" ;;
     multi-select) moma-multi-select "$@" ;;
+    multi-select-groups) moma-multi-select-groups "$@" ;;
     rabbit) moma-rabbit "$@" ;;
     confirm) moma-confirm "$@" ;;
     spinner) moma-spinner "$@" ;;

@@ -28,8 +28,11 @@ source dist/moma
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
-| `select` | Select one value with the arrow keys. |
+| `select` | Select one value with the arrow keys (alias for `single-select`). |
+| `single-select` | Select one value with the arrow keys. |
+| `single-select-groups` | Select one value from named groups with the arrow keys. |
 | `multi-select` | Select multiple values with the arrow keys and Space. |
+| `multi-select-groups` | Select multiple values from named groups with the arrow keys and Space. |
 | `rabbit` | Print the Moma rabbit component. |
 
 ## Helper commands
@@ -95,6 +98,20 @@ MOMA_THEME=night moma msg "Ready"
 Additional themes inherit omitted roles from `default`. Set `MOMA_CONFIG_FILE`
 to load a different configuration file.
 
+## Selection components
+
+`moma-select` is a documented compatibility alias for `moma-single-select`;
+both accept the same arguments and render identically. `moma-multi-select`
+keeps its existing arguments and behavior.
+
+`moma-single-select-groups` and `moma-multi-select-groups` organize options
+under repeated `--group <name>` and `--option <value>` pairs. Group headings
+are display-only: they never receive focus, are never toggled, are never
+counted as options, and are never printed on stdout. `--initial`, `--choose`,
+and `--selected` use one-based indexes that count only options, in visual
+order across every group. Up and down navigation skips headings and wraps
+between the first and last option across all groups.
+
 ## Decoration width
 
 - `MOMA_WIDTH=<number>`: Give every horizontal decoration the same fixed inner width.
@@ -114,7 +131,16 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma title "Moma" "Installer"
 ./dist/moma label "TEXT HERE"
 ./dist/moma select "Development" "Staging" "Production" --choose 2
+./dist/moma single-select "Up" "Down" "Stop" --choose 1
+./dist/moma single-select-groups --title "Features" \
+  --group "Docker" --option "Up" --option "Down" --option "Stop" \
+  --group "npm" --option "install" --option "run dev" --option "run deploy" \
+  --choose 4
 ./dist/moma multi-select "Docker" "CI" "Tests" --choose 1,3
+./dist/moma multi-select-groups --title "Features" \
+  --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+  --group "South America" --option "Colombia" --option "Argentina" --option "Peru" \
+  --choose 1,3
 ./dist/moma confirm "Create this project?" --default yes
 ./dist/moma command-check bash curl
 ./dist/moma themes
@@ -131,7 +157,16 @@ moma-title "Moma" "Installer"
 moma-msg "Ready" --success
 moma-label "TEXT HERE"
 moma-select "Development" "Staging" "Production"
+moma-single-select "Up" "Down" "Stop"
+moma-single-select-groups \
+    --title "Features" \
+    --group "Docker" --option "Up" --option "Down" --option "Stop" \
+    --group "npm" --option "install" --option "run dev" --option "run deploy"
 moma-multi-select "Docker" "CI" "Tests"
+moma-multi-select-groups \
+    --title "Features" \
+    --group "North America" --option "United States" --option "Canada" --option "Mexico" \
+    --group "South America" --option "Colombia" --option "Argentina" --option "Peru"
 if moma-confirm "Create this project?"; then
     moma-msg "Project created" --success
 fi

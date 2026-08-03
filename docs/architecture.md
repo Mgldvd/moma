@@ -58,8 +58,9 @@ Executable usage:
 
 - stdout carries a component's primary output or consumable data.
 - stderr carries diagnostics and interactive controls.
-- `moma-input`, `moma-select`, and `moma-multi-select` emit captured values only
-  on stdout while their prompts and controls use stderr.
+- `moma-input`, `moma-select`, `moma-single-select`, `moma-single-select-groups`,
+  `moma-multi-select`, and `moma-multi-select-groups` emit captured values only
+  on stdout while their prompts, controls, and group headings use stderr.
 - `moma-confirm` communicates its result through its exit status and renders its
   controls on stderr.
 - `moma-spinner` renders animation on stderr. Its final semantic completion

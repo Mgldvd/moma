@@ -159,9 +159,21 @@ _moma_preview_render_inputs() {
 # Render the single-selection examples.
 _moma_preview_render_select() {
   {
-    moma-select \
+    moma-single-select \
       "Development" "Staging" "Production" \
       --title "Environment" --choose 2 >/dev/null
+  } 2>&1
+}
+
+# Render the grouped single-selection examples.
+_moma_preview_render_single_select_groups() {
+  {
+    moma-single-select-groups \
+      --title "Features" \
+      --group "Docker" --option "Up" --option "Down" --option "Stop" \
+      --group "npm" --option "install" --option "run dev" \
+      --option "run deploy" \
+      --choose 4 >/dev/null
   } 2>&1
 }
 
@@ -171,6 +183,19 @@ _moma_preview_render_multi_select() {
     moma-multi-select \
       "Docker" "CI" "Tests" \
       --title "Features" --choose 1,3 >/dev/null
+  } 2>&1
+}
+
+# Render the grouped multiple-selection examples.
+_moma_preview_render_multi_select_groups() {
+  {
+    moma-multi-select-groups \
+      --title "Features" \
+      --group "North America" \
+      --option "United States" --option "Canada" --option "Mexico" \
+      --group "South America" \
+      --option "Colombia" --option "Argentina" --option "Peru" \
+      --choose 1,3 >/dev/null
   } 2>&1
 }
 
@@ -315,14 +340,24 @@ _moma_preview() {
     'moma-input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
   _moma_preview_component \
-    "moma-select" "Arrow-key selection with one active dot marker." \
+    "moma-select" "Arrow-key selection with radio-style indicators." \
     'moma-select "Development" "Staging" "Production" --title "Environment"' \
     _moma_preview_render_select
+  _moma_preview_component \
+    "moma-single-select-groups" \
+    "Radio-style selection organized under named group headings." \
+    'moma-single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
+    _moma_preview_render_single_select_groups
   _moma_preview_component \
     "moma-multi-select" \
     "Toggle multiple choices with empty and filled square markers." \
     'moma-multi-select "Docker" "CI" "Tests"' \
     _moma_preview_render_multi_select
+  _moma_preview_component \
+    "moma-multi-select-groups" \
+    "Toggle multiple choices organized under named group headings." \
+    'moma-multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
+    _moma_preview_render_multi_select_groups
   _moma_preview_component \
     "moma-rabbit" "Branded activity and completion feedback." \
     'moma-rabbit "Preparing workspace" --info' \

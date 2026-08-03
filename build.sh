@@ -31,7 +31,11 @@ modules=(
   components/box-prompt.sh
   components/label.sh
   components/input.sh
-  components/select.sh
+  components/select-common.sh
+  components/single-select.sh
+  components/single-select-groups.sh
+  components/multi-select.sh
+  components/multi-select-groups.sh
   components/rabbit.sh
   components/interaction.sh
   components/command-check.sh
