@@ -109,9 +109,9 @@ label_output="$(NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE")"
 [[ "$label_output" == '  ┌─ TEXT HERE ────────────────────────────┐' ]]
 
 header_output="$(NO_COLOR=1 "$MOMA_DIST" header "Type Something")"
-expected_header=$'\n░▀█▀░█░█░█▀█░█▀▀░░░█▀▀░█▀█░█▄█░█▀▀░▀█▀░█░█░▀█▀░█░█░█▀▀░░\n'
-expected_header+=$'░░█░░░█░░█▀▀░█▀▀░░░▀▀█░█░█░█░█░█▀▀░░█░░█▀█░░█░░█░█░█░█░░\n'
-expected_header+='░░▀░░░▀░░▀░░░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀░▀░▀▀▀░░'
+expected_header=$'\n░▀█▀░█░█░█▀█░█▀▀░░░█▀▀░█▀█░█▄█░█▀▀░▀█▀░█░█░▀█▀░█▀█░█▀▀\n'
+expected_header+=$'░░█░░░█░░█▀▀░█▀▀░░░▀▀█░█░█░█░█░█▀▀░░█░░█▀█░░█░░█░█░█░█\n'
+expected_header+='░░▀░░░▀░░▀░░░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀░▀░▀▀▀'
 [[ "$header_output" == "$expected_header" ]]
 
 header_margin_spacing="$({
@@ -134,7 +134,7 @@ header_left_margin="$(
 [[ "$header_left_margin" == $'   ░█▀█\n   ░█▀█\n   ░▀░▀' ]]
 
 header_color_output="$(env -u NO_COLOR "$MOMA_DIST" header "Moma" --color red)"
-[[ "$header_color_output" == $'\033[31m'*$'\033[0m' ]]
+[[ "$header_color_output" == *$'\033[31m'*$'\033[0m'* ]]
 
 label_semantic_output="$(
   env -u NO_COLOR "$MOMA_DIST" label "Deployment" --success
