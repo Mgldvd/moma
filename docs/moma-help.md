@@ -17,6 +17,7 @@ source dist/moma
 
 | Command | Description |
 | --- | --- |
+| `header` | Print a Pagga ASCII heading. |
 | `title` | Print a title and subtitle. |
 | `title-sub` | Print a secondary title. |
 | `section` | Print a section heading. |
@@ -38,6 +39,8 @@ source dist/moma
 | `confirm` | Select Yes or No with the arrow keys or `y` and `n`. |
 | `spinner` | Follow a process and print completion feedback. |
 | `command-check` | Check whether executables are available. |
+| `version` | Print the installed version. |
+| `update` | Download and install the latest version. |
 
 ## Documentation commands
 
@@ -107,6 +110,7 @@ width is 8 columns and box padding may require a larger value.
 
 ```bash
 ./dist/moma msg "Ready" --success
+./dist/moma header "Moma" --color cyan
 ./dist/moma title "Moma" "Installer"
 ./dist/moma label "TEXT HERE"
 ./dist/moma select "Development" "Staging" "Production" --choose 2
@@ -122,6 +126,7 @@ width is 8 columns and box padding may require a larger value.
 ```bash
 source dist/moma
 
+moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
 moma-title "Moma" "Installer"
 moma-msg "Ready" --success
 moma-label "TEXT HERE"
@@ -132,6 +137,18 @@ if moma-confirm "Create this project?"; then
 fi
 moma-box "Important notice" --info
 ```
+
+## Updates
+
+Run these commands from an executable installation.
+
+```bash
+moma version
+moma update
+```
+
+`moma update` requires `curl` and write permission for the installed file and
+its directory. It validates the download before replacing the executable.
 
 ## Semantic styles
 

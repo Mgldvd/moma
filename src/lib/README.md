@@ -16,6 +16,7 @@ Core helpers use the private `_moma_*` namespace. Theme inputs use
 
 | Source | Public functions |
 | --- | --- |
+| [`header.sh`](../components/header.sh) | `moma-header` |
 | [`title.sh`](../components/title.sh) | `moma-title`, `moma-title-sub` |
 | [`section-message.sh`](../components/section-message.sh) | `moma-section`, `moma-msg` |
 | [`simple-list.sh`](../components/simple-list.sh) | `moma-msg-simple`, `moma-list` |
@@ -26,6 +27,7 @@ Core helpers use the private `_moma_*` namespace. Theme inputs use
 | [`rabbit.sh`](../components/rabbit.sh) | `moma-rabbit` |
 | [`interaction.sh`](../components/interaction.sh) | `moma-confirm`, `moma-spinner` |
 | [`command-check.sh`](../components/command-check.sh) | `moma-command-check` |
+| [`version.sh`](../core/version.sh) | `moma-version`, `moma-update` |
 
 ## Interfaces
 

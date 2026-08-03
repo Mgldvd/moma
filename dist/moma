@@ -24,6 +24,7 @@ source dist/moma
 
 | Command | Description |
 | --- | --- |
+| `header` | Print a Pagga ASCII heading. |
 | `title` | Print a title and subtitle. |
 | `title-sub` | Print a secondary title. |
 | `section` | Print a section heading. |
@@ -45,6 +46,8 @@ source dist/moma
 | `confirm` | Select Yes or No with the arrow keys or `y` and `n`. |
 | `spinner` | Follow a process and print completion feedback. |
 | `command-check` | Check whether executables are available. |
+| `version` | Print the installed version. |
+| `update` | Download and install the latest version. |
 
 ## Documentation commands
 
@@ -114,6 +117,7 @@ width is 8 columns and box padding may require a larger value.
 
 ```bash
 ./dist/moma msg "Ready" --success
+./dist/moma header "Moma" --color cyan
 ./dist/moma title "Moma" "Installer"
 ./dist/moma label "TEXT HERE"
 ./dist/moma select "Development" "Staging" "Production" --choose 2
@@ -129,6 +133,7 @@ width is 8 columns and box padding may require a larger value.
 ```bash
 source dist/moma
 
+moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
 moma-title "Moma" "Installer"
 moma-msg "Ready" --success
 moma-label "TEXT HERE"
@@ -139,6 +144,18 @@ if moma-confirm "Create this project?"; then
 fi
 moma-box "Important notice" --info
 ```
+
+## Updates
+
+Run these commands from an executable installation.
+
+```bash
+moma version
+moma update
+```
+
+`moma update` requires `curl` and write permission for the installed file and
+its directory. It validates the download before replacing the executable.
 
 ## Semantic styles
 
@@ -236,6 +253,27 @@ to load another path. Explicit `MOMA_COLOR_*` variables take priority over
 configured values.
 
 ## Visual components
+
+### `moma-header`
+
+Three-line Pagga ASCII heading for a prominent script or workflow identity.
+Letters are rendered in uppercase; unsupported characters use `?`.
+`--margin-top` adds empty lines before the heading and defaults to `1`.
+`--margin-bottom` adds empty lines after it and defaults to `2`; use `0` for
+either value to disable that spacing.
+`--margin-left` indents every heading row and defaults to `0`.
+
+```text
+moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]
+```
+
+```bash
+# Example 1
+moma-header "Moma"
+
+# Example 2
+moma-header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
+```
 
 ### `moma-title`
 
@@ -606,6 +644,17 @@ fi
 ./dist/moma help
 ```
 
+## Version and updates
+
+```bash
+./dist/moma version
+./dist/moma update
+```
+
+`update` downloads the latest executable, validates it, and atomically replaces
+the current executable. It requires `curl` and write permission for the installed
+file and its directory.
+
 ## Remote preview
 
 ```bash
@@ -670,7 +719,7 @@ _moma_preview_web_index () {
     <section class="docs-index" aria-labelledby="index-title">
       <div class="docs-index__heading">
         <h2 class="docs-index__title" id="index-title">API index</h2>
-        <p class="docs-index__total"><span class="docs-index__count">16</span> library functions</p>
+          <p class="docs-index__total"><span class="docs-index__count">19</span> library functions</p>
       </div>
       <label class="search">
         <span class="search__icon" aria-hidden="true">⌕</span>
@@ -679,9 +728,9 @@ _moma_preview_web_index () {
         <kbd class="search__shortcut">/</kbd>
       </label>
       <div class="index-links">
-        <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">14</strong></a>
-        <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">2</strong></a>
-        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">20</strong></a>
+        <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">15</strong></a>
+        <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">4</strong></a>
+        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">22</strong></a>
       </div>
     </section>
 
@@ -692,6 +741,21 @@ _moma_preview_web_index () {
           <h2 class="api-section__title">Visual components</h2>
           <p class="api-section__intro">Each function names a visible terminal component; semantic meaning is selected with flags.</p>
         </header>
+
+        <article class="api-entry" data-api="moma-header pagga ascii art heading title color">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">ASCII heading component</p><h3 class="api-entry__name">moma-header</h3></div>
+            <span class="status status--stable">Stable</span>
+          </header>
+          <p class="api-entry__description">Three-line Pagga text for a prominent script or workflow identity, with one blank line above, two below, and no left indent by default.</p>
+          <code class="signature">moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]</code>
+          <div class="wireframe" aria-label="moma-header output preview">
+            <p class="wireframe__label">Output</p>
+            <pre class="terminal-art terminal-art--cyan">░█▄█░█▀█░█▄█░█▀█
+░█░█░█░█░█░█░█▀█
+░▀░▀░▀▀▀░▀░▀░▀░▀</pre>
+          </div>
+        </article>
 
         <article class="api-entry" data-api="moma-title primary script header title subtitle accent">
           <header class="api-entry__header">
@@ -966,6 +1030,34 @@ o_(")(")</span></pre>
             </div>
           </div>
         </article>
+
+        <article class="api-entry" data-api="moma-version installed release version">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-version</h3></div>
+            <span class="status status--stable">Stable</span>
+          </header>
+          <p class="api-entry__description">Print the version embedded in the installed Moma executable.</p>
+          <code class="signature">moma-version</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <pre class="terminal-art">1.0.0</pre>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-update upgrade download release curl">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-update</h3></div>
+            <span class="status status--safe">Atomic</span>
+          </header>
+          <p class="api-entry__description">Download, validate, and atomically replace an executable Moma installation.</p>
+          <code class="signature">moma-update</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="dot-lines">
+              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>moma: updated successfully</span></p>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section class="api-section" id="cli">
@@ -977,7 +1069,7 @@ o_(")(")</span></pre>
 
         <div class="function-list">
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | multi-select | rabbit</code></article>
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, and executable checks.</p><code class="function-row__signature">moma confirm | spinner | command-check</code></article>
+          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
         </div>
@@ -989,7 +1081,7 @@ o_(")(")</span></pre>
 
   <footer class="footer">
     <p class="footer__brand">moma<span class="footer__cursor">_</span></p>
-    <p class="footer__copy">16 library functions · one standalone Bash file</p>
+    <p class="footer__copy">19 library functions · one standalone Bash file</p>
     <a class="footer__link" href="#top">Back to top ↑</a>
   </footer>
 </body>
@@ -1864,6 +1956,11 @@ const groups = [...document.querySelectorAll('[data-group]')];
 const emptyState = document.querySelector('.empty-state');
 const screenshotName = new URLSearchParams(window.location.search).get('component');
 const componentExamples = {
+  'moma-header': [
+    'moma-header "Moma"',
+    'moma-header "Deploy 2026" --color cyan --margin-bottom 1',
+    'moma-header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 2 --no-color',
+  ],
   'moma-title': [
     'moma-title "Moma" "Terminal UI library"',
     'moma-title "Deploy" "Production" --primary cyan',
@@ -1943,6 +2040,14 @@ const componentExamples = {
     'moma-command-check bash curl git',
     'moma-command-check docker --quiet',
     'if ! moma-command-check git; then\n  exit 1\nfi',
+  ],
+  'moma-version': [
+    'moma version',
+    'moma-version',
+  ],
+  'moma-update': [
+    'moma update',
+    'moma-update',
   ],
 };
 
@@ -2050,6 +2155,9 @@ MOMA_PREVIEW_JS_EOF
 
 # module: src/core/version.sh
 # Bash runtime compatibility.
+MOMA_VERSION="1.0.0"
+MOMA_UPDATE_URL="${MOMA_UPDATE_URL:-https://github.com/Mgldvd/moma/releases/latest/download/moma}"
+
 # Verify that the running Bash version meets a requested minimum.
 _moma_require_bash_version() {
   local required_major="${1:-4}"
@@ -2072,6 +2180,58 @@ if ! _moma_require_bash_version 4 0; then
   # shellcheck disable=SC2317
   return 3 2>/dev/null || exit 3
 fi
+
+# Print the installed Moma version.
+moma-version() {
+  printf '%s\n' "$MOMA_VERSION"
+}
+
+# Download and atomically replace an executable Moma installation.
+moma-update() {
+  local target_path target_dir temporary_path
+
+  if [[ $# -gt 0 ]]; then
+    _moma_usage_error moma-update "unexpected argument: $1"
+    return 2
+  fi
+  if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+    _moma_runtime_error moma-update "update requires an executable installation"
+    return 3
+  fi
+  if ! command -v curl &>/dev/null; then
+    _moma_runtime_error moma-update "curl is required to download updates"
+    return 3
+  fi
+
+  target_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+  target_dir="$(dirname "$target_path")"
+  if [[ ! -w "$target_path" || ! -w "$target_dir" ]]; then
+    _moma_runtime_error moma-update "installation is not writable: $target_path"
+    return 3
+  fi
+
+  if ! temporary_path="$(mktemp "$target_dir/.moma.update.XXXXXX")"; then
+    _moma_runtime_error moma-update "could not create update file"
+    return 3
+  fi
+  if ! curl -fsSL "$MOMA_UPDATE_URL" -o "$temporary_path"; then
+    rm -f "$temporary_path"
+    _moma_runtime_error moma-update "could not download update"
+    return 3
+  fi
+  if ! bash -n "$temporary_path"; then
+    rm -f "$temporary_path"
+    _moma_runtime_error moma-update "downloaded update is not valid Bash"
+    return 3
+  fi
+  if ! chmod 0755 "$temporary_path" || ! mv "$temporary_path" "$target_path"; then
+    rm -f "$temporary_path"
+    _moma_runtime_error moma-update "could not replace installation"
+    return 3
+  fi
+
+  printf 'moma: updated successfully\n'
+}
 
 # module: src/core/errors.sh
 # Error channels and public status-code conventions.
@@ -2851,6 +3011,7 @@ _moma_term_read_key() {
 # Print the canonical public command registry.
 _moma_command_registry() {
   cat <<'EOF'
+header	moma-header	Print a Pagga ASCII heading.
 title	moma-title	Print a title and subtitle.
 title-sub	moma-title-sub	Print a secondary title.
 section	moma-section	Print a section heading.
@@ -2867,6 +3028,8 @@ rabbit	moma-rabbit	Print the Moma rabbit.
 confirm	moma-confirm	Select Yes or No.
 spinner	moma-spinner	Follow a process.
 command-check	moma-command-check	Check executable dependencies.
+version	moma-version	Print the installed version.
+update	moma-update	Download and install the latest version.
 EOF
 }
 
@@ -2881,6 +3044,195 @@ _moma_command_function() {
     fi
   done < <(_moma_command_registry)
   return 1
+}
+
+# module: src/components/header.sh
+# Pagga ASCII header component.
+_moma_pagga_glyph() {
+  case "$1" in
+    0) printf '%s\n' '░▄▀▄' '░█/█' '░░▀░' ;;
+    1) printf '%s\n' '░▀█░' '░░█░' '░▀▀▀' ;;
+    2) printf '%s\n' '░▀▀▄' '░▄▀░' '░▀▀▀' ;;
+    3) printf '%s\n' '░▀▀█' '░░▀▄' '░▀▀░' ;;
+    4) printf '%s\n' '░█░█' '░░▀█' '░░░▀' ;;
+    5) printf '%s\n' '░█▀▀' '░▀▀▄' '░▀▀░' ;;
+    6) printf '%s\n' '░▄▀▀' '░█▀▄' '░░▀░' ;;
+    7) printf '%s\n' '░▀▀█' '░▄▀░' '░▀░░' ;;
+    8) printf '%s\n' '░▄▀▄' '░▄▀▄' '░░▀░' ;;
+    9) printf '%s\n' '░▄▀▄' '░░▀█' '░▀▀░' ;;
+    A) printf '%s\n' '░█▀█' '░█▀█' '░▀░▀' ;;
+    B) printf '%s\n' '░█▀▄' '░█▀▄' '░▀▀░' ;;
+    C) printf '%s\n' '░█▀▀' '░█░░' '░▀▀▀' ;;
+    D) printf '%s\n' '░█▀▄' '░█░█' '░▀▀░' ;;
+    E) printf '%s\n' '░█▀▀' '░█▀▀' '░▀▀▀' ;;
+    F) printf '%s\n' '░█▀▀' '░█▀▀' '░▀░░' ;;
+    G) printf '%s\n' '░█▀▀' '░█░█' '░▀▀▀' ;;
+    H) printf '%s\n' '░█░█' '░█▀█' '░▀░▀' ;;
+    I) printf '%s\n' '░▀█▀' '░░█░' '░▀▀▀' ;;
+    J) printf '%s\n' '░▀▀█' '░░░█' '░▀▀░' ;;
+    K) printf '%s\n' '░█░█' '░█▀▄' '░▀░▀' ;;
+    L) printf '%s\n' '░█░░' '░█░░' '░▀▀▀' ;;
+    M) printf '%s\n' '░█▄█' '░█░█' '░▀░▀' ;;
+    N) printf '%s\n' '░█▀█' '░█░█' '░▀░▀' ;;
+    O) printf '%s\n' '░█▀█' '░█░█' '░▀▀▀' ;;
+    P) printf '%s\n' '░█▀█' '░█▀▀' '░▀░░' ;;
+    Q) printf '%s\n' '░▄▀▄' '░█\█' '░░▀\' ;;
+    R) printf '%s\n' '░█▀▄' '░█▀▄' '░▀░▀' ;;
+    S) printf '%s\n' '░█▀▀' '░▀▀█' '░▀▀▀' ;;
+    T) printf '%s\n' '░▀█▀' '░░█░' '░░▀░' ;;
+    U) printf '%s\n' '░█░█' '░█░█' '░▀▀▀' ;;
+    V) printf '%s\n' '░█░█' '░▀▄▀' '░░▀░' ;;
+    W) printf '%s\n' '░█░█' '░█▄█' '░▀░▀' ;;
+    X) printf '%s\n' '░█░█' '░▄▀▄' '░▀░▀' ;;
+    Y) printf '%s\n' '░█░█' '░░█░' '░░▀░' ;;
+    Z) printf '%s\n' '░▀▀█' '░▄▀░' '░▀▀▀' ;;
+    ' ') printf '%s\n' '░░' '░░' '░░' ;;
+    *) printf '%s\n' '░?░' '░?░' '░?░' ;;
+  esac
+}
+
+# Render a Pagga ASCII header from normalized arguments.
+_moma_render_header() {
+  local text="$1"
+  local color="${2:-$MOMA_COLOR_PRIMARY}"
+  local no_color="${3:-false}"
+  local margin_top="${4:-1}"
+  local margin_bottom="${5:-2}"
+  local margin_left="${6:-0}"
+  local index character resolved_color reset left_padding
+  local -a glyph=()
+  local row_one=""
+  local row_two=""
+  local row_three=""
+
+  text="${text^^}"
+  for ((index = 0; index < ${#text}; index++)); do
+    character="${text:index:1}"
+    mapfile -t glyph < <(_moma_pagga_glyph "$character")
+    row_one+="${glyph[0]}"
+    row_two+="${glyph[1]}"
+    row_three+="${glyph[2]}"
+  done
+
+  resolved_color="$(_moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color")"
+  reset="$(_moma_reset_color "$no_color")"
+  left_padding="$(printf '%*s' "$margin_left" '')"
+  for ((index = 0; index < margin_top; index++)); do
+    printf '\n'
+  done
+  printf '%s%b%s%b\n' "$left_padding" "$resolved_color" "$row_one" "$reset"
+  printf '%s%b%s%b\n' "$left_padding" "$resolved_color" "$row_two" "$reset"
+  printf '%s%b%s%b\n' "$left_padding" "$resolved_color" "$row_three" "$reset"
+  for ((index = 0; index < margin_bottom; index++)); do
+    printf '\n'
+  done
+}
+
+# Parse header options and print a Pagga ASCII heading.
+moma-header() {
+  local text=""
+  local color="$MOMA_COLOR_PRIMARY"
+  local margin_top=1
+  local margin_bottom=2
+  local margin_left=0
+  local no_color=false
+  local -a positional=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-header "$1"
+          return 1
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --margin-top)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-header "$1"
+          return 1
+        fi
+        margin_top="$2"
+        shift 2
+        ;;
+      --margin-top=*)
+        margin_top="${1#*=}"
+        shift
+        ;;
+      --margin-bottom | --margin | -m)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-header "$1"
+          return 1
+        fi
+        margin_bottom="$2"
+        shift 2
+        ;;
+      --margin-bottom=* | --margin=*)
+        margin_bottom="${1#*=}"
+        shift
+        ;;
+      --margin-left)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-header "$1"
+          return 1
+        fi
+        margin_left="$2"
+        shift 2
+        ;;
+      --margin-left=*)
+        margin_left="${1#*=}"
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-header "<text>" [--color <color>] [--margin-top <number>] [--margin-bottom <number>] [--margin-left <number>] [--no-color]
+EOF
+        return 0
+        ;;
+      --)
+        shift
+        positional+=("$@")
+        break
+        ;;
+      -*)
+        _moma_unknown_option moma-header "$1"
+        return 1
+        ;;
+      *)
+        positional+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  text="${positional[*]}"
+  if ! _moma_is_uint "$margin_top"; then
+    _moma_usage_error moma-header "invalid top margin: $margin_top"
+    return 2
+  fi
+  if ! _moma_is_uint "$margin_bottom"; then
+    _moma_usage_error moma-header "invalid bottom margin: $margin_bottom"
+    return 2
+  fi
+  if ! _moma_is_uint "$margin_left"; then
+    _moma_usage_error moma-header "invalid left margin: $margin_left"
+    return 2
+  fi
+  margin_top="$((10#$margin_top))"
+  margin_bottom="$((10#$margin_bottom))"
+  margin_left="$((10#$margin_left))"
+  _moma_render_header \
+    "$text" "$color" "$no_color" \
+    "$margin_top" "$margin_bottom" "$margin_left"
 }
 
 # module: src/components/title.sh
@@ -5878,6 +6230,11 @@ _moma_preview_render_title() {
   moma-title "Moma" "Terminal UI library"
 }
 
+# Render Pagga ASCII header examples.
+_moma_preview_render_header() {
+  moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0
+}
+
 # Render the secondary-title examples.
 _moma_preview_render_title_sub() {
   moma-title-sub "Deployment" "Production environment"
@@ -6040,6 +6397,10 @@ _moma_preview() {
   _moma_preview_section \
     "01" "Structure" \
     "Large-format headings for scripts and workflow stages."
+  _moma_preview_component \
+    "moma-header" "Pagga ASCII heading for a prominent script identity." \
+    'moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
+    _moma_preview_render_header
   _moma_preview_component \
     "moma-title" "Primary script header." \
     'moma-title "Moma" "Terminal UI library"' \
@@ -6250,6 +6611,7 @@ _moma_main() {
   # Keep dispatch explicit. The registry validates metadata; no input is
   # evaluated or expanded into a command name.
   case "$command" in
+    header) moma-header "$@" ;;
     title) moma-title "$@" ;;
     title-sub) moma-title-sub "$@" ;;
     section) moma-section "$@" ;;
@@ -6266,6 +6628,8 @@ _moma_main() {
     confirm) moma-confirm "$@" ;;
     spinner) moma-spinner "$@" ;;
     command-check) moma-command-check "$@" ;;
+    version) moma-version "$@" ;;
+    update) moma-update "$@" ;;
     *)
       _moma_runtime_error \
         moma \

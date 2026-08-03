@@ -32,6 +32,11 @@ plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"confirm"* ]]
 [[ "$plain_help" == *"spinner"* ]]
 [[ "$plain_help" == *"command-check"* ]]
+[[ "$plain_help" == *"version"* ]]
+[[ "$plain_help" == *"update"* ]]
+
+version_output="$("$MOMA_DIST" version)"
+[[ "$version_output" == "1.0.0" ]]
 
 binary_output="$(NO_COLOR=1 "$MOMA_DIST" msg "Ready" --success)"
 [[ "$binary_output" == *"Ready"* ]]
@@ -102,6 +107,34 @@ list_output="$(
 
 label_output="$(NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE")"
 [[ "$label_output" == '  ┌─ TEXT HERE ────────────────────────────┐' ]]
+
+header_output="$(NO_COLOR=1 "$MOMA_DIST" header "Type Something")"
+expected_header=$'\n░▀█▀░█░█░█▀█░█▀▀░░░█▀▀░█▀█░█▄█░█▀▀░▀█▀░█░█░▀█▀░█░█░█▀▀░░\n'
+expected_header+=$'░░█░░░█░░█▀▀░█▀▀░░░▀▀█░█░█░█░█░█▀▀░░█░░█▀█░░█░░█░█░█░█░░\n'
+expected_header+='░░▀░░░▀░░▀░░░▀▀▀░░░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀░▀░▀▀▀░░'
+[[ "$header_output" == "$expected_header" ]]
+
+header_margin_spacing="$({
+  printf 'PREVIOUS\n'
+  NO_COLOR=1 "$MOMA_DIST" header "A"
+  printf 'NEXT'
+})"
+[[ "$header_margin_spacing" == $'PREVIOUS\n\n░█▀█\n░█▀█\n░▀░▀\n\n\nNEXT' ]]
+
+header_no_margin_spacing="$({
+  NO_COLOR=1 "$MOMA_DIST" header "A" --margin-top 0 --margin-bottom 0
+  printf 'NEXT'
+})"
+[[ "$header_no_margin_spacing" == $'░█▀█\n░█▀█\n░▀░▀\nNEXT' ]]
+
+header_left_margin="$(
+  NO_COLOR=1 "$MOMA_DIST" header "A" \
+    --margin-top 0 --margin-bottom 0 --margin-left 3
+)"
+[[ "$header_left_margin" == $'   ░█▀█\n   ░█▀█\n   ░▀░▀' ]]
+
+header_color_output="$(env -u NO_COLOR "$MOMA_DIST" header "Moma" --color red)"
+[[ "$header_color_output" == $'\033[31m'*$'\033[0m' ]]
 
 label_semantic_output="$(
   env -u NO_COLOR "$MOMA_DIST" label "Deployment" --success
@@ -457,6 +490,7 @@ mapfile -t expected_functions <<'EOF'
 moma-box
 moma-command-check
 moma-confirm
+moma-header
 moma-input
 moma-label
 moma-list
@@ -470,6 +504,8 @@ moma-select
 moma-spinner
 moma-title
 moma-title-sub
+moma-update
+moma-version
 EOF
 
 mapfile -t actual_functions < <(
@@ -516,6 +552,29 @@ standalone_output="$(NO_COLOR=1 bash -c '
 ' _ "$standalone_dir/moma")"
 [[ "$standalone_output" == *"Standalone"* ]]
 
+update_candidate="$standalone_dir/latest-moma"
+cat >"$update_candidate" <<'EOF'
+#!/bin/bash
+if [[ "${1:-}" == "version" ]]; then
+  printf '9.9.9\n'
+fi
+EOF
+chmod 0755 "$update_candidate"
+
+fake_update_bin="$standalone_dir/update-bin"
+mkdir -p "$fake_update_bin"
+cat >"$fake_update_bin/curl" <<'EOF'
+#!/bin/bash
+cp "$MOMA_UPDATE_FIXTURE" "${!#}"
+EOF
+chmod 0755 "$fake_update_bin/curl"
+
+PATH="$fake_update_bin:$PATH" \
+  MOMA_UPDATE_FIXTURE="$update_candidate" \
+  MOMA_UPDATE_URL="https://updates.example.test/moma" \
+  "$standalone_dir/moma" update
+[[ "$("$standalone_dir/moma" version)" == "9.9.9" ]]
+
 fake_bin="$standalone_dir/bin"
 mkdir -p "$fake_bin"
 cat >"$fake_bin/glow" <<'EOF'
@@ -534,6 +593,7 @@ glow_help="$(
 
 terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 [[ "$terminal_preview" == *"COMPONENT GALLERY"* ]]
+[[ "$terminal_preview" == *"moma-header"* ]]
 [[ "$terminal_preview" == *"moma-title"* ]]
 [[ "$terminal_preview" == *"moma-select"* ]]
 [[ "$terminal_preview" == *"moma-multi-select"* ]]
@@ -593,6 +653,6 @@ if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
 fi
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
-[[ "$api_count" == "16" ]]
+[[ "$api_count" == "19" ]]
 
 printf 'Smoke tests passed.\n'

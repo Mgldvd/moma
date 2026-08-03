@@ -51,7 +51,7 @@
     <section class="docs-index" aria-labelledby="index-title">
       <div class="docs-index__heading">
         <h2 class="docs-index__title" id="index-title">API index</h2>
-        <p class="docs-index__total"><span class="docs-index__count">16</span> library functions</p>
+          <p class="docs-index__total"><span class="docs-index__count">19</span> library functions</p>
       </div>
       <label class="search">
         <span class="search__icon" aria-hidden="true">⌕</span>
@@ -60,9 +60,9 @@
         <kbd class="search__shortcut">/</kbd>
       </label>
       <div class="index-links">
-        <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">14</strong></a>
-        <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">2</strong></a>
-        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">20</strong></a>
+        <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">15</strong></a>
+        <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">4</strong></a>
+        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">22</strong></a>
       </div>
     </section>
 
@@ -73,6 +73,21 @@
           <h2 class="api-section__title">Visual components</h2>
           <p class="api-section__intro">Each function names a visible terminal component; semantic meaning is selected with flags.</p>
         </header>
+
+        <article class="api-entry" data-api="moma-header pagga ascii art heading title color">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">ASCII heading component</p><h3 class="api-entry__name">moma-header</h3></div>
+            <span class="status status--stable">Stable</span>
+          </header>
+          <p class="api-entry__description">Three-line Pagga text for a prominent script or workflow identity, with one blank line above, two below, and no left indent by default.</p>
+          <code class="signature">moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]</code>
+          <div class="wireframe" aria-label="moma-header output preview">
+            <p class="wireframe__label">Output</p>
+            <pre class="terminal-art terminal-art--cyan">░█▄█░█▀█░█▄█░█▀█
+░█░█░█░█░█░█░█▀█
+░▀░▀░▀▀▀░▀░▀░▀░▀</pre>
+          </div>
+        </article>
 
         <article class="api-entry" data-api="moma-title primary script header title subtitle accent">
           <header class="api-entry__header">
@@ -347,6 +362,34 @@ o_(")(")</span></pre>
             </div>
           </div>
         </article>
+
+        <article class="api-entry" data-api="moma-version installed release version">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-version</h3></div>
+            <span class="status status--stable">Stable</span>
+          </header>
+          <p class="api-entry__description">Print the version embedded in the installed Moma executable.</p>
+          <code class="signature">moma-version</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <pre class="terminal-art">1.0.0</pre>
+          </div>
+        </article>
+
+        <article class="api-entry" data-api="moma-update upgrade download release curl">
+          <header class="api-entry__header">
+            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-update</h3></div>
+            <span class="status status--safe">Atomic</span>
+          </header>
+          <p class="api-entry__description">Download, validate, and atomically replace an executable Moma installation.</p>
+          <code class="signature">moma-update</code>
+          <div class="wireframe">
+            <p class="wireframe__label">Output</p>
+            <div class="dot-lines">
+              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>moma: updated successfully</span></p>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section class="api-section" id="cli">
@@ -358,7 +401,7 @@ o_(")(")</span></pre>
 
         <div class="function-list">
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | multi-select | rabbit</code></article>
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, and executable checks.</p><code class="function-row__signature">moma confirm | spinner | command-check</code></article>
+          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
           <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
         </div>
@@ -370,7 +413,7 @@ o_(")(")</span></pre>
 
   <footer class="footer">
     <p class="footer__brand">moma<span class="footer__cursor">_</span></p>
-    <p class="footer__copy">16 library functions · one standalone Bash file</p>
+    <p class="footer__copy">19 library functions · one standalone Bash file</p>
     <a class="footer__link" href="#top">Back to top ↑</a>
   </footer>
 </body>

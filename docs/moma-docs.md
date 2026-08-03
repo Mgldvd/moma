@@ -76,6 +76,27 @@ configured values.
 
 ## Visual components
 
+### `moma-header`
+
+Three-line Pagga ASCII heading for a prominent script or workflow identity.
+Letters are rendered in uppercase; unsupported characters use `?`.
+`--margin-top` adds empty lines before the heading and defaults to `1`.
+`--margin-bottom` adds empty lines after it and defaults to `2`; use `0` for
+either value to disable that spacing.
+`--margin-left` indents every heading row and defaults to `0`.
+
+```text
+moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]
+```
+
+```bash
+# Example 1
+moma-header "Moma"
+
+# Example 2
+moma-header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
+```
+
 ### `moma-title`
 
 Primary identity block for the beginning of a script or major workflow.
@@ -444,6 +465,17 @@ fi
 ./dist/moma preview web
 ./dist/moma help
 ```
+
+## Version and updates
+
+```bash
+./dist/moma version
+./dist/moma update
+```
+
+`update` downloads the latest executable, validates it, and atomically replaces
+the current executable. It requires `curl` and write permission for the installed
+file and its directory.
 
 ## Remote preview
 
