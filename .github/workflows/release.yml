@@ -29,7 +29,7 @@ jobs:
         run: ./build.sh
 
       - name: Run smoke suite
-        run: bash -x ./tests/smoke.sh
+        run: MOMA_TEST_TTY=0 ./tests/smoke.sh
 
       - name: Verify release version
         run: |
