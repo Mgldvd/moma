@@ -363,7 +363,7 @@ secret_output="$(
 )"
 [[ "$secret_output" == "secret-value" ]]
 
-if command -v script &>/dev/null; then
+if [[ "${MOMA_TEST_TTY:-1}" == "1" ]] && command -v script &>/dev/null; then
   state_check="bash -c 'before=\"\$(stty -g)\"; "
   state_check+="source \"$MOMA_DIST\"; "
   state_check+="after=\"\$(stty -g)\"; "
