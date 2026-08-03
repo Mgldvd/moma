@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish, such as v1.0.0
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,9 +17,13 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Build standalone artifact
         run: ./build.sh
@@ -24,11 +34,17 @@ jobs:
       - name: Verify release version
         run: |
           version="$(./dist/moma version)"
-          [[ "v${version}" == "${GITHUB_REF_NAME}" ]]
+          [[ "v${version}" == "${RELEASE_TAG}" ]]
+
+      - name: Prepare release binary
+        run: |
+          install -Dm0755 dist/moma release/moma
+          test -x release/moma
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           generate_release_notes: true
-          files: dist/moma
+          files: release/moma
           fail_on_unmatched_files: true
