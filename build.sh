@@ -24,6 +24,7 @@ modules=(
   core/semantic.sh
   core/terminal.sh
   core/registry.sh
+  components/header.sh
   components/title.sh
   components/section-message.sh
   components/simple-list.sh

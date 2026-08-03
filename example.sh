@@ -15,10 +15,13 @@ fi
 # shellcheck disable=SC1090
 source "$MOMA"
 
+# moma-version reports the installed version; moma-update refreshes an executable installation.
+
 # Keep every horizontal decoration aligned. Set MOMA_MAX_WIDTH instead when
 # decorations should grow with their content up to a common limit.
 MOMA_WIDTH="${MOMA_WIDTH:-48}"
 
+moma-header "Project setup" --color cyan
 moma-title "Project setup" "Interactive form example"
 moma-title-sub "Component showcase" "All public Moma components"
 moma-box "Complete the form to create a project configuration." --info

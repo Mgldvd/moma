@@ -95,6 +95,11 @@ _moma_preview_render_title() {
   moma-title "Moma" "Terminal UI library"
 }
 
+# Render Pagga ASCII header examples.
+_moma_preview_render_header() {
+  moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0
+}
+
 # Render the secondary-title examples.
 _moma_preview_render_title_sub() {
   moma-title-sub "Deployment" "Production environment"
@@ -257,6 +262,10 @@ _moma_preview() {
   _moma_preview_section \
     "01" "Structure" \
     "Large-format headings for scripts and workflow stages."
+  _moma_preview_component \
+    "moma-header" "Pagga ASCII heading for a prominent script identity." \
+    'moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
+    _moma_preview_render_header
   _moma_preview_component \
     "moma-title" "Primary script header." \
     'moma-title "Moma" "Terminal UI library"' \

@@ -7,6 +7,11 @@ const groups = [...document.querySelectorAll('[data-group]')];
 const emptyState = document.querySelector('.empty-state');
 const screenshotName = new URLSearchParams(window.location.search).get('component');
 const componentExamples = {
+  'moma-header': [
+    'moma-header "Moma"',
+    'moma-header "Deploy 2026" --color cyan --margin-bottom 1',
+    'moma-header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 2 --no-color',
+  ],
   'moma-title': [
     'moma-title "Moma" "Terminal UI library"',
     'moma-title "Deploy" "Production" --primary cyan',
@@ -86,6 +91,14 @@ const componentExamples = {
     'moma-command-check bash curl git',
     'moma-command-check docker --quiet',
     'if ! moma-command-check git; then\n  exit 1\nfi',
+  ],
+  'moma-version': [
+    'moma version',
+    'moma-version',
+  ],
+  'moma-update': [
+    'moma update',
+    'moma-update',
   ],
 };
 

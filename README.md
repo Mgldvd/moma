@@ -50,6 +50,23 @@ moma --help
 Add the `PATH` export to the appropriate shell profile to keep it after the
 current session.
 
+### Check version and update
+
+1. Check the installed version.
+
+```bash
+moma version
+```
+
+2. Download the latest executable.
+
+```bash
+moma update
+```
+
+`moma update` requires `curl` and write permission for the installed file and
+its directory.
+
 ## Usage
 
 ### Load as a library

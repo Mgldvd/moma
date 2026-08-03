@@ -72,6 +72,7 @@ _moma_main() {
   # Keep dispatch explicit. The registry validates metadata; no input is
   # evaluated or expanded into a command name.
   case "$command" in
+    header) moma-header "$@" ;;
     title) moma-title "$@" ;;
     title-sub) moma-title-sub "$@" ;;
     section) moma-section "$@" ;;
@@ -88,6 +89,8 @@ _moma_main() {
     confirm) moma-confirm "$@" ;;
     spinner) moma-spinner "$@" ;;
     command-check) moma-command-check "$@" ;;
+    version) moma-version "$@" ;;
+    update) moma-update "$@" ;;
     *)
       _moma_runtime_error \
         moma \
