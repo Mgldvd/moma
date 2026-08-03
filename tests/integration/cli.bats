@@ -29,6 +29,60 @@ setup_file() {
   [[ "$(<"$stderr_file")" == *"Enter select"* ]]
 }
 
+@test "select remains a compatibility alias for single-select" {
+  alias_stdout="$BATS_TEST_TMPDIR/alias-stdout"
+  canonical_stdout="$BATS_TEST_TMPDIR/canonical-stdout"
+
+  NO_COLOR=1 "$MOMA_DIST" select Up Down Stop --choose 2 \
+    >"$alias_stdout" 2>/dev/null
+  NO_COLOR=1 "$MOMA_DIST" single-select Up Down Stop --choose 2 \
+    >"$canonical_stdout" 2>/dev/null
+
+  [[ "$(<"$alias_stdout")" == "$(<"$canonical_stdout")" ]]
+}
+
+@test "single-select-groups keeps controls on stderr and the value on stdout" {
+  stdout_file="$BATS_TEST_TMPDIR/stdout"
+  stderr_file="$BATS_TEST_TMPDIR/stderr"
+
+  NO_COLOR=1 "$MOMA_DIST" single-select-groups \
+    --title Features \
+    --group Docker --option Up --option Down --option Stop \
+    --group npm --option install --option "run dev" --option "run deploy" \
+    --choose 4 \
+    >"$stdout_file" 2>"$stderr_file"
+
+  [[ "$(<"$stdout_file")" == "install" ]]
+  [[ "$(<"$stderr_file")" == *"Enter select"* ]]
+}
+
+@test "multi-select-groups returns values in visual order and dedups indexes" {
+  stdout_file="$BATS_TEST_TMPDIR/stdout"
+
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --title Features \
+    --group "North America" --option "United States" --option Canada \
+    --option Mexico \
+    --group "South America" --option Colombia --option Argentina \
+    --option Peru \
+    --choose 3,1,3 \
+    >"$stdout_file" 2>/dev/null
+
+  [[ "$(<"$stdout_file")" == $'United States\nMexico' ]]
+}
+
+@test "grouped selection arguments are validated with component-prefixed errors" {
+  run env NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
+    --option Up
+  [[ "$status" -eq 2 ]]
+  [[ "$output" == *"moma-single-select-groups:"* ]]
+
+  run env NO_COLOR=1 "$MOMA_DIST" multi-select-groups --title Features \
+    --group Docker
+  [[ "$status" -eq 2 ]]
+  [[ "$output" == *"moma-multi-select-groups: every group requires at least one --option"* ]]
+}
+
 @test "unknown CLI commands retain status 1" {
   run "$MOMA_DIST" does-not-exist
   [[ "$status" -eq 1 ]]
