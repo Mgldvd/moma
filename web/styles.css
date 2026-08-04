@@ -392,10 +392,6 @@ html {
   position: static;
 }
 
-.quick-start__command + .quick-start__command {
-  border-top: 1px solid var(--line);
-}
-
 .quick-start__command {
   display: block;
   overflow-x: hidden;
