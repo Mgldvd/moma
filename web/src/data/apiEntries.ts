@@ -182,6 +182,30 @@ export const API_ENTRIES: ApiEntryData[] = [
     },
   },
   {
+    id: 'moma-block',
+    kind: 'Content block component',
+    name: 'moma-block',
+    descriptionHtml: 'Titled, colored content block for grouping related information, such as a résumé section or a categorized reference list. Rows come from repeated <code>--item</code> (a bold term next to a muted description, aligned as a column) and <code>--text</code> (a plain line), interleaved in the order given.',
+    signature: 'moma block --title "<text>" [--item "term" "description"]... [--text "line"]... [--success|--error|--warning|--info] [--color color] [--no-color]',
+    searchText: 'moma-block block resume by blocks definition list term description column grouped section color item text',
+    examples: [
+      'moma block --title "Shells" --color blue --item "Bash" "GNU command shell." --item "Zsh" "Interactive shell with completion."',
+      'moma block --title "Summary" --text "All checks passed." --text "No manual follow-up required."',
+      'moma block --title "Review" --warning --item "Environment" "production" --text "Confirm the target before deploying."',
+    ],
+    wireframe: {
+      bodyHtml: `  <span class="tw-info">┌</span> <strong>Shells and Terminal Experience</strong>
+  <span class="tw-info">│</span> <strong>Bash</strong>  <span class="tw-muted">GNU command shell and scripting environment.</span>
+  <span class="tw-info">│</span> <strong>Zsh</strong>   <span class="tw-muted">Interactive shell with advanced completion.</span>
+  <span class="tw-info">└</span>
+
+  <span class="tw-accent">┌</span> <strong>Files, Search, and Data Processing</strong>
+  <span class="tw-accent">│</span> <strong>ripgrep</strong>  <span class="tw-muted">Fast recursive text-search utility.</span>
+  <span class="tw-accent">│</span> <strong>jq</strong>       <span class="tw-muted">Command-line JSON query and transformation processor.</span>
+  <span class="tw-accent">└</span>`,
+    },
+  },
+  {
     id: 'moma-prompt',
     kind: 'Prompt component',
     name: 'moma-prompt',

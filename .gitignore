@@ -56,3 +56,5 @@ node_modules/
 skills-lock.json
 .claude/
 .agents/
+
+screenshots/output/

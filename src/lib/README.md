@@ -29,6 +29,7 @@ Core helpers use the private `_moma_*` namespace. Theme inputs use
 | [`section-message.sh`](../components/section-message.sh) | `moma-section`, `moma-msg` |
 | [`simple-list.sh`](../components/simple-list.sh) | `moma-msg-simple`, `moma-list` |
 | [`box-prompt.sh`](../components/box-prompt.sh) | `moma-box`, `moma-prompt` |
+| [`block.sh`](../components/block.sh) | `moma-block` |
 | [`label.sh`](../components/label.sh) | `moma-label` |
 | [`input.sh`](../components/input.sh) | `moma-input` |
 | [`select-common.sh`](../components/select-common.sh) | Private selection rendering, transition, and group-validation helpers |
