@@ -375,7 +375,11 @@ html {
 }
 
 .quick-start__label {
-  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
   color: var(--pink);
@@ -384,14 +388,18 @@ html {
   text-transform: uppercase;
 }
 
-.quick-start .code-block + .code-block {
+.quick-start__label .copy-btn {
+  position: static;
+}
+
+.quick-start__command + .quick-start__command {
   border-top: 1px solid var(--line);
 }
 
 .quick-start__command {
   display: block;
   overflow-x: hidden;
-  padding: 0.55rem 3.75rem 0.55rem 1rem;
+  padding: 0.55rem 1rem;
   background: var(--pink-soft);
   color: var(--ink);
   font: calc(0.84rem + 2px)/1.5 var(--font-mono);
@@ -597,8 +605,8 @@ html {
   white-space: nowrap;
 }
 
-/* Wrapper JS adds around .signature and .quick-start__command so the copy
-   button has a stable, non-scrolling position to anchor to. */
+/* Wrapper JS adds around .signature so the copy button has a stable,
+   non-scrolling position to anchor to. */
 .code-block {
   position: relative;
 }

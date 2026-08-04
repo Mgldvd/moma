@@ -351,13 +351,11 @@ if (savedTheme === 'light' || savedTheme === 'dark') {
   root.dataset.theme = savedTheme;
 }
 
-// Copy a code block's plain text (never the highlighted HTML) to the
-// clipboard, falling back to the legacy execCommand path for browsers
-// without the async Clipboard API, and show a transient "Copied" state on
-// the triggering button either way.
-function copyCodeToClipboard(codeEl, button) {
-  const text = codeEl.textContent;
-
+// Copy plain text (never highlighted HTML) to the clipboard, falling back
+// to the legacy execCommand path for browsers without the async Clipboard
+// API, and show a transient "Copied" state on the triggering button
+// either way.
+function copyTextToClipboard(text, button) {
   function announceCopied() {
     window.clearTimeout(button.dataset.copyResetTimer);
     button.textContent = 'Copied';
@@ -396,27 +394,30 @@ function copyCodeToClipboard(codeEl, button) {
   }
 }
 
-// Add a "Copy" button to a code block's container, positioned by CSS
-// relative to that container (.code-block or .api-examples__example).
-function addCopyButton(container, codeEl) {
+// Add a "Copy" button to a container that copies a fixed block of plain
+// text. Positioning comes from CSS: absolute within a .code-block or
+// .api-examples__example, or in normal flow when the container is a flex
+// row such as .quick-start__label.
+function addCopyButton(container, text, label) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'copy-btn';
   button.textContent = 'Copy';
-  button.setAttribute('aria-label', 'Copy command to clipboard');
-  button.addEventListener('click', () => copyCodeToClipboard(codeEl, button));
+  button.setAttribute('aria-label', label || 'Copy command to clipboard');
+  button.addEventListener('click', () => copyTextToClipboard(text, button));
   container.append(button);
+  return button;
 }
 
-// Give a bare <code> block (.signature, .quick-start__command) a
-// positioned wrapper so its copy button has a stable anchor even when the
-// code itself scrolls horizontally.
+// Give a bare <code> block (.signature) a positioned wrapper so its copy
+// button has a stable anchor even when the code itself scrolls
+// horizontally.
 function wrapCodeWithCopyButton(codeEl) {
   const wrapper = document.createElement('div');
   wrapper.className = 'code-block';
   codeEl.replaceWith(wrapper);
   wrapper.append(codeEl);
-  addCopyButton(wrapper, codeEl);
+  addCopyButton(wrapper, codeEl.textContent);
 }
 
 entries.forEach((entry) => {
@@ -444,7 +445,7 @@ entries.forEach((entry) => {
     exampleCode.className = 'api-examples__code';
     exampleCode.innerHTML = highlightBashSyntax(example);
     exampleBlock.append(exampleCode);
-    addCopyButton(exampleBlock, exampleCode);
+    addCopyButton(exampleBlock, example);
     exampleList.append(exampleBlock);
   });
 
@@ -452,9 +453,22 @@ entries.forEach((entry) => {
   entry.querySelector('.wireframe')?.before(exampleSection);
 });
 
-document.querySelectorAll('.quick-start__command').forEach((command) => {
-  command.innerHTML = highlightBashSyntax(command.textContent);
-  wrapCodeWithCopyButton(command);
+// Each hero quick-start group (Preview, Load, Install) gets one copy
+// button that copies every command in that group, not one button per
+// command line.
+document.querySelectorAll('.quick-start').forEach((group) => {
+  const label = group.querySelector('.quick-start__label');
+  const commands = [...group.querySelectorAll('.quick-start__command')];
+  if (!label || commands.length === 0) {
+    return;
+  }
+
+  const groupName = label.textContent.trim();
+  const combinedText = commands.map((command) => command.textContent).join('\n');
+  commands.forEach((command) => {
+    command.innerHTML = highlightBashSyntax(command.textContent);
+  });
+  addCopyButton(label, combinedText, `Copy ${groupName} commands to clipboard`);
 });
 
 document.querySelectorAll('.signature').forEach((signature) => {
