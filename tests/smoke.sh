@@ -773,9 +773,11 @@ Lambda Mu Nu Xi Omicron --title Options" /dev/null
   [[ "$multi_select_overflow_tty_output" == *$'Nu\r'* ]]
 
   # The same fix, grouped: 3 groups / 12 options (row_count 16, full_lines
-  # 26) must scroll a compact, fixed-size window rather than the unwindowed
-  # 26-line layout, and a row deep inside a scrolled-out group (Peru, row 8)
-  # must stay individually selectable, not just reachable via Select All.
+  # 26) must scroll a bounded compact window rather than the unwindowed
+  # 26-line layout (its move_up count varies with how many group
+  # boundaries scroll into view, but always stays well under 26), and a row
+  # deep inside a scrolled-out group (Peru, row 8) must stay individually
+  # selectable, not just reachable via Select All.
   multi_select_groups_overflow_tty_output="$(
     printf $'\033[B\033[B\033[B\033[B\033[B\033[B \n' |
       script -qec \

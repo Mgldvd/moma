@@ -1,14 +1,38 @@
+# Count how many rows in a compact render's visible window are a "Select
+# All" or group "All" row. Each gets a leading blank separator line to keep
+# groups visually distinct, so this lets the caller size the window to the
+# terminal's real height including that extra cost, and report the actual
+# printed line count for the next redraw's cursor movement.
+_moma_multi_groups_window_blank_count() {
+  local window_start="$1"
+  local window_count="$2"
+  local num_groups="$3"
+  shift 3
+  local -a group_counts=("$@")
+  local row resolved kind count=0
+
+  for ((row = window_start; row < window_start + window_count; row++)); do
+    resolved="$(_moma_multi_groups_resolve_row "$row" "$num_groups" "${group_counts[@]}")"
+    kind="${resolved%% *}"
+    [[ "$kind" == selectall || "$kind" == group ]] && count=$((count + 1))
+  done
+  printf '%s' "$count"
+}
+
 # Multiple-selection component split across named groups, each with its own
 # "All" toggle and a top-level "Select All" toggle. Group headings remain
 # display-only, but the All rows are real, focusable, toggleable rows.
 # Render a multiple-selection menu split across named groups from normalized
-# arguments. Group headings and blank separators cost extra lines that vary
-# with where the list scrolls, so when windowed and the full layout would
-# not fit the terminal, this switches to a compact layout instead: headings
-# and blank separators are dropped, each group's All row is labeled with its
-# group name inline, and every navigable row costs exactly one line, which
-# lets a fixed-size scrolling window (the same math as moma-multi-select)
-# stay correct regardless of scroll position.
+# arguments, moving the cursor up by prev_lines (the previous call's real
+# printed line count, unused on the first, non-redraw call) and printing
+# this call's real printed line count on stdout for the caller to pass as
+# prev_lines next time. Group headings cost extra lines that vary with
+# where the list scrolls, so when windowed and the full layout would not
+# fit the terminal, this switches to a compact layout instead: headings are
+# dropped, each group's All row is labeled with its group name inline, and
+# every row keeps its blank separator, but the printed line count is no
+# longer constant across redraws, hence prev_lines instead of a fixed
+# formula.
 _moma_render_multi_select_groups() {
   local title="$1"
   local active_row="$2"
@@ -17,8 +41,9 @@ _moma_render_multi_select_groups() {
   local no_color="$5"
   local redraw="$6"
   local windowed="$7"
-  local num_groups="$8"
-  shift 8
+  local prev_lines="$8"
+  local num_groups="$9"
+  shift 9
   local -a group_names=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a group_counts=("${@:1:$num_groups}")
@@ -29,27 +54,55 @@ _moma_render_multi_select_groups() {
   local full_lines=$((total_options + num_groups * 3 + 5))
 
   local compact=false window_start=0 window_count="$row_count" \
-    indicator_lines=0
+    indicator_lines=0 blank_count=0
   if $windowed; then
-    local term_height max_visible
+    local term_height budget
     term_height="$(_moma_term_height)"
     if ((full_lines > term_height)); then
       compact=true
-      max_visible=$((term_height - 4))
-      ((max_visible < 1)) && max_visible=1
-      if ((max_visible < row_count)); then
+      budget=$((term_height - 4))
+      ((budget < 1)) && budget=1
+      if ((budget < row_count)); then
         indicator_lines=1
-        local window
+        local max_visible window
+        max_visible="$budget"
         window="$(_moma_select_window "$active_row" "$row_count" "$max_visible")"
         window_start="${window%%$'\t'*}"
         window_count="${window#*$'\t'}"
+        blank_count="$(
+          _moma_multi_groups_window_blank_count \
+            "$window_start" "$window_count" "$num_groups" "${group_counts[@]}"
+        )"
+        # A window this size might include enough group boundaries that its
+        # blank separators alone would overflow the budget; shrink it once,
+        # conservatively, by exactly that much extra cost. A smaller window
+        # can only contain the same or fewer boundaries, so this always
+        # converges to a window that fits.
+        if ((window_count + blank_count > budget)); then
+          max_visible=$((budget - blank_count))
+          ((max_visible < 1)) && max_visible=1
+          window="$(_moma_select_window "$active_row" "$row_count" "$max_visible")"
+          window_start="${window%%$'\t'*}"
+          window_count="${window#*$'\t'}"
+          blank_count="$(
+            _moma_multi_groups_window_blank_count \
+              "$window_start" "$window_count" "$num_groups" "${group_counts[@]}"
+          )"
+        fi
+      else
+        blank_count="$(
+          _moma_multi_groups_window_blank_count \
+            0 "$row_count" "$num_groups" "${group_counts[@]}"
+        )"
       fi
     fi
   fi
 
   if $compact; then
+    local printed_lines=$((2 + indicator_lines + window_count + blank_count + 1))
+
     if $redraw; then
-      _moma_term_move_up "$((window_count + indicator_lines + 3))"
+      _moma_term_move_up "$prev_lines"
     fi
 
     _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
@@ -67,6 +120,11 @@ _moma_render_multi_select_groups() {
       )"
       kind="${resolved%% *}"
       payload="${resolved#* }"
+
+      if [[ "$kind" == selectall || "$kind" == group ]]; then
+        _moma_select_render_blank "$redraw"
+      fi
+
       active=false
       ((row != active_row)) || active=true
       case "$kind" in
@@ -99,11 +157,12 @@ _moma_render_multi_select_groups() {
 
     _moma_select_render_footer \
       "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
+    printf '%s' "$printed_lines"
     return
   fi
 
   if $redraw; then
-    _moma_term_move_up "$full_lines"
+    _moma_term_move_up "$prev_lines"
   fi
 
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
@@ -148,6 +207,7 @@ _moma_render_multi_select_groups() {
 
   _moma_select_render_footer \
     "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
+  printf '%s' "$full_lines"
 }
 
 # Classify a flat option index range as fully selected, partially selected,
@@ -529,15 +589,18 @@ EOF
   local active_row=$((active_index + initial_group_index + 2))
   local row_count=$((1 + num_groups + total_options))
 
+  local rendered_lines=0
   if $choose_set; then
     if $required && [[ -z "$selected_state" ]]; then
       printf 'moma-multi-select-groups: select at least one option\n' >&2
       return 2
     fi
-    _moma_render_multi_select_groups \
-      "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-      false "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+    rendered_lines="$(
+      _moma_render_multi_select_groups \
+        "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
+        false 0 "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
+        "${options[@]}"
+    )"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -550,10 +613,12 @@ EOF
     return 2
   fi
 
-  _moma_render_multi_select_groups \
-    "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-    true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-    "${options[@]}"
+  rendered_lines="$(
+    _moma_render_multi_select_groups \
+      "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
+      true 0 "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
+      "${options[@]}"
+  )"
 
   local event transition remainder transition_status
   while true; do
@@ -587,9 +652,11 @@ EOF
         ;;
     esac
 
-    _moma_render_multi_select_groups \
-      "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
-      true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+    rendered_lines="$(
+      _moma_render_multi_select_groups \
+        "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
+        true "$rendered_lines" "$num_groups" "${group_names[@]}" \
+        "${group_counts[@]}" "${options[@]}"
+    )"
   done
 }

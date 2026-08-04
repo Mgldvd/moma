@@ -17,9 +17,10 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
   scrollback, which redrew the full list on every keypress and made the
   highlighted row appear to jump around or scroll away.
   `moma-multi-select-groups` switches to a compact layout while scrolled
-  (headings dropped, each group's All row labeled with its group name) so
-  every option, including ones scrolled well out of the initial view, stays
-  individually selectable. `--choose` is unaffected on both and always
+  (heading text dropped, each group's All row labeled with its group name,
+  blank separators between groups kept) so every option, including ones
+  scrolled well out of the initial view, stays individually selectable and
+  groups stay visually distinct. `--choose` is unaffected on both and always
   renders the complete list.
 
 ## [1.2.0] - 2026-08-03

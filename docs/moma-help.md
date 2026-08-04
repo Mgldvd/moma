@@ -145,11 +145,11 @@ option or is ever printed on stdout, so `--initial`, `--choose`, and
 
 When the full grouped layout is taller than the terminal, `moma-multi-select-groups`
 switches to a compact scrolling window like `moma-multi-select`'s: group
-headings and blank separators are dropped, each group's "All" row is
-labeled with its group name (for example "All · South America") so context
-survives without the heading line, and every row — including options deep
-inside a scrolled-out group — remains fully navigable and selectable.
-`--choose` keeps the full layout with headings, unwindowed and
+heading lines are dropped, each group's "All" row is labeled with its group
+name instead (for example "All · South America") and keeps its blank
+separator so groups stay visually distinct, and every row — including
+options deep inside a scrolled-out group — remains fully navigable and
+selectable. `--choose` keeps the full layout with headings, unwindowed and
 deterministic.
 
 ## Decoration width

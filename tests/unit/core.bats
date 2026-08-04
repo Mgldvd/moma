@@ -229,32 +229,51 @@ setup() {
 
 @test "multi-select-groups render switches to a compact window when the full layout would not fit" {
   # 3 groups (3/5/4 options: row_count 16, full_lines 26), active_row 8
-  # (Peru): max_visible is LINES(10) - 4 = 6, so the window scrolls to
-  # [3..8] (Canada..Peru), 3 rows hidden above and 7 hidden below. Compact
-  # mode drops group headings and blank separators so every row costs
-  # exactly one line.
+  # (Peru). Budget is LINES(10) - 4 = 6; the row-count-only window [3..8]
+  # would cost 6 rows + 1 blank (for the SouthAmerica boundary) = 7, over
+  # budget, so it shrinks by that 1 to [4..8] (Mexico..Peru): 5 rows + 1
+  # blank fits exactly in 6. This also proves the two-pass budget
+  # correction (blank separators can push a window over budget) works.
+  # The visual render goes to stderr; the render's own printed-line count
+  # (for the caller's next move_up) goes to stdout, so the two must be
+  # captured separately rather than through bats' combined `run`.
   # shellcheck disable=SC2016
-  run env LINES=10 NO_COLOR=1 bash -c '
+  visual="$(
+    env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select_groups \
-          "Options" 8 "" "" false false true 3 \
+          "Options" 8 "" "" false false true 0 3 \
           NorthAmerica SouthAmerica Europe \
           3 5 4 \
           UnitedStates Canada Mexico \
           Colombia Argentina Peru Chile Brazil \
           Spain France Germany Italy
-    ' _ "$MOMA_DIST"
-  [[ "$status" -eq 0 ]]
-  # 2 header lines + 1 scroll indicator + 6 rows + 1 footer.
-  [[ "$(printf '%s\n' "$output" | wc -l)" -eq 10 ]]
-  [[ "$output" == *"3 more above"* ]]
-  [[ "$output" == *"7 more below"* ]]
-  [[ "$output" == *"All · SouthAmerica"* ]]
-  [[ "$output" == *"› □ Peru"* ]]
-  [[ "$output" != *"Select All"* ]]
-  [[ "$output" != *"UnitedStates"* ]]
-  [[ "$output" != *"NorthAmerica"* ]]
-  [[ "$output" != *"Spain"* ]]
+    ' _ "$MOMA_DIST" 2>&1 1>/dev/null
+  )"
+  # shellcheck disable=SC2016
+  printed_lines="$(
+    env LINES=10 NO_COLOR=1 bash -c '
+        source "$1"
+        _moma_render_multi_select_groups \
+          "Options" 8 "" "" false false true 0 3 \
+          NorthAmerica SouthAmerica Europe \
+          3 5 4 \
+          UnitedStates Canada Mexico \
+          Colombia Argentina Peru Chile Brazil \
+          Spain France Germany Italy
+    ' _ "$MOMA_DIST" 2>/dev/null
+  )"
+  # 2 header lines + 1 scroll indicator + 5 rows + 1 blank separator + 1 footer.
+  [[ "$printed_lines" == "10" ]]
+  [[ "$(printf '%s\n' "$visual" | wc -l)" -eq 10 ]]
+  [[ "$visual" == *"4 more above"* ]]
+  [[ "$visual" == *"7 more below"* ]]
+  [[ "$visual" == *"All · SouthAmerica"* ]]
+  [[ "$visual" == *"› □ Peru"* ]]
+  [[ "$visual" != *"Select All"* ]]
+  [[ "$visual" != *"UnitedStates"* ]]
+  [[ "$visual" != *"NorthAmerica"* ]]
+  [[ "$visual" != *"Spain"* ]]
 }
 
 @test "multi-select-groups render stays unwindowed for non-interactive callers" {
@@ -264,7 +283,7 @@ setup() {
   run env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select_groups \
-          "Options" 0 "" "" false false false 3 \
+          "Options" 0 "" "" false false false 0 3 \
           NorthAmerica SouthAmerica Europe \
           3 5 4 \
           UnitedStates Canada Mexico \
