@@ -8,7 +8,7 @@ export const SITE = {
   url: 'https://mgldvd.github.io/moma/',
   repoUrl: 'https://github.com/Mgldvd/moma',
   version: '1.2.1',
-  functionCount: 22,
-  visualComponentCount: 18,
+  functionCount: 23,
+  visualComponentCount: 19,
   workflowHelperCount: 4,
 } as const;

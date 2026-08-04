@@ -6,6 +6,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Moma follows [Semantic Versioning](https://semver.org/). See
 [Versioning](README.md#versioning) in the README for the release policy.
 
+## [Unreleased]
+
+### Added
+
+- `moma-block` (`moma block`), a titled, colored content block for grouping
+  related information, such as a résumé section or a categorized reference
+  list. Rows come from repeated `--item` (a bold term next to a muted
+  description, aligned as a column) and `--text` (a plain line) flags,
+  interleaved in the order given; each block can use its own color and one
+  blank line follows it, so calling it repeatedly stacks blocks with
+  consistent spacing.
+
 ## [1.2.1] - 2026-08-04
 
 ### Fixed

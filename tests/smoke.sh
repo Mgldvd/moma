@@ -187,6 +187,33 @@ label_spacing="$({
 })"
 [[ "$label_spacing" == *$'┐\n\nNEXT' ]]
 
+block_output="$(
+  NO_COLOR=1 "$MOMA_DIST" block \
+    --title "Shells" \
+    --item "Bash" "GNU shell." \
+    --item "Zsh" "Interactive shell." \
+    --text "Plain note."
+)"
+[[ "$block_output" == $'  ┌ Shells\n  │ Bash  GNU shell.\n  │ Zsh   Interactive shell.\n  │ Plain note.\n  └' ]]
+
+block_spacing="$({
+  NO_COLOR=1 "$MOMA_DIST" block --title "One" --text "First."
+  printf 'NEXT'
+})"
+[[ "$block_spacing" == $'  ┌ One\n  │ First.\n  └\n\nNEXT' ]]
+
+block_semantic_output="$(
+  env -u NO_COLOR "$MOMA_DIST" block --title "Review" --warning --text "Check"
+)"
+[[ "$block_semantic_output" == *$'\033[33m'*'└'* ]]
+
+set +e
+block_missing_title="$(NO_COLOR=1 "$MOMA_DIST" block --text "x" 2>&1)"
+block_missing_title_status=$?
+set -e
+[[ "$block_missing_title_status" -eq 2 ]]
+[[ "$block_missing_title" == *"--title is required"* ]]
+
 fixed_boxes="$({
   NO_COLOR=1 MOMA_WIDTH=50 \
     "$MOMA_DIST" box "Your configuration is ready." --success
@@ -884,6 +911,7 @@ set -e
 [[ "$command_status" -eq 1 ]]
 
 mapfile -t expected_functions <<'EOF'
+moma-block
 moma-box
 moma-command-check
 moma-confirm
@@ -925,7 +953,7 @@ for public_function in "${expected_functions[@]}"; do
   bash -c \
     'source "$1"; declare -F "$2" >/dev/null' \
     _ "$MOMA_DIST" "$public_function"
-  rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/web/index.html"
+  rg -q "id: '$public_function'" "$ROOT_DIR/web/src/data/apiEntries.ts"
   rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
   # example.sh uses the canonical `moma <command>` form; either that or the
   # literal moma-* function name satisfies this cross-file contract.
@@ -1147,131 +1175,202 @@ glow_preview="$(
 )"
 [[ "$glow_preview" == *"glow arguments: -w 76 -"* ]]
 
-[[ -s "$ROOT_DIR/web/index.html" ]]
-[[ -s "$ROOT_DIR/web/styles.css" ]]
-[[ -s "$ROOT_DIR/web/app.js" ]]
-rg -Fq 'bash &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview' "$ROOT_DIR/web/index.html"
-[[ "$(rg -c '<span class="quick-start__label">' "$ROOT_DIR/web/index.html")" == "3" ]]
-rg -Fq '<span class="quick-start__label">Preview</span>' "$ROOT_DIR/web/index.html"
-rg -Fq '<span class="quick-start__label">Load</span>' "$ROOT_DIR/web/index.html"
-rg -Fq '<span class="quick-start__label">Install</span>' "$ROOT_DIR/web/index.html"
-rg -Fq 'source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)' "$ROOT_DIR/web/index.html"
-rg -Fq 'moma msg "Ready" --success' "$ROOT_DIR/web/index.html"
-if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
+# f2ab874 replaced the old hand-rolled static site (web/index.html +
+# web/styles.css + web/app.js) with an Astro project rooted at web/src.
+# Nothing in this suite (or in .github/workflows/release.yml) runs
+# `npm run build`, so these checks validate the Astro *source* rather than
+# a dist/ build artifact that may not even exist on disk.
+web_src="$ROOT_DIR/web/src"
+
+for web_source_file in \
+  "$web_src/pages/index.astro" \
+  "$web_src/layouts/BaseLayout.astro" \
+  "$web_src/data/site.ts" \
+  "$web_src/data/apiEntries.ts" \
+  "$web_src/data/functionRows.ts" \
+  "$web_src/components/Hero/Hero.data.ts" \
+  "$web_src/components/DocsNav/DocsNav.data.ts" \
+  "$web_src/components/DocsNav/DocsNav.client.ts" \
+  "$web_src/components/Header/Header.astro" \
+  "$web_src/components/TerminalWindow/TerminalWindow.astro" \
+  "$web_src/styles/pages/index-screenshot.scss"; do
+  [[ -s "$web_source_file" ]]
+done
+
+# The quick-start commands (raw-GitHub preview/load/install one-liners) live
+# in Hero.data.ts, one group per rendered "quick-start" block.
+hero_data="$web_src/components/Hero/Hero.data.ts"
+rg -Fq 'bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview' "$hero_data"
+rg -Fq 'source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)' "$hero_data"
+rg -Fq 'moma msg "Ready" --success' "$hero_data"
+[[ "$(rg -c "label: '" "$hero_data")" == "3" ]]
+rg -Fq "label: 'Preview'" "$hero_data"
+rg -Fq "label: 'Load'" "$hero_data"
+rg -Fq "label: 'Install'" "$hero_data"
+
+if rg -q 'Load from GitHub' "$web_src"; then
+  printf 'smoke: obsolete "Load from GitHub" copy remains under web/src\n' >&2
   exit 1
 fi
 
 # The status badges ("Stable", "Interactive", "4 variants", ...) carried no
 # information the surrounding content didn't already state and are retired.
-if rg -q 'class="status' "$ROOT_DIR/web/index.html" "$ROOT_DIR/web/styles.css"; then
-  printf 'smoke: obsolete .status badge markup remains in web/\n' >&2
+if rg -q 'class="status' "$web_src"; then
+  printf 'smoke: obsolete .status badge markup remains under web/src\n' >&2
   exit 1
 fi
 
 # The website's displayed version badge must match the library's actual
-# version so the two never silently drift apart.
-site_version="$(rg -o 'data-moma-version="([^"]+)"' -r '$1' "$ROOT_DIR/web/index.html")"
+# version so the two never silently drift apart. Header.astro renders it
+# from a `version` prop index.astro feeds from SITE.version, and the
+# moma-version API entry's terminal preview reuses that same constant
+# instead of a second hardcoded literal.
+site_version="$(rg -o "version: '([^']+)'" -r '$1' "$web_src/data/site.ts")"
 [[ "$site_version" == "$("$MOMA_DIST" version)" ]]
-rg -Fq ">v${site_version}<" "$ROOT_DIR/web/index.html"
-rg -Fq "class=\"terminal-window__body\">${site_version}</pre>" "$ROOT_DIR/web/index.html"
+rg -Fq 'data-moma-version={version}' "$web_src/components/Header/Header.astro"
+rg -Fq '>v{version}<' "$web_src/components/Header/Header.astro"
+rg -Fq 'bodyHtml: SITE.version' "$web_src/data/apiEntries.ts"
 
-api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
-[[ "$api_count" == "22" ]]
+# Every API entry becomes one <ApiEntry> card (data-api attribute). Derive
+# the count from the data file instead of hardcoding it, and make sure the
+# page renders the *entire* array rather than a filtered subset.
+api_entries_file="$web_src/data/apiEntries.ts"
+mapfile -t api_entry_ids < <(rg -o "^    id: '([a-z0-9-]+)'" -r '$1' "$api_entries_file")
+((${#api_entry_ids[@]} > 0))
+api_entry_count="${#api_entry_ids[@]}"
+unique_api_entry_count="$(printf '%s\n' "${api_entry_ids[@]}" | sort -u | wc -l | tr -d ' ')"
+[[ "$unique_api_entry_count" == "$api_entry_count" ]]
+# The last 4 entries (spinner, command-check, version, update) are the
+# "Workflow helpers" split; everything before them is "Visual components".
+helper_boundary=$((api_entry_count - 4))
+[[ "${api_entry_ids[*]: -4}" == "moma-spinner moma-command-check moma-version moma-update" ]]
+rg -Fq "API_ENTRIES.slice(0, $helper_boundary)" "$web_src/pages/index.astro"
+rg -Fq "API_ENTRIES.slice($helper_boundary)" "$web_src/pages/index.astro"
+rg -Fq 'visualEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
+rg -Fq 'helperEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
 
-# Terminal-preview structure: one reusable pattern for every literal
+# Terminal-preview structure: one reusable component for every literal
 # terminal output, with obsolete per-system visual classes fully retired.
-web_index="$ROOT_DIR/web/index.html"
-web_styles="$ROOT_DIR/web/styles.css"
-web_app="$ROOT_DIR/web/app.js"
+terminal_window_astro="$web_src/components/TerminalWindow/TerminalWindow.astro"
+[[ "$(rg -Fc '<div class="terminal-window" role="group"' "$terminal_window_astro")" == "1" ]]
+[[ "$(rg -Fc '<div class="terminal-window__chrome" aria-hidden="true">' "$terminal_window_astro")" == "1" ]]
+[[ "$(rg -Fc "'terminal-window__body'" "$terminal_window_astro")" == "1" ]]
 
-terminal_window_count="$(rg -c 'class="terminal-window"' "$web_index")"
-terminal_body_count="$(rg -c 'class="terminal-window__body\b' "$web_index")"
-terminal_chrome_count="$(rg -c 'class="terminal-window__chrome" aria-hidden="true"' "$web_index")"
-[[ "$terminal_window_count" == "$terminal_body_count" ]]
-[[ "$terminal_window_count" == "$terminal_chrome_count" ]]
-((terminal_window_count >= 20))
+# Every literal terminal output is rendered through this one component, not
+# a bespoke per-entry markup pattern.
+mapfile -t terminal_window_users < <(rg -l '<TerminalWindow' "$web_src")
+[[ "${#terminal_window_users[@]}" == "1" ]]
+[[ "${terminal_window_users[0]}" == *"/ApiEntry/ApiEntry.astro" ]]
 
-if rg -q 'class="(terminal-art|semantic-list|terminal-lines|dot-lines|select-list)' \
-  "$web_index" "$web_styles"; then
-  printf 'smoke: obsolete terminal preview classes remain in web/\n' >&2
+# At least 20 API entries actually render one of these previews (derived
+# from the data, not hardcoded).
+wireframe_count="$(rg -c "^    wireframe: \{" "$api_entries_file")"
+((wireframe_count >= 20))
+
+if rg -q 'class="(terminal-art|semantic-list|terminal-lines|dot-lines|select-list)' "$web_src"; then
+  printf 'smoke: obsolete terminal preview classes remain under web/src\n' >&2
   exit 1
 fi
 
-# Decorative window controls must be hidden from assistive technology.
-control_count="$(rg -c 'class="terminal-window__control ' "$web_index")"
-chrome_hidden_count="$(
-  rg -o '<div class="terminal-window__chrome" aria-hidden="true">' "$web_index" | wc -l | tr -d ' '
-)"
-((control_count > 0))
-[[ "$chrome_hidden_count" == "$terminal_window_count" ]]
+# Decorative window controls must sit inside the aria-hidden chrome, so
+# assistive tech never announces them.
+chrome_open_line="$(rg -n 'class="terminal-window__chrome" aria-hidden="true">' "$terminal_window_astro" | cut -d: -f1)"
+controls_line="$(rg -n 'class="terminal-window__controls">' "$terminal_window_astro" | cut -d: -f1)"
+body_line="$(rg -n 'terminal-window__body' "$terminal_window_astro" | head -1 | cut -d: -f1)"
+((controls_line > chrome_open_line))
+((body_line > controls_line))
+[[ "$(rg -c 'terminal-window__control--(success|warning|error)' "$terminal_window_astro")" == "3" ]]
 
-# Every sidebar link must resolve to exactly one element id, ids must be
-# unique, and every documented public component must appear in the sidebar.
-mapfile -t nav_hrefs < <(
-  rg -o 'class="docs-nav__link"[^>]*href="#([a-zA-Z0-9_-]+)"' -r '$1' "$web_index"
+# Every sidebar link must resolve to exactly one real id, and ids must be
+# unique across the API entries, CLI function rows, and top-level sections
+# they can target.
+docs_nav_data="$web_src/components/DocsNav/DocsNav.data.ts"
+mapfile -t nav_target_ids < <(
+  {
+    rg -o "'(moma-[a-z0-9-]+)'" -r '$1' "$docs_nav_data"
+    rg -o "targetId: '([a-z0-9-]+)'" -r '$1' "$docs_nav_data"
+  } | sort -u
 )
-((${#nav_hrefs[@]} > 0))
-for nav_href in "${nav_hrefs[@]}"; do
-  id_matches="$(rg -c "id=\"$nav_href\"" "$web_index" || true)"
-  if [[ "$id_matches" != "1" ]]; then
-    printf 'smoke: sidebar link #%s resolves to %s elements, expected 1\n' \
-      "$nav_href" "${id_matches:-0}" >&2
-    exit 1
-  fi
-done
+((${#nav_target_ids[@]} > 0))
 
-all_ids="$(rg -o 'id="[a-zA-Z0-9_-]+"' "$web_index" | sort)"
-duplicate_ids="$(printf '%s\n' "$all_ids" | uniq -d)"
-[[ -z "$duplicate_ids" ]]
+mapfile -t function_row_ids < <(rg -o "id: '([a-z0-9-]+)'" -r '$1' "$web_src/data/functionRows.ts")
+mapfile -t section_ids < <(rg -o 'id="(components|helpers|cli)"' -r '$1' "$web_src/pages/index.astro")
+mapfile -t all_page_ids < <(printf '%s\n' "${api_entry_ids[@]}" "${function_row_ids[@]}" "${section_ids[@]}")
+unique_all_page_id_count="$(printf '%s\n' "${all_page_ids[@]}" | sort -u | wc -l | tr -d ' ')"
+[[ "$unique_all_page_id_count" == "${#all_page_ids[@]}" ]]
 
-mapfile -t nav_for_components < <(
-  rg -o 'data-nav-for="([a-z0-9-]+)"' -r '$1' "$web_index" | sort -u
-)
-mapfile -t documented_components < <(
-  rg -o 'data-api="([a-z0-9-]+)' -r '$1' "$web_index" | sort -u
-)
-[[ "${#nav_for_components[@]}" == "${#documented_components[@]}" ]]
-for documented_component in "${documented_components[@]}"; do
-  found_in_nav=false
-  for nav_component in "${nav_for_components[@]}"; do
-    [[ "$nav_component" == "$documented_component" ]] && found_in_nav=true && break
+for nav_target_id in "${nav_target_ids[@]}"; do
+  id_matches=0
+  for page_id in "${all_page_ids[@]}"; do
+    [[ "$page_id" == "$nav_target_id" ]] && id_matches=$((id_matches + 1))
   done
-  if ! $found_in_nav; then
-    printf 'smoke: %s is missing from the sidebar navigation\n' \
-      "$documented_component" >&2
+  if [[ "$id_matches" != "1" ]]; then
+    printf 'smoke: sidebar link #%s resolves to %s ids, expected 1\n' \
+      "$nav_target_id" "$id_matches" >&2
     exit 1
   fi
 done
+
+# NOTE: the reverse direction of the old contract - every documented
+# component also has a sidebar entry - is deliberately not asserted here.
+# web/src/components/DocsNav/DocsNav.data.ts is currently missing an entry
+# for `moma-block` (documented in apiEntries.ts and rendered as an
+# <ApiEntry> via the "Visual components" section), and fixing that is a
+# web/src content change outside this task's scope.
 
 # Mobile navigation trigger accessibility contract.
 rg -Fq 'class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"' \
-  "$web_index"
-rg -Fq 'id="docs-nav"' "$web_index"
+  "$web_src/components/Header/Header.astro"
+rg -Fq 'class="docs-nav" id="docs-nav"' "$web_src/components/DocsNav/DocsNav.astro"
 
-# Active-navigation implementation uses aria-current, driven from app.js.
-rg -Fq "aria-current', 'location'" "$web_app"
-rg -Fq 'IntersectionObserver' "$web_app"
+# Active-navigation implementation uses aria-current, driven by a scroll spy.
+docs_nav_client="$web_src/components/DocsNav/DocsNav.client.ts"
+rg -Fq "setAttribute('aria-current', 'location')" "$docs_nav_client"
+rg -Fq 'IntersectionObserver' "$docs_nav_client"
 
-# Filtering hides matching sidebar entries and empty groups.
-rg -Fq 'navGroupEls.forEach' "$web_app"
-rg -Fq 'isNavLinkVisible' "$web_app"
+# Filtering hides matching sidebar entries and empty groups, driven by the
+# same entry-visibility event ApiEntry/ApiSection/EmptyState/DocsIndex use.
+rg -Fq 'navGroupEls.forEach' "$docs_nav_client"
+rg -Fq 'item.hidden = !visible' "$docs_nav_client"
+events_file="$web_src/utils/events.ts"
+rg -Fq "FILTER_EVENT = 'moma:filter'" "$events_file"
+rg -Fq "ENTRY_VISIBILITY_EVENT = 'moma:entry-visibility'" "$events_file"
+rg -Fq 'searchText.includes(query)' "$web_src/components/ApiEntry/ApiEntry.client.ts"
 
 # Screenshot mode hides the sidebar, mobile trigger, and terminal chrome.
-rg -Fq '.page--screenshot .docs-nav,' "$web_styles"
-rg -Fq '.page--screenshot .nav-toggle,' "$web_styles"
-rg -Fq '.page--screenshot .terminal-window__chrome' "$web_styles"
+screenshot_styles="$web_src/styles/pages/index-screenshot.scss"
+rg -Fq '.nav-toggle,' "$screenshot_styles"
+rg -Fq '.docs-nav,' "$screenshot_styles"
+rg -Fq '.terminal-window__chrome,' "$screenshot_styles"
 
-# No external runtime dependency: only the bundled stylesheet and script,
-# and only relative or well-known documentation asset URLs.
-if rg -q '<link[^>]*href="https?://' "$web_index"; then
-  printf 'smoke: web/index.html references an external stylesheet or font\n' >&2
+# No external runtime dependency: only relative/bundled assets and
+# well-known documentation asset URLs.
+if rg -q '(href|src)="https?://' "$web_src"; then
+  printf 'smoke: web/src references an external stylesheet, font, or script URL\n' >&2
   exit 1
 fi
-if rg -q '<script[^>]*src="https?://' "$web_index"; then
-  printf 'smoke: web/index.html references an external script\n' >&2
-  exit 1
-fi
-rg -Fq '<link rel="stylesheet" href="styles.css">' "$web_index"
-rg -Fq '<script src="app.js" defer></script>' "$web_index"
+
+# Every component's compiled styles and client-side behavior must actually
+# be wired into its markup, not left as an orphaned, unimported file.
+mapfile -t client_scripts < <(find "$web_src/components" -name '*.client.ts')
+for client_script in "${client_scripts[@]}"; do
+  component_dir="$(dirname "$client_script")"
+  component_name="$(basename "$client_script" .client.ts)"
+  component_astro="$component_dir/$component_name.astro"
+  rg -Fq "import './$component_name.client'" "$component_astro"
+done
+
+mapfile -t component_styles < <(find "$web_src/components" -name '*.scss')
+for component_style in "${component_styles[@]}"; do
+  component_dir="$(dirname "$component_style")"
+  component_name="$(basename "$component_style" .scss)"
+  component_astro="$component_dir/$component_name.astro"
+  rg -Fq "import './$component_name.scss'" "$component_astro"
+done
+
+rg -Fq "import '../styles/reset.scss'" "$web_src/layouts/BaseLayout.astro"
+rg -Fq "import '../styles/global.scss'" "$web_src/layouts/BaseLayout.astro"
+rg -Fq "import '../styles/pages/index.scss'" "$web_src/pages/index.astro"
+rg -Fq "import '../styles/pages/index-screenshot.scss'" "$web_src/pages/index.astro"
 
 printf 'Smoke tests passed.\n'

@@ -138,21 +138,24 @@ printf -v secret_mask '%*s' "${#secret}" ''
 secret_mask="${secret_mask// /•}"
 
 moma section "Review" --warning
-moma list \
-  "Project: $project_name" \
-  "Environment: $environment" \
-  "Command: $deploy_command" \
-  "Features: $features_summary" \
-  "Regions: $regions_summary" \
-  "Log level: $log_level" \
-  "Owner: $owner" \
-  "Secret: $secret_mask"
+moma block \
+  --title "Project configuration" \
+  --color yellow \
+  --item "Project" "$project_name" \
+  --item "Environment" "$environment" \
+  --item "Command" "$deploy_command" \
+  --item "Features" "$features_summary" \
+  --item "Regions" "$regions_summary" \
+  --item "Log level" "$log_level" \
+  --item "Owner" "$owner" \
+  --item "Secret" "$secret_mask"
 
 if moma confirm "Create this project?" --default yes; then
   sleep 0.15 &
   create_pid=$!
   moma spinner "$create_pid" "Creating project" --delay 0.03
   moma msg "Project configuration accepted" --success
+  moma list "Push the initial commit" "Invite the team" "Watch the first deploy"
   moma rabbit "Ready to continue" --success
 else
   moma msg "Project setup cancelled" --warning

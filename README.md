@@ -147,6 +147,7 @@ task build
 | Visual | `moma-msg-simple` | Print a compact message. |
 | Visual | `moma-list` | Print an unordered list. |
 | Visual | `moma-box` | Print a framed notice. |
+| Visual | `moma-block` | Print a titled, colored content block. |
 | Visual | `moma-prompt` | Print a question lead-in. |
 | Visual | `moma-label` | Print a decorated label. |
 | Visual | `moma-rabbit` | Print the Moma activity component. |

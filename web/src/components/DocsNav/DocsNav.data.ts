@@ -15,6 +15,7 @@ export const NAV_GROUPS: NavGroup[] = [
       'moma-msg-simple',
       'moma-list',
       'moma-box',
+      'moma-block',
       'moma-prompt',
       'moma-label',
       'moma-rabbit',
