@@ -18,8 +18,8 @@ src/preview and src/cli
   metadata. It does not call public components.
 - `src/components/` implements the public `moma-*` functions. Components may
   call core helpers and other public components where composition is useful.
-- `src/preview/` consumes the public API to render examples and serve embedded
-  documentation.
+- `src/preview/` consumes the public API to render terminal examples, serve
+  the embedded Markdown reference, and open the hosted documentation website.
 - `src/cli/` validates command names against the registry and dispatches through
   an explicit allowlist. It does not use `eval`.
 
@@ -41,18 +41,27 @@ The command registry in `src/core/registry.sh` maps each executable command to
 its public function and short description. The registry, CLI, web metadata,
 examples, source index, and smoke expectations must remain synchronized.
 
-Library usage:
+`src/cli/main.sh` defines one explicit dispatcher, `_moma_main`, and one
+public shell function, `moma() { _moma_main "$@"; }`. Sourcing `dist/moma`
+defines `moma` without invoking it; the executable-only guard at the end of
+the generated file calls `_moma_main` directly, so there is exactly one
+dispatch path and `moma` never calls itself. The canonical command works
+identically after sourcing or once installed:
 
 ```bash
 source dist/moma
-moma-msg "Ready" --success
+moma msg "Ready" --success
 ```
-
-Executable usage:
 
 ```bash
-./dist/moma msg "Ready" --success
+moma msg "Ready" --success
 ```
+
+Every public `moma-*` function (for example `moma-msg`) also remains callable
+directly after sourcing, for backward compatibility with existing scripts;
+`moma <command>` and `moma-<command>` call the same underlying
+implementation, so there is no divergent parsing or rendering logic between
+the two forms.
 
 ## Output Contract
 
@@ -101,9 +110,9 @@ working directory, or consumer traps when sourced.
 
 `build.sh` performs these stages:
 
-1. Validate every embedded document, web asset, and ordered module.
+1. Validate every embedded document and ordered module.
 2. Create a temporary artifact in the destination directory.
-3. Embed Markdown and web assets.
+3. Embed the help and API-reference Markdown documents.
 4. Concatenate core, component, preview, and CLI modules in dependency order.
 5. Add the executable-only `_moma_main` guard.
 6. Run `bash -n` on the complete temporary artifact.

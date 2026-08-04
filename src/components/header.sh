@@ -1,5 +1,9 @@
 # Pagga ASCII header component.
 _moma_pagga_glyph() {
+  # The Q glyph's backslashes below are literal pixels, not escaped quotes.
+  # A disable directive cannot target a single case branch, so this covers
+  # the whole case statement.
+  # shellcheck disable=SC1003
   case "$1" in
     0) printf '%s\n' '░▄▀▄' '░█/█' '░░▀░' ;;
     1) printf '%s\n' '░▀█░' '░░█░' '░▀▀▀' ;;

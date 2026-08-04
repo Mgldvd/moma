@@ -17,8 +17,19 @@ Repository: <https://github.com/Mgldvd/moma>
 
 ```bash
 moma <command> [arguments] [options]
-source dist/moma
 ```
+
+Use the installed executable directly, or source the library first to make
+the same `moma` command available as a shell function in the current shell:
+
+```bash
+source dist/moma
+moma <command> [arguments] [options]
+```
+
+Existing scripts that call direct `moma-*` functions (for example
+`moma-msg-simple`) keep working after `source dist/moma`; they remain
+supported for backward compatibility but are not the recommended interface.
 
 ## Component commands
 
@@ -60,7 +71,7 @@ source dist/moma
 | `themes` | List configured color themes. |
 | `preview` | Show the terminal reference. |
 | `preview md` | Show the Markdown reference with Glow when available. |
-| `preview web` | Serve the browser reference. |
+| `preview web` | Open the hosted Moma documentation website in the default browser. |
 
 ## Remote preview
 
@@ -71,6 +82,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 ## Global options
 
 - `--theme <name>`: Use a configured color theme for this command.
+- `--version`, `-v`: Print the installed version and exit. Recognized only
+  as a leading argument, before a command is selected.
 - `-h`, `--help`: Show help.
 
 ## Color themes
@@ -117,7 +130,17 @@ are display-only: they never receive focus, are never toggled, are never
 counted as options, and are never printed on stdout. `--initial`, `--choose`,
 and `--selected` use one-based indexes that count only options, in visual
 order across every group. Up and down navigation skips headings and wraps
-between the first and last option across all groups.
+between the first and last focusable row across all groups.
+
+`moma-multi-select-groups` also renders a focusable "All" row above each
+group's options and a focusable "Select All" row above every group. Space on
+an "All" row toggles every option in that group; Space on "Select All"
+toggles every option across all groups. Both fill (`▣`) once every option in
+their scope is selected, show a hatched glyph (`▨`) once some but not all
+are, and are otherwise empty (`□`); toggling clears a fully selected scope
+and otherwise fills whatever is still unselected. Neither row counts as an
+option or is ever printed on stdout, so `--initial`, `--choose`, and
+`--selected` numbering is unaffected.
 
 ## Decoration width
 
@@ -152,6 +175,10 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma command-check bash curl
 ./dist/moma themes
 ./dist/moma preview
+./dist/moma preview web
+./dist/moma version
+./dist/moma --version
+./dist/moma -v
 ```
 
 ## Library examples
@@ -186,6 +213,8 @@ Run these commands from an executable installation.
 
 ```bash
 moma version
+moma --version
+moma -v
 moma update
 ```
 
@@ -223,6 +252,20 @@ Repository: <https://github.com/Mgldvd/moma>
 source dist/moma
 ```
 
+Or install the executable and call the same command directly, without
+sourcing anything:
+
+```bash
+moma msg "Ready" --success
+```
+
+Every command in this reference uses the canonical `moma <command>` syntax.
+It works identically after `source dist/moma` (the sourced library defines
+`moma` as a shell function) or once the executable is installed as `moma`.
+Direct `moma-*` functions (for example `moma-msg`) remain available after
+sourcing the library, for backward compatibility with existing scripts; see
+[Backward compatibility](#backward-compatibility).
+
 ## Consistent decoration widths
 
 Set `MOMA_WIDTH` once to give every horizontal decoration the same fixed inner
@@ -230,8 +273,8 @@ width, regardless of its text length.
 
 ```bash
 export MOMA_WIDTH=50
-moma-box "Your configuration is ready." --success
-moma-box "Back up your files before continuing." --warning
+moma box "Your configuration is ready." --success
+moma box "Back up your files before continuing." --warning
 ```
 
 Use `MOMA_MAX_WIDTH` when decorations should remain automatic but never exceed
@@ -299,15 +342,15 @@ either value to disable that spacing.
 `--margin-left` indents every heading row and defaults to `0`.
 
 ```text
-moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]
+moma header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]
 ```
 
 ```bash
 # Example 1
-moma-header "Moma"
+moma header "Moma"
 
 # Example 2
-moma-header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
+moma header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin-left 2
 ```
 
 ### `moma-title`
@@ -315,18 +358,18 @@ moma-header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin
 Primary identity block for the beginning of a script or major workflow.
 
 ```text
-moma-title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]
+moma title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]
 ```
 
 ```bash
 # Example 1
-moma-title "Moma" "Terminal UI library"
+moma title "Moma" "Terminal UI library"
 
 # Example 2
-moma-title "Deploy" "Production" --primary cyan
+moma title "Deploy" "Production" --primary cyan
 
 # Example 3
-moma-title "Backup" "Nightly job" --accent yellow --min-width 48
+moma title "Backup" "Nightly job" --accent yellow --min-width 48
 ```
 
 ![moma-title preview](../.img/moma-title.png)
@@ -336,18 +379,18 @@ moma-title "Backup" "Nightly job" --accent yellow --min-width 48
 Secondary heading for stages nested inside the main workflow.
 
 ```text
-moma-title-sub "Deployment" "Production environment" [--width number] [--max-width number]
+moma title-sub "Deployment" "Production environment" [--width number] [--max-width number]
 ```
 
 ```bash
 # Example 1
-moma-title-sub "Dependencies" "Installing packages"
+moma title-sub "Dependencies" "Installing packages"
 
 # Example 2
-moma-title-sub "Deploy" "Production" --color cyan
+moma title-sub "Deploy" "Production" --color cyan
 
 # Example 3
-moma-title-sub "Tests" --message "Running suite" --min-width 42
+moma title-sub "Tests" --message "Running suite" --min-width 42
 ```
 
 ![moma-title-sub preview](../.img/moma-title-sub.png)
@@ -357,18 +400,18 @@ moma-title-sub "Tests" --message "Running suite" --min-width 42
 Strong separator that gives semantic context to the content that follows.
 
 ```text
-moma-section "Dependencies ready" --success
+moma section "Dependencies ready" --success
 ```
 
 ```bash
 # Example 1
-moma-section "Dependencies ready" --success
+moma section "Dependencies ready" --success
 
 # Example 2
-moma-section "Configuration failed" --error
+moma section "Configuration failed" --error
 
 # Example 3
-moma-section "Next step" --info --icon "→"
+moma section "Next step" --info --icon "→"
 ```
 
 ![moma-section preview](../.img/moma-section.png)
@@ -378,18 +421,18 @@ moma-section "Next step" --info --icon "→"
 Compact feedback with semantic defaults or custom color and icon overrides.
 
 ```text
-moma-msg "Package installed" --success [--color value] [--icon value]
+moma msg "Package installed" --success [--color value] [--icon value]
 ```
 
 ```bash
 # Example 1
-moma-msg "Package installed" --success
+moma msg "Package installed" --success
 
 # Example 2
-moma-msg "Connection refused" --error
+moma msg "Connection refused" --error
 
 # Example 3
-moma-msg "Downloading metadata" --color cyan --icon "→"
+moma msg "Downloading metadata" --color cyan --icon "→"
 ```
 
 ![moma-msg preview](../.img/moma-msg.png)
@@ -399,18 +442,18 @@ moma-msg "Downloading metadata" --color cyan --icon "→"
 A quiet message with only a dot marker and no semantic icon.
 
 ```text
-moma-msg-simple "Package installed" [--success|--error|--warning|--info] [--color value]
+moma msg-simple "Package installed" [--success|--error|--warning|--info] [--color value]
 ```
 
 ```bash
 # Example 1
-moma-msg-simple "Package installed"
+moma msg-simple "Package installed"
 
 # Example 2
-moma-msg-simple "Package installation failed" --error
+moma msg-simple "Package installation failed" --error
 
 # Example 3
-moma-msg-simple "Queued" --color yellow --marker "•"
+moma msg-simple "Queued" --color yellow --marker "•"
 ```
 
 ![moma-msg-simple preview](../.img/moma-msg-simple.png)
@@ -420,18 +463,18 @@ moma-msg-simple "Queued" --color yellow --marker "•"
 An unordered terminal list with a consistent marker for every item.
 
 ```text
-moma-list "Clone repository" "Install dependencies" [--success|--error|--warning|--info]
+moma list "Clone repository" "Install dependencies" [--success|--error|--warning|--info]
 ```
 
 ```bash
 # Example 1
-moma-list "Clone repository" "Install dependencies" "Start application"
+moma list "Clone repository" "Install dependencies" "Start application"
 
 # Example 2
-moma-list "Database ready" "Cache ready" --success
+moma list "Database ready" "Cache ready" --success
 
 # Example 3
-moma-list "Review logs" "Retry deployment" --marker "→" --color yellow
+moma list "Review logs" "Retry deployment" --marker "→" --color yellow
 ```
 
 ![moma-list preview](../.img/moma-list.png)
@@ -441,22 +484,22 @@ moma-list "Review logs" "Retry deployment" --marker "→" --color yellow
 Framed notice for information that must stand apart from surrounding output.
 
 ```text
-moma-box "Configuration is ready." --success [--width number] [--max-width number]
+moma box "Configuration is ready." --success [--width number] [--max-width number]
 ```
 
 ```bash
 # Example 1
-moma-box "Configuration is ready." --success
+moma box "Configuration is ready." --success
 
 # Example 2
-moma-box "Review the deployment settings." --warning --width 48
+moma box "Review the deployment settings." --warning --width 48
 
 # Example 3
-moma-box "Build failed." --error --icon "✖" --padding 2
+moma box "Build failed." --error --icon "✖" --padding 2
 
 # Same fixed width for multiple boxes
-moma-box "Configuration is ready." --success --width 50
-moma-box "Back up your files before continuing." --warning --width 50
+moma box "Configuration is ready." --success --width 50
+moma box "Back up your files before continuing." --warning --width 50
 ```
 
 ![moma-box preview](../.img/moma-box.png)
@@ -466,18 +509,18 @@ moma-box "Back up your files before continuing." --warning --width 50
 Question lead-in used before confirmation or free-form interaction.
 
 ```text
-moma-prompt "Continue with the installation?" --color pink [--width number] [--max-width number]
+moma prompt "Continue with the installation?" --color pink [--width number] [--max-width number]
 ```
 
 ```bash
 # Example 1
-moma-prompt "Continue with the installation?"
+moma prompt "Continue with the installation?"
 
 # Example 2
-moma-prompt "Select an environment" --color cyan
+moma prompt "Select an environment" --color cyan
 
 # Example 3
-moma-prompt "Deploy now?" --default "yes" --icon "?"
+moma prompt "Deploy now?" --default "yes" --icon "?"
 ```
 
 ![moma-prompt preview](../.img/moma-prompt.png)
@@ -487,18 +530,18 @@ moma-prompt "Deploy now?" --default "yes" --icon "?"
 Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.
 
 ```text
-moma-label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]
+moma label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]
 ```
 
 ```bash
 # Example 1
-moma-label "PROJECT NAME"
+moma label "PROJECT NAME"
 
 # Example 2
-moma-label "DEPLOYMENT" --success
+moma label "DEPLOYMENT" --success
 
 # Example 3
-moma-label "NOTES" --width 52 --color cyan --icon "→"
+moma label "NOTES" --width 52 --color cyan --icon "→"
 ```
 
 ![moma-label preview](../.img/moma-label.png)
@@ -508,18 +551,18 @@ moma-label "NOTES" --width 52 --color cyan --icon "→"
 Branded activity and completion feedback using Moma's rabbit signature.
 
 ```text
-moma-rabbit "Preparing workspace" --info
+moma rabbit "Preparing workspace" --info
 ```
 
 ```bash
 # Example 1
-moma-rabbit "Preparing workspace" --info
+moma rabbit "Preparing workspace" --info
 
 # Example 2
-moma-rabbit "Deployment complete" --success
+moma rabbit "Deployment complete" --success
 
 # Example 3
-moma-rabbit "Build needs attention" --warning --icon "!"
+moma rabbit "Build needs attention" --warning --icon "!"
 ```
 
 ![moma-rabbit preview](../.img/moma-rabbit.png)
@@ -531,18 +574,18 @@ moma-rabbit "Build needs attention" --warning --icon "!"
 Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.
 
 ```text
-moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]
+moma input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]
 ```
 
 ```bash
 # Example 1
-moma-input --title "Project name" --placeholder "my-project"
+moma input --title "Project name" --placeholder "my-project"
 
 # Example 2
-project="$(moma-input --title "Project name" --read --required --trim)"
+project="$(moma input --title "Project name" --read --required --trim)"
 
 # Example 3
-password="$(moma-input --title "Password" --read --secret --required)"
+password="$(moma input --title "Password" --read --secret --required)"
 ```
 
 ![moma-input preview](../.img/moma-input.png)
@@ -552,18 +595,18 @@ password="$(moma-input --title "Password" --read --secret --required)"
 Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls. Each row shows a radio indicator: `◉` for the focused selection and `○` for every other option.
 
 ```text
-moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]
+moma single-select "Development" "Staging" "Production" [--title text] [--initial number]
 ```
 
 ```bash
 # Example 1
-environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"
+environment="$(moma single-select "Development" "Staging" "Production" --title "Environment")"
 
 # Example 2
-environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"
+environment="$(moma single-select "Development" "Staging" "Production" --choose 2)"
 
 # Example 3
-region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
+region="$(moma single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"
 ```
 
 ![moma-select preview](../.img/moma-select.png)
@@ -573,7 +616,7 @@ region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --col
 Documented compatibility alias for `moma-single-select`. It accepts the same arguments, renders identically, and remains available for existing scripts and the `select` CLI command.
 
 ```bash
-environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"
+environment="$(moma select "Development" "Staging" "Production" --title "Environment")"
 ```
 
 ### `moma-single-select-groups`
@@ -581,13 +624,13 @@ environment="$(moma-select "Development" "Staging" "Production" --title "Environ
 Select one value organized under named, non-selectable group headings. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--initial` and `--choose` use one-based indexes that count only options, in visual order across every group.
 
 ```text
-moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]
+moma single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]
 ```
 
 ```bash
 # Example 1
 action="$(
-  moma-single-select-groups \
+  moma single-select-groups \
     --title "Features" \
     --group "Docker" --option "Up" --option "Down" --option "Stop" \
     --group "npm" --option "install" --option "run dev" --option "run deploy"
@@ -595,7 +638,7 @@ action="$(
 
 # Example 2 (--choose 4 selects "install", the first option of the second group)
 action="$(
-  moma-single-select-groups \
+  moma single-select-groups \
     --title "Features" \
     --group "Docker" --option "Up" --option "Down" --option "Stop" \
     --group "npm" --option "install" --option "run dev" --option "run deploy" \
@@ -608,34 +651,34 @@ action="$(
 Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not.
 
 ```text
-moma-multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
+moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
 ```
 
 ```bash
 # Example 1
-features="$(moma-multi-select "Docker" "CI" "Tests" --title "Features")"
+features="$(moma multi-select "Docker" "CI" "Tests" --title "Features")"
 
 # Example 2
-features="$(moma-multi-select "Docker" "CI" "Tests" --choose 1,3)"
+features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"
 
 # Example 3
-features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
+features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
 ```
 
 ![moma-multi-select preview](../.img/moma-multi-select.png)
 
 ### `moma-multi-select-groups`
 
-Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group.
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout.
 
 ```text
-moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
+moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
 ```
 
 ```bash
 # Example 1
 countries="$(
-  moma-multi-select-groups \
+  moma multi-select-groups \
     --title "Features" \
     --group "North America" --option "United States" --option "Canada" --option "Mexico" \
     --group "South America" --option "Colombia" --option "Argentina" --option "Peru"
@@ -643,7 +686,7 @@ countries="$(
 
 # Example 2
 countries="$(
-  moma-multi-select-groups \
+  moma multi-select-groups \
     --title "Features" \
     --group "North America" --option "United States" --option "Canada" --option "Mexico" \
     --group "South America" --option "Colombia" --option "Argentina" --option "Peru" \
@@ -656,19 +699,19 @@ countries="$(
 Select Yes or No with the arrow keys, Enter, or the y and n shortcuts. A successful answer leaves one blank line below the controls.
 
 ```text
-moma-confirm "Create this project?" [--default yes|no] [--answer yes|no]
+moma confirm "Create this project?" [--default yes|no] [--answer yes|no]
 ```
 
 ```bash
 # Example 1
-moma-confirm "Create this project?" --default yes
+moma confirm "Create this project?" --default yes
 
 # Example 2
-moma-confirm "Delete the cache?" --answer no
+moma confirm "Delete the cache?" --answer no
 
 # Example 3
-if moma-confirm "Deploy now?"; then
-  moma-msg "Deploying" --info
+if moma confirm "Deploy now?"; then
+  moma msg "Deploying" --info
 fi
 ```
 
@@ -681,21 +724,21 @@ fi
 Display progress while a process is active, then print semantic completion feedback.
 
 ```text
-moma-spinner pid ["message"] [--delay seconds]
+moma spinner pid ["message"] [--delay seconds]
 ```
 
 ```bash
 # Example 1
 sleep 2 &
-moma-spinner "$!" "Waiting"
+moma spinner "$!" "Waiting"
 
 # Example 2
 backup_database &
-moma-spinner --pid "$!" --message "Backing up"
+moma spinner --pid "$!" --message "Backing up"
 
 # Example 3
 build_project &
-moma-spinner "$!" "Building" --delay 0.05
+moma spinner "$!" "Building" --delay 0.05
 ```
 
 ![moma-spinner preview](../.img/moma-spinner.png)
@@ -705,18 +748,18 @@ moma-spinner "$!" "Building" --delay 0.05
 Check whether every requested executable is available and return a useful status.
 
 ```text
-moma-command-check bash curl git [--quiet]
+moma command-check bash curl git [--quiet]
 ```
 
 ```bash
 # Example 1
-moma-command-check bash curl git
+moma command-check bash curl git
 
 # Example 2
-moma-command-check docker --quiet
+moma command-check docker --quiet
 
 # Example 3
-if ! moma-command-check git; then
+if ! moma command-check git; then
   exit 1
 fi
 ```
@@ -735,22 +778,50 @@ fi
 ## Preview commands
 
 ```bash
-./dist/moma preview
-./dist/moma preview md
-./dist/moma preview web
-./dist/moma help
+moma preview
+moma preview md
+moma preview web
+moma help
 ```
+
+`preview web` opens the hosted Moma documentation website
+(`https://mgldvd.github.io/moma/`) in the default browser using `open` on
+macOS or `xdg-open` on Linux. It does not start a local server or require
+Python.
 
 ## Version and updates
 
 ```bash
-./dist/moma version
-./dist/moma update
+moma version
+moma --version
+moma -v
+moma update
 ```
+
+`version`, `--version`, and `-v` all print the same canonical version string
+and exit `0`. `--version` and `-v` are recognized only as leading arguments,
+before a command is selected.
 
 `update` downloads the latest executable, validates it, and atomically replaces
 the current executable. It requires `curl` and write permission for the installed
-file and its directory.
+file and its directory, so it must run from an executable installation.
+
+## Backward compatibility
+
+Every public component also has a direct `moma-*` function (for example
+`moma-msg-simple`, `moma-single-select`, `moma-confirm`) available once
+`dist/moma` is sourced. These functions are the same implementation the
+`moma <command>` dispatcher calls, so behavior is identical; they remain
+supported so existing scripts keep working without changes, but new scripts
+should use the canonical `moma <command>` form shown throughout this
+reference.
+
+```bash
+source dist/moma
+
+moma msg-simple "Package installed"   # recommended
+moma-msg-simple "Package installed"   # legacy, still supported
+```
 
 ## Remote preview
 
@@ -758,1573 +829,6 @@ file and its directory.
 bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview
 ```
 MOMA_DOCS_MARKDOWN_EOF
-}
-
-# embedded document: web/index.html
-_moma_preview_web_index () {
-    cat <<'MOMA_PREVIEW_HTML_EOF'
-<!doctype html>
-<html lang="en" data-theme="light">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Complete Moma Bash API and terminal component reference.">
-  <title>Moma Documentation — API Preview</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
-</head>
-<body class="page">
-  <header class="topbar">
-    <a class="brand" href="#top" aria-label="Moma documentation home">
-      <span class="brand__mark">M</span>
-      <span class="brand__name">moma<span class="brand__cursor">_</span></span>
-      <span class="brand__label">documentation</span>
-    </a>
-    <nav class="topbar__nav" aria-label="Documentation sections">
-      <a class="topbar__link" href="#components">Components</a>
-      <a class="topbar__link" href="#helpers">Helpers</a>
-      <a class="topbar__link" href="#cli">CLI</a>
-    </nav>
-    <button class="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false">
-      <span class="theme-toggle__icon" aria-hidden="true">◐</span>
-      <span class="theme-toggle__text">Theme</span>
-    </button>
-  </header>
-
-  <main class="docs" id="top">
-    <header class="docs-hero">
-      <p class="docs-hero__eyebrow">MOMA / API REFERENCE</p>
-      <h1 class="docs-hero__title">Moma <span class="docs-hero__accent">Terminal components</span></h1>
-      <p class="docs-hero__intro">Complete visual and functional reference for the Moma Bash library. Every public function is listed below with its signature, purpose, and terminal output where applicable.</p>
-      <div class="quick-start">
-        <span class="quick-start__label">Preview</span>
-        <code class="quick-start__command">bash &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma) preview</code>
-      </div>
-      <div class="quick-start">
-        <span class="quick-start__label">Load</span>
-        <code class="quick-start__command">source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)</code>
-        <code class="quick-start__command">moma-msg "Ready" --success</code>
-      </div>
-      <div class="quick-start">
-        <span class="quick-start__label">Install</span>
-        <code class="quick-start__command">mkdir -p "$HOME/.local/bin"</code>
-        <code class="quick-start__command">curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma -o "$HOME/.local/bin/moma"</code>
-        <code class="quick-start__command">chmod 0755 "$HOME/.local/bin/moma"</code>
-      </div>
-    </header>
-
-    <section class="docs-index" aria-labelledby="index-title">
-      <div class="docs-index__heading">
-        <h2 class="docs-index__title" id="index-title">API index</h2>
-          <p class="docs-index__total"><span class="docs-index__count">19</span> library functions</p>
-      </div>
-      <label class="search">
-        <span class="search__icon" aria-hidden="true">⌕</span>
-        <span class="search__label">Filter API</span>
-        <input class="search__input" type="search" placeholder="Filter functions…" autocomplete="off">
-        <kbd class="search__shortcut">/</kbd>
-      </label>
-      <div class="index-links">
-        <a class="index-links__item" href="#components"><span class="index-links__number">01</span> Visual components <strong class="index-links__count">15</strong></a>
-        <a class="index-links__item" href="#helpers"><span class="index-links__number">02</span> Workflow helpers <strong class="index-links__count">4</strong></a>
-        <a class="index-links__item" href="#cli"><span class="index-links__number">03</span> Command interface <strong class="index-links__count">22</strong></a>
-      </div>
-    </section>
-
-    <div class="api-sections">
-      <section class="api-section" id="components" data-group>
-        <header class="api-section__header">
-          <p class="api-section__number">01 / 03</p>
-          <h2 class="api-section__title">Visual components</h2>
-          <p class="api-section__intro">Each function names a visible terminal component; semantic meaning is selected with flags.</p>
-        </header>
-
-        <article class="api-entry" data-api="moma-header pagga ascii art heading title color">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">ASCII heading component</p><h3 class="api-entry__name">moma-header</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">Three-line Pagga text for a prominent script or workflow identity, with one blank line above, two below, and no left indent by default.</p>
-          <code class="signature">moma-header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]</code>
-          <div class="wireframe" aria-label="moma-header output preview">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art terminal-art--cyan">░█▄█░█▀█░█▄█░█▀█
-░█░█░█░█░█░█░█▀█
-░▀░▀░▀▀▀░▀░▀░▀░▀</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-title primary script header title subtitle accent">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Heading component</p><h3 class="api-entry__name">moma-title</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">Primary identity block for the beginning of a script or major workflow.</p>
-          <code class="signature">moma-title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]</code>
-          <div class="wireframe" aria-label="moma-title output preview">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art terminal-art--pink">┌─────────────────────────────────────┐
-▪  <span class="terminal-art__cyan">Moma</span>  Terminal UI library          ▪
-└─────────────────────────────────────┘</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-title-sub secondary workflow header subtitle">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Heading component</p><h3 class="api-entry__name">moma-title-sub</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">Secondary heading for stages nested inside the main workflow.</p>
-          <code class="signature">moma-title-sub "Deployment" "Production environment" [--width number] [--max-width number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art"><span class="terminal-art__pink">▪</span>  <span class="terminal-art__cyan">Deployment</span>  Production environment
-└────────────────────────────────────────</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-section semantic heading success error warning info">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Section component</p><h3 class="api-entry__name">moma-section</h3></div>
-            <span class="status status--variants">4 variants</span>
-          </header>
-          <p class="api-entry__description">Strong separator that gives semantic context to the content that follows.</p>
-          <code class="signature">moma-section "Dependencies ready" --success</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Semantic outputs</p>
-            <div class="semantic-list">
-              <p class="semantic-list__item semantic-list__item--success"><span>✔</span> Dependencies ready</p>
-              <p class="semantic-list__item semantic-list__item--error"><span>✖</span> Configuration failed</p>
-              <p class="semantic-list__item semantic-list__item--warning"><span>!</span> Review required</p>
-              <p class="semantic-list__item semantic-list__item--info"><span>→</span> Next step</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-msg message inline feedback icon success error warning info">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Message component</p><h3 class="api-entry__name">moma-msg</h3></div>
-            <span class="status status--variants">Flexible</span>
-          </header>
-          <p class="api-entry__description">Compact feedback with semantic defaults or custom color and icon overrides.</p>
-          <code class="signature">moma-msg "Package installed" --success [--color value] [--icon value]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="terminal-lines">
-              <p class="terminal-lines__item terminal-lines__item--success">▪ ✔ Package installed &nbsp;✔</p>
-              <p class="terminal-lines__item terminal-lines__item--error">▪ ✖ Connection refused &nbsp;✖</p>
-              <p class="terminal-lines__item terminal-lines__item--warning">▪ ! Using cached version &nbsp;!</p>
-              <p class="terminal-lines__item terminal-lines__item--info">▪ → Downloading metadata &nbsp;→</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-msg-simple simple message dot marker no icon success error warning info semantic">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Simple message</p><h3 class="api-entry__name">moma-msg-simple</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">A quiet message with only a dot marker and no semantic icon.</p>
-          <code class="signature">moma-msg-simple "Package installed" [--success|--error|--warning|--info] [--color value]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="dot-lines">
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>Package installed</span></p>
-              <p class="dot-lines__item"><span class="dot-lines__marker dot-lines__marker--error">▪</span><span>Package installation failed</span></p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-list unordered list items dot marker success error warning info semantic">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">List component</p><h3 class="api-entry__name">moma-list</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">An unordered terminal list with a consistent marker for every item.</p>
-          <code class="signature">moma-list "Clone repository" "Install dependencies" [--success|--error|--warning|--info]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="dot-lines">
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>Clone repository</span></p>
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>Install dependencies</span></p>
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>Start application</span></p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-box framed boxed notice emphasis success warning info error width max-width MOMA_WIDTH MOMA_MAX_WIDTH">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Notice component</p><h3 class="api-entry__name">moma-box</h3></div>
-            <span class="status status--variants">4 variants</span>
-          </header>
-          <p class="api-entry__description">Framed notice with automatic, fixed, or maximum width. Long content wraps inside the border.</p>
-          <code class="signature">moma-box "Configuration is ready." --success [--width number] [--max-width number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art terminal-art--green">┌────────────────────────────────┐
-│ ✔ Configuration is ready.     │
-└────────────────────────────────┘</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-prompt question confirmation interaction">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Prompt component</p><h3 class="api-entry__name">moma-prompt</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">Question lead-in used before confirmation or free-form interaction.</p>
-          <code class="signature">moma-prompt "Continue with the installation?" --color pink [--width number] [--max-width number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art"><span class="terminal-art__pink">▪</span>  Continue with the installation?
-└──────────────────────────────────────</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-label decorated input header separator text width color semantic">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Label component</p><h3 class="api-entry__name">moma-label</h3></div>
-            <span class="status status--variants">4 variants</span>
-          </header>
-          <p class="api-entry__description">Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.</p>
-          <code class="signature">moma-label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art"><span class="terminal-art__cyan">┌─ TEXT HERE ────────────────────────────┐</span></pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-input interactive field read value placeholder secret required default trim">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Input component</p><h3 class="api-entry__name">moma-input</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.</p>
-          <code class="signature">moma-input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art terminal-art--pink">┌─ Owner ────────────────────────────────┐
-│❯ <span class="terminal-art__muted">asdf</span>
-
-┌─ Secret ───────────────────────────────┐
-│❯ <span class="terminal-art__muted">****</span></pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-single-select interactive selection list arrows up down radio choice">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.</p>
-          <code class="signature">moma-single-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="select-list">
-              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Environment</span></p>
-              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Development</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Staging</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Production</p>
-              <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-select interactive selection alias compatibility single-select">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Documented compatibility alias for <code>moma-single-select</code>. Same arguments, same rendering, kept for existing scripts and the <code>select</code> CLI command.</p>
-          <code class="signature">moma-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
-        </article>
-
-        <article class="api-entry" data-api="moma-single-select-groups interactive selection list arrows up down radio choice groups headings">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select-groups</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Select one value organized under named, non-selectable group headings. Option numbers are one-based, count only options, and follow visual order across every group.</p>
-          <code class="signature">moma-single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="select-list">
-              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
-              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__group">Docker</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">◉</span>Up</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Down</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>Stop</p>
-              <p class="select-list__group">npm</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>install</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run dev</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">○</span>run deploy</p>
-              <p class="select-list__hint">↑/↓ move · Enter select · q cancel</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-multi-select interactive multiple selection list arrows space checkbox empty filled square">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Toggle multiple values below a decorated Moma heading and return every selection on its own line.</p>
-          <code class="signature">moma-multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="select-list">
-              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
-              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Docker</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>CI</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Tests</p>
-              <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select-groups</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.</p>
-          <code class="signature">moma-multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="select-list">
-              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Features</span></p>
-              <p class="select-list__rule" aria-hidden="true">└──────────────────────────────</p>
-              <p class="select-list__group">North America</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__pointer" aria-hidden="true">›</span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>United States</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Canada</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker select-list__marker--checked" aria-hidden="true">▣</span>Mexico</p>
-              <p class="select-list__group">South America</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Colombia</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Argentina</p>
-              <p class="select-list__item"><span class="select-list__pointer" aria-hidden="true"></span><span class="select-list__marker" aria-hidden="true">□</span>Peru</p>
-              <p class="select-list__hint">↑/↓ move · Space toggle · Enter confirm · q cancel</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-confirm interactive confirmation yes no selection arrows shortcut default answer">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Confirmation select</p><h3 class="api-entry__name">moma-confirm</h3></div>
-            <span class="status status--interactive">Interactive</span>
-          </header>
-          <p class="api-entry__description">Select Yes or No with the arrow keys, Enter, or the y and n shortcuts. A successful answer leaves one blank line below the controls.</p>
-          <code class="signature">moma-confirm "Create this project?" [--default yes|no] [--answer yes|no]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="select-list">
-              <p class="select-list__prompt"><span class="select-list__prompt-marker" aria-hidden="true">▪</span><span>Create this project? [yes]</span></p>
-              <p class="select-list__rule" aria-hidden="true">└────────────────────────────────</p>
-              <p class="select-list__item select-list__item--active"><span class="select-list__marker" aria-hidden="true">▪</span>Yes</p>
-              <p class="select-list__item"><span class="select-list__marker" aria-hidden="true"></span>No</p>
-              <p class="select-list__hint">↑/↓ move · Enter confirm · y yes · n no</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-rabbit branded progress activity mascot success info">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Activity component</p><h3 class="api-entry__name">moma-rabbit</h3></div>
-            <span class="status status--brand">Moma</span>
-          </header>
-          <p class="api-entry__description">Branded activity and completion feedback using Moma's rabbit signature.</p>
-          <code class="signature">moma-rabbit "Preparing workspace" --info</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art"><span class="terminal-art__cyan">| → Preparing workspace</span>
-/⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
-
-  <span class="terminal-art__pink">(\(\
-  (-.-)
-o_(")(")</span></pre>
-          </div>
-        </article>
-      </section>
-
-      <section class="api-section" id="helpers" data-group>
-        <header class="api-section__header">
-          <p class="api-section__number">02 / 03</p>
-          <h2 class="api-section__title">Workflow helpers</h2>
-          <p class="api-section__intro">Small reusable helpers for process feedback and dependency checks.</p>
-        </header>
-
-        <article class="api-entry" data-api="moma-spinner progress pid process completion">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Process helper</p><h3 class="api-entry__name">moma-spinner</h3></div>
-            <span class="status status--stable">Process</span>
-          </header>
-          <p class="api-entry__description">Display progress while a process is active, then print semantic completion feedback.</p>
-          <code class="signature">moma-spinner pid ["message"] [--delay seconds]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="terminal-lines">
-              <p class="terminal-lines__item terminal-lines__item--success">▪ ✔ Processing &nbsp;✔</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-command-check dependency executable available missing quiet">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Dependency helper</p><h3 class="api-entry__name">moma-command-check</h3></div>
-            <span class="status status--stable">Safe</span>
-          </header>
-          <p class="api-entry__description">Check whether every requested executable is available and return a useful status.</p>
-          <code class="signature">moma-command-check bash curl git [--quiet]</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="dot-lines">
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>bash is available</span></p>
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>curl is available</span></p>
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>git is available</span></p>
-            </div>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-version installed release version">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-version</h3></div>
-            <span class="status status--stable">Stable</span>
-          </header>
-          <p class="api-entry__description">Print the version embedded in the installed Moma executable.</p>
-          <code class="signature">moma-version</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <pre class="terminal-art">1.0.0</pre>
-          </div>
-        </article>
-
-        <article class="api-entry" data-api="moma-update upgrade download release curl">
-          <header class="api-entry__header">
-            <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-update</h3></div>
-            <span class="status status--safe">Atomic</span>
-          </header>
-          <p class="api-entry__description">Download, validate, and atomically replace an executable Moma installation.</p>
-          <code class="signature">moma-update</code>
-          <div class="wireframe">
-            <p class="wireframe__label">Output</p>
-            <div class="dot-lines">
-              <p class="dot-lines__item"><span class="dot-lines__marker">▪</span><span>moma: updated successfully</span></p>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section class="api-section" id="cli">
-        <header class="api-section__header">
-          <p class="api-section__number">03 / 03</p>
-          <h2 class="api-section__title">Command interface</h2>
-          <p class="api-section__intro">The standalone file exposes every library function as a command and keeps documentation previews in the same entrypoint.</p>
-        </header>
-
-        <div class="function-list">
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit</code></article>
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
-          <article class="function-row"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
-        </div>
-      </section>
-    </div>
-
-    <p class="empty-state" hidden>No API functions match this filter.</p>
-  </main>
-
-  <footer class="footer">
-    <p class="footer__brand">moma<span class="footer__cursor">_</span></p>
-    <p class="footer__copy">19 library functions · one standalone Bash file</p>
-    <a class="footer__link" href="#top">Back to top ↑</a>
-  </footer>
-</body>
-</html>
-MOMA_PREVIEW_HTML_EOF
-}
-
-# embedded document: web/styles.css
-_moma_preview_web_styles () {
-    cat <<'MOMA_PREVIEW_CSS_EOF'
-:root {
-  color-scheme: light;
-  --canvas: #f6f4ef;
-  --paper: #fffefa;
-  --ink: #151419;
-  --muted: #66636b;
-  --faint: #8d8992;
-  --line: #cbc7c0;
-  --line-strong: #6d6971;
-  --pink: #c41f9f;
-  --pink-soft: #fae8f6;
-  --cyan: #007d96;
-  --green: #147d35;
-  --red: #bd3040;
-  --yellow: #876600;
-  --terminal: #0d1926;
-  --terminal-ink: #f5f1f7;
-  --terminal-chrome: #d4d4d4;
-  --terminal-chrome-ink: #424242;
-  --terminal-dot: #242424;
-  --terminal-dot-muted: #7d7d7d;
-  --terminal-hot-pink: #ff0883;
-  --terminal-bright-cyan: #08bfff;
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-  --canvas: #0c0d11;
-  --paper: #12141a;
-  --ink: #f5f2ee;
-  --muted: #aaa6b0;
-  --faint: #777481;
-  --line: #353740;
-  --line-strong: #777a85;
-  --pink: #ff90e7;
-  --pink-soft: #2c1b2a;
-  --cyan: #68e4ff;
-  --green: #73f59a;
-  --red: #ff7676;
-  --yellow: #f9dc66;
-  --terminal: #0d1926;
-  --terminal-ink: #f5f1f7;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-.page {
-  min-width: 320px;
-  margin: 0;
-  background:
-    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgb(120 115 125 / 8%) calc(100% - 1px)) 0 0 / 2rem 2rem,
-    linear-gradient(0deg, transparent 0, transparent calc(100% - 1px), rgb(120 115 125 / 8%) calc(100% - 1px)) 0 0 / 2rem 2rem,
-    var(--canvas);
-  color: var(--ink);
-  font: 20px/1.65 var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-.topbar {
-  position: sticky;
-  z-index: 10;
-  top: 0;
-  display: flex;
-  min-height: 4.5rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--canvas) 92%, transparent);
-  backdrop-filter: blur(16px);
-}
-
-.topbar__nav {
-  display: none;
-}
-
-.topbar__link {
-  color: var(--muted);
-  font: 700 calc(0.75rem + 2px) var(--font-mono);
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.topbar__link:hover {
-  color: var(--pink);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  text-decoration: none;
-}
-
-.brand__mark {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  place-items: center;
-  border: 1px solid var(--pink);
-  color: var(--pink);
-  font-size: calc(0.8rem + 2px);
-  font-weight: 800;
-}
-
-.brand__name {
-  font-weight: 800;
-}
-
-.brand__cursor {
-  color: var(--pink);
-  animation: blink 1s steps(2, start) infinite;
-}
-
-.brand__label {
-  display: none;
-  color: var(--faint);
-  font-size: calc(0.72rem + 2px);
-}
-
-.theme-toggle {
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.theme-toggle__icon {
-  color: var(--pink);
-  font-size: calc(1rem + 2px);
-}
-
-.theme-toggle__text {
-  display: none;
-  font: 700 calc(0.68rem + 2px) var(--font-mono);
-  text-transform: uppercase;
-}
-
-.docs {
-  width: min(100% - 2rem, 58rem);
-  margin: 0 auto;
-}
-
-.docs-hero {
-  padding: 2rem 0;
-  border-bottom: 2px solid var(--ink);
-}
-
-.docs-hero__eyebrow {
-  margin: 0 0 0.85rem;
-  color: var(--cyan);
-  font: 800 calc(0.72rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-}
-
-.docs-hero__title {
-  max-width: none;
-  margin: 0;
-  font-size: clamp(2rem, 7vw, 2.65rem);
-  font-weight: 780;
-  letter-spacing: -0.065em;
-  line-height: 0.95;
-}
-
-.docs-hero__accent {
-  color: var(--pink);
-}
-
-.docs-hero__intro {
-  max-width: 43rem;
-  margin: 1rem 0 0;
-  color: var(--muted);
-  font-size: calc(1.05rem + 2px);
-  line-height: 1.75;
-}
-
-.quick-start {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin: 1.25rem 0 0;
-  border-left: 3px solid var(--pink);
-}
-
-.quick-start__label {
-  padding: 0.4rem 1rem;
-  color: var(--pink);
-  font: 800 calc(0.68rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.quick-start__command {
-  padding: 0.55rem 1rem;
-  color: var(--ink);
-  font: calc(0.84rem + 2px)/1.5 var(--font-mono);
-}
-
-.docs-index {
-  padding: 3rem 0;
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.docs-index__heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.docs-index__title {
-  margin: 0;
-  font-size: 1.7rem;
-  letter-spacing: -0.04em;
-}
-
-.docs-index__total {
-  margin: 0;
-  color: var(--muted);
-  font-size: calc(0.82rem + 2px);
-}
-
-.docs-index__count {
-  color: var(--pink);
-  font: 800 calc(1.3rem + 2px) var(--font-mono);
-}
-
-.search {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-  padding: 0.8rem 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.search:focus-within {
-  border-color: var(--pink);
-}
-
-.search__icon {
-  color: var(--pink);
-  font-size: calc(1.2rem + 2px);
-}
-
-.search__label {
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  clip: rect(0 0 0 0);
-}
-
-.search__input {
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--ink);
-  font: calc(0.95rem + 2px) var(--font-sans);
-}
-
-.search__input::placeholder {
-  color: var(--faint);
-}
-
-.search__shortcut {
-  padding: 0.15rem 0.45rem;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--faint);
-  font: calc(0.68rem + 2px) var(--font-mono);
-}
-
-.index-links {
-  display: flex;
-  flex-direction: column;
-}
-
-.index-links__item {
-  display: grid;
-  grid-template-columns: 2rem 1fr auto;
-  gap: 0.65rem;
-  align-items: center;
-  padding: 0.8rem 0;
-  border-bottom: 1px dotted var(--line);
-  color: var(--ink);
-  font-size: calc(0.9rem + 2px);
-  text-decoration: none;
-}
-
-.index-links__item:hover {
-  color: var(--pink);
-}
-
-.index-links__number {
-  color: var(--faint);
-  font: calc(0.68rem + 2px) var(--font-mono);
-}
-
-.index-links__count {
-  color: var(--pink);
-  font: 800 calc(0.8rem + 2px) var(--font-mono);
-}
-
-.api-sections {
-  padding-bottom: 5rem;
-}
-
-.api-section {
-  scroll-margin-top: 6rem;
-  padding: 5rem 0 0;
-}
-
-.api-section[hidden] {
-  display: none;
-}
-
-.api-section__header {
-  padding-bottom: 2rem;
-  border-bottom: 2px solid var(--ink);
-}
-
-.api-section__number {
-  margin: 0 0 0.6rem;
-  color: var(--pink);
-  font: 800 calc(0.7rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-}
-
-.api-section__title {
-  margin: 0;
-  font-size: clamp(2rem, 8vw, 3.4rem);
-  letter-spacing: -0.05em;
-  line-height: 1;
-}
-
-.api-section__intro {
-  max-width: 42rem;
-  margin: 1rem 0 0;
-  color: var(--muted);
-  font-size: calc(1rem + 2px);
-}
-
-.api-entry {
-  padding: 3rem 0;
-  border-bottom: 1px solid var(--line-strong);
-}
-
-.api-entry[hidden] {
-  display: none;
-}
-
-.api-entry__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.api-entry__kind {
-  margin: 0 0 0.35rem;
-  color: var(--faint);
-  font: 800 calc(0.65rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.api-entry__name {
-  margin: 0;
-  font: 800 clamp(1.45rem, 6vw, 2.25rem) var(--font-mono);
-  letter-spacing: -0.04em;
-}
-
-.api-entry__description {
-  max-width: 43rem;
-  margin: 1.2rem 0;
-  color: var(--muted);
-  font-size: calc(1rem + 2px);
-}
-
-.status {
-  display: inline-block;
-  flex: none;
-  padding: 0.25rem 0.45rem;
-  border: 1px solid currentColor;
-  font: 800 calc(0.58rem + 2px) var(--font-mono);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.status--stable { color: var(--green); }
-.status--variants { color: var(--cyan); }
-.status--interactive { color: var(--yellow); }
-.status--brand { color: var(--pink); }
-.status--internal { color: var(--faint); }
-
-.signature {
-  display: block;
-  overflow-x: auto;
-  padding: 1rem 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  color: var(--pink);
-  font: calc(0.82rem + 2px)/1.6 var(--font-mono);
-  white-space: nowrap;
-}
-
-.api-examples {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.api-examples__title {
-  margin: 0 0 0.8rem;
-  color: var(--faint);
-  font: 800 calc(0.64rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.api-examples__list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-
-.api-examples__example {
-  margin: 0;
-  padding: 0.8rem 1rem;
-  background: var(--pink-soft);
-  border-left: 2px solid var(--pink);
-  overflow-x: auto;
-}
-
-.api-examples__code {
-  color: var(--ink);
-  font: calc(0.76rem + 2px)/1.6 var(--font-mono);
-  white-space: pre;
-}
-
-.wireframe {
-  margin-top: 1.75rem;
-  padding-left: 1.25rem;
-  border-left: 1px dashed var(--line-strong);
-}
-
-.wireframe__label {
-  margin: 0 0 1rem;
-  color: var(--faint);
-  font: 800 calc(0.64rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.terminal-art {
-  max-width: 100%;
-  margin: 0;
-  overflow-x: auto;
-  color: var(--terminal-ink);
-  font: calc(0.8rem + 2px)/1.6 var(--font-mono);
-  white-space: pre;
-  background: var(--terminal);
-  padding: 1.25rem;
-}
-
-.terminal-art--pink { color: #ff90e7; }
-.terminal-art--green { color: #73f59a; }
-.terminal-art__pink { color: #ff90e7; }
-.terminal-art__cyan { color: #68e4ff; }
-.terminal-art__muted { color: #777e8e; }
-
-.semantic-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: var(--terminal);
-  padding: 1rem;
-  font-family: var(--font-mono);
-}
-
-.semantic-list__item {
-  margin: 0;
-  padding: 0.4rem 0.6rem;
-  border-left: 2px solid currentColor;
-  font-size: calc(0.8rem + 2px);
-}
-
-.semantic-list__item--success { color: #73f59a; }
-.semantic-list__item--error { color: #ff7676; }
-.semantic-list__item--warning { color: #f9dc66; }
-.semantic-list__item--info { color: #68e4ff; }
-
-.terminal-lines {
-  padding: 1rem 1.25rem;
-  background: var(--terminal);
-  font-family: var(--font-mono);
-}
-
-.terminal-lines__item {
-  margin: 0.2rem 0;
-  font-size: calc(0.8rem + 2px);
-}
-
-.terminal-lines__item--success { color: #73f59a; }
-.terminal-lines__item--error { color: #ff7676; }
-.terminal-lines__item--warning { color: #f9dc66; }
-.terminal-lines__item--info { color: #68e4ff; }
-
-.dot-lines {
-  padding: 1rem 1.25rem;
-  background: var(--terminal);
-  color: var(--terminal-ink);
-  font-family: var(--font-mono);
-}
-
-.dot-lines__item {
-  display: flex;
-  gap: 0.8rem;
-  margin: 0.2rem 0;
-  font-size: calc(0.8rem + 2px);
-}
-
-.dot-lines__marker {
-  flex: none;
-  color: #68e4ff;
-}
-
-.dot-lines__marker--error {
-  color: #ff7676;
-}
-
-.select-list {
-  padding: 1rem 1.25rem;
-  background: var(--terminal);
-  font-family: var(--font-mono);
-}
-
-.select-list__title,
-.select-list__prompt,
-.select-list__rule,
-.select-list__item,
-.select-list__hint {
-  margin: 0.2rem 0;
-  font-size: calc(0.8rem + 2px);
-}
-
-.select-list__title {
-  margin-bottom: 0.65rem;
-  color: var(--terminal-ink);
-  font-weight: 700;
-}
-
-.select-list__prompt {
-  display: flex;
-  gap: 0.8rem;
-  color: var(--terminal-ink);
-  font-weight: 700;
-}
-
-.select-list__prompt-marker,
-.select-list__rule {
-  color: #68e4ff;
-}
-
-.select-list__rule {
-  margin-bottom: 0.65rem;
-}
-
-.select-list__item {
-  display: flex;
-  gap: 0.8rem;
-  color: #a9acb8;
-}
-
-.select-list__item--active {
-  color: #f5f1f7;
-}
-
-.select-list__marker {
-  width: 1ch;
-  flex: none;
-  color: #68e4ff;
-}
-
-.select-list__marker--checked {
-  color: #73f59a;
-}
-
-.select-list__pointer {
-  width: 1ch;
-  flex: none;
-  color: #68e4ff;
-}
-
-.select-list__group {
-  margin: 0.9rem 0 0.2rem;
-  font-size: calc(0.8rem + 2px);
-  color: #777e8e;
-}
-
-.select-list__hint {
-  margin-top: 0.65rem;
-  color: #777e8e;
-}
-
-.function-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.function-row {
-  display: grid;
-  gap: 0.7rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.function-row[hidden] {
-  display: none;
-}
-
-.function-row__name {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  align-items: center;
-}
-
-.function-row__function {
-  color: var(--ink);
-  font: 800 calc(1rem + 2px) var(--font-mono);
-}
-
-.function-row__description {
-  margin: 0;
-  color: var(--muted);
-  font-size: calc(0.92rem + 2px);
-}
-
-.function-row__signature {
-  overflow-x: auto;
-  color: var(--pink);
-  font: calc(0.76rem + 2px)/1.6 var(--font-mono);
-  white-space: nowrap;
-}
-
-.empty-state {
-  margin: 4rem 0;
-  padding: 2rem 0;
-  border-top: 1px dashed var(--line-strong);
-  border-bottom: 1px dashed var(--line-strong);
-  color: var(--muted);
-  text-align: center;
-}
-
-.footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 2.5rem max(1rem, calc((100% - 58rem) / 2));
-  border-top: 2px solid var(--ink);
-  background: var(--paper);
-}
-
-.footer__brand {
-  margin: 0;
-  font: 800 calc(1rem + 2px) var(--font-mono);
-}
-
-.footer__cursor { color: var(--pink); }
-.footer__copy { margin: 0; color: var(--muted); font-size: calc(0.82rem + 2px); }
-.footer__link { color: var(--pink); font-size: calc(0.82rem + 2px); text-decoration: none; }
-
-.page--screenshot {
-  position: relative;
-  min-height: 100vh;
-  padding-top: 2.75rem;
-  color: var(--terminal-ink);
-  background: var(--terminal);
-  border: 1px solid var(--terminal-chrome);
-  border-radius: 0.35rem;
-  overflow: hidden;
-}
-
-.page--screenshot::before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 2.75rem;
-  color: var(--terminal-chrome-ink);
-  font: calc(0.72rem + 2px)/1 var(--font-sans);
-  background: var(--terminal-chrome);
-  content: "Moma";
-}
-
-.page--screenshot::after {
-  position: absolute;
-  top: 1.05rem;
-  right: 1.25rem;
-  z-index: 2;
-  width: 0.65rem;
-  height: 0.65rem;
-  background: var(--terminal-dot);
-  border-radius: 50%;
-  box-shadow: -1.15rem 0 var(--terminal-dot-muted), -2.3rem 0 var(--terminal-dot-muted);
-  content: "";
-}
-
-.page--screenshot .topbar,
-.page--screenshot .docs-hero,
-.page--screenshot .docs-index,
-.page--screenshot .api-section__header,
-.page--screenshot .empty-state,
-.page--screenshot .api-entry__kind,
-.page--screenshot .api-entry__description,
-.page--screenshot .status,
-.page--screenshot .signature,
-.page--screenshot .api-examples,
-.page--screenshot .function-row__description,
-.page--screenshot .function-row__signature,
-.page--screenshot .wireframe__label,
-.page--screenshot .footer {
-  display: none;
-}
-
-.page--screenshot .docs {
-  display: flex;
-  align-items: center;
-  width: min(100% - 6rem, 58rem);
-  min-height: calc(100vh - 2.75rem);
-}
-
-.page--screenshot .api-sections {
-  width: 100%;
-  padding: 0;
-}
-
-.page--screenshot .api-section {
-  padding: 0;
-}
-
-.page--screenshot .component-preview--screenshot-target {
-  width: 100%;
-  padding: 0;
-  background: var(--terminal);
-  border: 0;
-}
-
-.page--screenshot .function-row {
-  display: none;
-}
-
-.page--screenshot .function-row.component-preview--screenshot-target {
-  display: block;
-}
-
-.page--screenshot .api-entry__header,
-.page--screenshot .function-row__name {
-  margin-bottom: 2.25rem;
-}
-
-.page--screenshot .api-entry__name,
-.page--screenshot .function-row__function {
-  color: var(--terminal-hot-pink);
-  font-size: calc(1.4rem + 2px);
-  letter-spacing: 0;
-}
-
-.page--screenshot .api-entry__name::before,
-.page--screenshot .function-row__function::before {
-  color: var(--terminal-bright-cyan);
-  content: "$ ";
-}
-
-.page--screenshot .wireframe {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.page--screenshot .terminal-art,
-.page--screenshot .semantic-list__item,
-.page--screenshot .terminal-lines__item,
-.page--screenshot .dot-lines__item,
-.page--screenshot .select-list__title,
-.page--screenshot .select-list__prompt,
-.page--screenshot .select-list__rule,
-.page--screenshot .select-list__item,
-.page--screenshot .select-list__group,
-.page--screenshot .select-list__hint {
-  font-size: calc(1.05rem + 2px);
-  line-height: 1.7;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .brand__cursor { animation: none; }
-}
-
-@media (min-width: 480px) {
-  .brand__label { display: inline; }
-  .theme-toggle__text { display: inline; }
-  .docs { width: min(100% - 3rem, 58rem); }
-  .terminal-art, .semantic-list__item, .terminal-lines__item, .dot-lines__item, .select-list__title, .select-list__prompt, .select-list__rule, .select-list__item, .select-list__group, .select-list__hint { font-size: calc(0.9rem + 2px); }
-}
-
-@media (min-width: 768px) {
-  .topbar { padding-inline: 2rem; }
-  .topbar__nav { display: flex; gap: 1.3rem; }
-  .docs-hero { padding-block: 2.5rem; }
-  .docs-hero__title { white-space: nowrap; }
-  .docs-hero__intro { font-size: calc(1.05rem + 2px); }
-  .quick-start { max-width: 42rem; }
-  .api-entry { padding-block: 4rem; }
-  .wireframe { padding-left: 2rem; }
-  .semantic-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .function-row { grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 1.2fr); gap: 0.8rem 2rem; }
-  .function-row__signature { grid-column: 2; }
-  .footer { flex-direction: row; align-items: center; justify-content: space-between; }
-}
-
-@media (min-width: 1200px) {
-  .topbar { padding-inline: 3rem; }
-  .docs-hero__title { font-size: 2.65rem; }
-}
-MOMA_PREVIEW_CSS_EOF
-}
-
-# embedded document: web/app.js
-_moma_preview_web_script () {
-    cat <<'MOMA_PREVIEW_JS_EOF'
-const root = document.documentElement;
-const themeToggle = document.querySelector('.theme-toggle');
-const searchInput = document.querySelector('.search__input');
-const count = document.querySelector('.docs-index__count');
-const entries = [...document.querySelectorAll('[data-api]')];
-const groups = [...document.querySelectorAll('[data-group]')];
-const emptyState = document.querySelector('.empty-state');
-const screenshotName = new URLSearchParams(window.location.search).get('component');
-const componentExamples = {
-  'moma-header': [
-    'moma-header "Moma"',
-    'moma-header "Deploy 2026" --color cyan --margin-bottom 1',
-    'moma-header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 2 --no-color',
-  ],
-  'moma-title': [
-    'moma-title "Moma" "Terminal UI library"',
-    'moma-title "Deploy" "Production" --primary cyan',
-    'moma-title "Backup" "Nightly job" --accent yellow --min-width 48',
-  ],
-  'moma-title-sub': [
-    'moma-title-sub "Dependencies" "Installing packages"',
-    'moma-title-sub "Deploy" "Production" --color cyan',
-    'moma-title-sub "Tests" --message "Running suite" --min-width 42',
-  ],
-  'moma-section': [
-    'moma-section "Dependencies ready" --success',
-    'moma-section "Configuration failed" --error',
-    'moma-section "Next step" --info --icon "→"',
-  ],
-  'moma-msg': [
-    'moma-msg "Package installed" --success',
-    'moma-msg "Connection refused" --error',
-    'moma-msg "Downloading metadata" --color cyan --icon "→"',
-  ],
-  'moma-msg-simple': [
-    'moma-msg-simple "Package installed"',
-    'moma-msg-simple "Package installation failed" --error',
-    'moma-msg-simple "Queued" --color yellow --marker "•"',
-  ],
-  'moma-list': [
-    'moma-list "Clone repository" "Install dependencies" "Start application"',
-    'moma-list "Database ready" "Cache ready" --success',
-    'moma-list "Review logs" "Retry deployment" --marker "→" --color yellow',
-  ],
-  'moma-box': [
-    'moma-box "Configuration is ready." --success',
-    'moma-box "Review the deployment settings." --warning --width 48',
-    'moma-box "A long notice wraps inside its border." --info --max-width 32',
-  ],
-  'moma-prompt': [
-    'moma-prompt "Continue with the installation?"',
-    'moma-prompt "Select an environment" --color cyan',
-    'moma-prompt "Deploy now?" --default "yes" --icon "?"',
-  ],
-  'moma-label': [
-    'moma-label "PROJECT NAME"',
-    'moma-label "DEPLOYMENT" --success',
-    'moma-label "NOTES" --width 52 --color cyan --icon "→"',
-  ],
-  'moma-input': [
-    'moma-input --title "Project name" --placeholder "my-project"',
-    'project="$(moma-input --title "Project name" --read --required --trim)"',
-    'password="$(moma-input --title "Password" --read --secret --required)"',
-  ],
-  'moma-single-select': [
-    'environment="$(moma-single-select "Development" "Staging" "Production" --title "Environment")"',
-    'environment="$(moma-single-select "Development" "Staging" "Production" --choose 2)"',
-    'region="$(moma-single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
-  ],
-  'moma-select': [
-    'environment="$(moma-select "Development" "Staging" "Production" --title "Environment")"',
-  ],
-  'moma-single-select-groups': [
-    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy")"',
-    'action="$(moma-single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy" --choose 4)"',
-  ],
-  'moma-multi-select': [
-    'features="$(moma-multi-select "Docker" "CI" "Tests" --title "Features")"',
-    'features="$(moma-multi-select "Docker" "CI" "Tests" --choose 1,3)"',
-    'features="$(moma-multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"',
-  ],
-  'moma-multi-select-groups': [
-    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
-    'countries="$(moma-multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru" --choose 1,3 --required)"',
-  ],
-  'moma-rabbit': [
-    'moma-rabbit "Preparing workspace" --info',
-    'moma-rabbit "Deployment complete" --success',
-    'moma-rabbit "Build needs attention" --warning --icon "!"',
-  ],
-  'moma-confirm': [
-    'moma-confirm "Create this project?" --default yes',
-    'moma-confirm "Delete the cache?" --answer no',
-    'if moma-confirm "Deploy now?"; then\n  moma-msg "Deploying" --info\nfi',
-  ],
-  'moma-spinner': [
-    'sleep 2 &\nmoma-spinner "$!" "Waiting"',
-    'backup_database &\nmoma-spinner --pid "$!" --message "Backing up"',
-    'build_project &\nmoma-spinner "$!" "Building" --delay 0.05',
-  ],
-  'moma-command-check': [
-    'moma-command-check bash curl git',
-    'moma-command-check docker --quiet',
-    'if ! moma-command-check git; then\n  exit 1\nfi',
-  ],
-  'moma-version': [
-    'moma version',
-    'moma-version',
-  ],
-  'moma-update': [
-    'moma update',
-    'moma-update',
-  ],
-};
-
-const savedTheme = localStorage.getItem('moma-preview-theme');
-if (savedTheme === 'light' || savedTheme === 'dark') {
-  root.dataset.theme = savedTheme;
-}
-
-entries.forEach((entry) => {
-  const componentName = entry.dataset.api.split(' ')[0];
-  const examples = componentExamples[componentName];
-
-  if (!examples) {
-    return;
-  }
-
-  const exampleSection = document.createElement('section');
-  const exampleTitle = document.createElement('p');
-  const exampleList = document.createElement('div');
-
-  exampleSection.className = 'api-examples';
-  exampleTitle.className = 'api-examples__title';
-  exampleTitle.textContent = 'Bash examples';
-  exampleList.className = 'api-examples__list';
-
-  examples.forEach((example) => {
-    const exampleBlock = document.createElement('pre');
-    const exampleCode = document.createElement('code');
-
-    exampleBlock.className = 'api-examples__example';
-    exampleCode.className = 'api-examples__code';
-    exampleCode.textContent = example;
-    exampleBlock.append(exampleCode);
-    exampleList.append(exampleBlock);
-  });
-
-  exampleSection.append(exampleTitle, exampleList);
-  entry.querySelector('.wireframe')?.before(exampleSection);
-});
-
-if (screenshotName) {
-  const screenshotTarget = entries.find((entry) => (
-    entry.dataset.api.split(' ')[0] === screenshotName
-  ));
-
-  root.dataset.theme = 'light';
-  document.body.classList.add('page--screenshot');
-
-  entries.forEach((entry) => {
-    entry.hidden = entry !== screenshotTarget;
-  });
-
-  groups.forEach((group) => {
-    group.hidden = !screenshotTarget || !group.contains(screenshotTarget);
-  });
-
-  if (screenshotTarget) {
-    screenshotTarget.classList.add('component-preview--screenshot-target');
-  }
-}
-
-function syncThemeButton() {
-  const isDark = root.dataset.theme === 'dark';
-  themeToggle.setAttribute('aria-pressed', String(isDark));
-  themeToggle.setAttribute('aria-label', isDark ? 'Use light theme' : 'Use dark theme');
-}
-
-function filterComponents() {
-  const query = searchInput.value.trim().toLowerCase();
-  let visibleCount = 0;
-
-  entries.forEach((entry) => {
-    const isVisible = entry.dataset.api.includes(query);
-    entry.hidden = !isVisible;
-    visibleCount += Number(isVisible);
-  });
-
-  groups.forEach((group) => {
-    group.hidden = !group.querySelector('[data-api]:not([hidden])');
-  });
-
-  count.textContent = String(visibleCount);
-  emptyState.hidden = visibleCount !== 0;
-}
-
-themeToggle.addEventListener('click', () => {
-  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('moma-preview-theme', root.dataset.theme);
-  syncThemeButton();
-});
-
-searchInput.addEventListener('input', filterComponents);
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === '/' && document.activeElement !== searchInput) {
-    event.preventDefault();
-    searchInput.focus();
-  }
-});
-
-syncThemeButton();
-count.textContent = String(entries.length);
-MOMA_PREVIEW_JS_EOF
 }
 
 # module: src/core/version.sh
@@ -2355,8 +859,13 @@ if ! _moma_require_bash_version 4 0; then
   return 3 2>/dev/null || exit 3
 fi
 
-# Print the installed Moma version.
+# Print the installed Moma version. This is the single canonical source for
+# the `version` command and the top-level `--version`/`-v` flags.
 moma-version() {
+  if [[ $# -gt 0 ]]; then
+    _moma_usage_error moma-version "unexpected argument: $1"
+    return 2
+  fi
   printf '%s\n' "$MOMA_VERSION"
 }
 
@@ -3226,6 +1735,10 @@ _moma_command_function() {
 # module: src/components/header.sh
 # Pagga ASCII header component.
 _moma_pagga_glyph() {
+  # The Q glyph's backslashes below are literal pixels, not escaped quotes.
+  # A disable directive cannot target a single case branch, so this covers
+  # the whole case statement.
+  # shellcheck disable=SC1003
   case "$1" in
     0) printf '%s\n' '░▄▀▄' '░█/█' '░░▀░' ;;
     1) printf '%s\n' '░▀█░' '░░█░' '░▀▀▀' ;;
@@ -5955,12 +4468,14 @@ EOF
 }
 
 # module: src/components/multi-select-groups.sh
-# Multiple-selection component split across named, non-selectable groups.
+# Multiple-selection component split across named groups, each with its own
+# "All" toggle and a top-level "Select All" toggle. Group headings remain
+# display-only, but the All rows are real, focusable, toggleable rows.
 # Render a multiple-selection menu split across named groups from normalized
-# arguments. Group headings are display-only and never receive focus.
+# arguments.
 _moma_render_multi_select_groups() {
   local title="$1"
-  local active_index="$2"
+  local active_row="$2"
   local selected_state="$3"
   local color="$4"
   local no_color="$5"
@@ -5972,27 +4487,48 @@ _moma_render_multi_select_groups() {
   local -a group_counts=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a options=("$@")
+  local total_options="${#options[@]}"
 
   if $redraw; then
-    _moma_term_move_up "$((${#options[@]} + num_groups * 2 + 3))"
+    _moma_term_move_up "$((total_options + num_groups * 3 + 5))"
   fi
 
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
 
-  local group_index offset=0 row glyph active flat_index
+  local glyph active row_index=0
+  glyph="$(_moma_multi_groups_range_glyph "$selected_state" 0 "$total_options")"
+  active=false
+  ((row_index != active_row)) || active=true
+  _moma_select_render_blank "$redraw"
+  _moma_select_render_row \
+    "$active" "$glyph" "Select All" "$color" "$no_color" "$redraw"
+  row_index=$((row_index + 1))
+
+  local group_index offset=0 row glyph_range flat_index
   for group_index in "${!group_names[@]}"; do
     _moma_select_render_blank "$redraw"
     _moma_select_render_group_heading "${group_names[$group_index]}" "$redraw"
+
+    glyph_range="$(
+      _moma_multi_groups_range_glyph \
+        "$selected_state" "$offset" "${group_counts[$group_index]}"
+    )"
+    active=false
+    ((row_index != active_row)) || active=true
+    _moma_select_render_row \
+      "$active" "$glyph_range" "All" "$color" "$no_color" "$redraw"
+    row_index=$((row_index + 1))
 
     for ((row = 0; row < group_counts[group_index]; row++)); do
       flat_index=$((offset + row))
       glyph="□"
       _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
       active=false
-      ((flat_index != active_index)) || active=true
+      ((row_index != active_row)) || active=true
       _moma_select_render_row \
         "$active" "$glyph" "${options[$flat_index]}" \
         "$color" "$no_color" "$redraw"
+      row_index=$((row_index + 1))
     done
     offset=$((offset + group_counts[group_index]))
   done
@@ -6001,9 +4537,192 @@ _moma_render_multi_select_groups() {
     "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
 }
 
+# Classify a flat option index range as fully selected, partially selected,
+# or empty. Prints "all", "some", or "none".
+_moma_multi_groups_range_state() {
+  local selected_state="$1"
+  local start="$2"
+  local count="$3"
+  local i selected_count=0
+
+  for ((i = start; i < start + count; i++)); do
+    _moma_multi_is_selected "$selected_state" "$i" &&
+      selected_count=$((selected_count + 1))
+  done
+
+  if ((count == 0 || selected_count == 0)); then
+    printf 'none'
+  elif ((selected_count == count)); then
+    printf 'all'
+  else
+    printf 'some'
+  fi
+}
+
+# Render the checkbox glyph for an option range: filled when every option is
+# selected, hatched for a partial selection, empty otherwise.
+_moma_multi_groups_range_glyph() {
+  case "$(_moma_multi_groups_range_state "$@")" in
+    all) printf '▣' ;;
+    some) printf '▨' ;;
+    *) printf '□' ;;
+  esac
+}
+
+# Toggle every option in a flat index range as one unit: clear the range once
+# every option in it is already selected, otherwise select whatever in the
+# range is still unselected.
+_moma_multi_groups_toggle_range() {
+  local selected_state="$1"
+  local start="$2"
+  local count="$3"
+  local i
+
+  if [[ "$(
+    _moma_multi_groups_range_state "$selected_state" "$start" "$count"
+  )" == all ]]; then
+    local -a values=()
+    local value result=""
+    [[ -n "$selected_state" ]] && IFS=',' read -r -a values <<<"$selected_state"
+    for value in "${values[@]}"; do
+      ((value >= start && value < start + count)) ||
+        result+="${result:+,}$value"
+    done
+    printf '%s' "$result"
+    return
+  fi
+
+  for ((i = start; i < start + count; i++)); do
+    _moma_multi_is_selected "$selected_state" "$i" ||
+      selected_state+="${selected_state:+,}$i"
+  done
+  printf '%s' "$selected_state"
+}
+
+# Resolve the flat option offset (0-based) at which a group's options begin.
+_moma_multi_groups_group_offset() {
+  local group_index="$1"
+  local num_groups="$2"
+  shift 2
+  local -a group_counts=("${@:1:$num_groups}")
+  local offset=0 g
+
+  for ((g = 0; g < group_index; g++)); do
+    offset=$((offset + group_counts[g]))
+  done
+  printf '%s' "$offset"
+}
+
+# Resolve a flat option index (0-based) to the group index that contains it.
+_moma_multi_groups_group_of_flat_index() {
+  local flat_index="$1"
+  local num_groups="$2"
+  shift 2
+  local -a group_counts=("${@:1:$num_groups}")
+  local group_index offset=0
+
+  for group_index in "${!group_counts[@]}"; do
+    if ((flat_index < offset + group_counts[group_index])); then
+      printf '%s' "$group_index"
+      return
+    fi
+    offset=$((offset + group_counts[group_index]))
+  done
+}
+
+# Resolve a navigable row index to its kind: "selectall", "group
+# <group_index>", or "option <flat_index>". Navigable rows are, in visual
+# order, one Select All row, then per group one All row followed by its
+# option rows.
+_moma_multi_groups_resolve_row() {
+  local row_index="$1"
+  local num_groups="$2"
+  shift 2
+  local -a group_counts=("${@:1:$num_groups}")
+
+  if ((row_index == 0)); then
+    printf 'selectall'
+    return
+  fi
+
+  local remaining=$((row_index - 1)) group_index block_size flat_offset=0
+  for group_index in "${!group_counts[@]}"; do
+    block_size=$((1 + group_counts[group_index]))
+    if ((remaining < block_size)); then
+      if ((remaining == 0)); then
+        printf 'group %s' "$group_index"
+      else
+        printf 'option %s' "$((flat_offset + remaining - 1))"
+      fi
+      return
+    fi
+    remaining=$((remaining - block_size))
+    flat_offset=$((flat_offset + group_counts[group_index]))
+  done
+}
+
+# Resolve a grouped multiple-selection keyboard event to its next state.
+# active_row and row_count span every navigable row: the Select All row,
+# every group's All row, and every option row.
+_moma_multi_select_groups_transition() {
+  local active_row="$1"
+  local selected_state="$2"
+  local row_count="$3"
+  local total_options="$4"
+  local num_groups="$5"
+  shift 5
+  local -a group_counts=("${@:1:$num_groups}")
+  shift "$num_groups"
+  local event="$1"
+  local result=continue
+
+  case "$event" in
+    up | k)
+      active_row=$(((active_row - 1 + row_count) % row_count))
+      ;;
+    down | j)
+      active_row=$(((active_row + 1) % row_count))
+      ;;
+    space)
+      local resolved kind payload offset
+      resolved="$(
+        _moma_multi_groups_resolve_row "$active_row" "$num_groups" \
+          "${group_counts[@]}"
+      )"
+      kind="${resolved%% *}"
+      payload="${resolved#* }"
+      case "$kind" in
+        selectall)
+          selected_state="$(
+            _moma_multi_groups_toggle_range \
+              "$selected_state" 0 "$total_options"
+          )"
+          ;;
+        group)
+          offset="$(
+            _moma_multi_groups_group_offset "$payload" "$num_groups" \
+              "${group_counts[@]}"
+          )"
+          selected_state="$(
+            _moma_multi_groups_toggle_range \
+              "$selected_state" "$offset" "${group_counts[$payload]}"
+          )"
+          ;;
+        option)
+          selected_state="$(_moma_multi_toggle "$selected_state" "$payload")"
+          ;;
+      esac
+      ;;
+    enter) result=confirm ;;
+    cancel) result=cancel ;;
+  esac
+
+  printf '%s\t%s\t%s\n' "$active_row" "$selected_state" "$result"
+}
+
 # Parse grouped multiple-selection options and return chosen values on
 # stdout, in original visual order. Option numbers are one-based, global,
-# and exclude group headings.
+# and exclude group headings and the Select All / All toggle rows.
 moma-multi-select-groups() {
   local title="Select options"
   local color="$MOMA_COLOR_PRIMARY"
@@ -6136,6 +4855,7 @@ Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>.
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
 Group headings are display-only: they never receive focus and are never printed on stdout.
+Each group has a focusable "All" row above its options that toggles every option in that group, and a "Select All" row above every group toggles every option across all groups. Both fill when every option in their scope is selected, show a hatched glyph when only some are, and are never counted as options or printed on stdout.
 Number lists are one-based, comma-separated, count only options, and follow visual order across every group.
 --choose selects immediately for scripts and tests. Each selected value is printed on its own line, in original visual order.
 EOF
@@ -6159,6 +4879,7 @@ EOF
   _moma_validate_groups moma-multi-select-groups "${group_counts[@]}" ||
     return 2
 
+  local num_groups="${#group_names[@]}"
   local total_options="${#options[@]}"
   if ! _moma_is_index_in_range "$initial" "$total_options"; then
     printf 'moma-multi-select-groups: invalid initial option: %s\n' \
@@ -6187,14 +4908,22 @@ EOF
   fi
 
   local active_index=$((initial - 1))
+  local initial_group_index
+  initial_group_index="$(
+    _moma_multi_groups_group_of_flat_index \
+      "$active_index" "$num_groups" "${group_counts[@]}"
+  )"
+  local active_row=$((active_index + initial_group_index + 2))
+  local row_count=$((1 + num_groups + total_options))
+
   if $choose_set; then
     if $required && [[ -z "$selected_state" ]]; then
       printf 'moma-multi-select-groups: select at least one option\n' >&2
       return 2
     fi
     _moma_render_multi_select_groups \
-      "$title" "$active_index" "$selected_state" "$color" "$no_color" false \
-      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
+      "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
       "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
@@ -6209,8 +4938,8 @@ EOF
   fi
 
   _moma_render_multi_select_groups \
-    "$title" "$active_index" "$selected_state" "$color" "$no_color" false \
-    "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+    "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
+    "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
     "${options[@]}"
 
   local event transition remainder transition_status
@@ -6221,10 +4950,11 @@ EOF
     fi
 
     transition="$(
-      _moma_multi_select_transition \
-        "$active_index" "$selected_state" "$total_options" "$event"
+      _moma_multi_select_groups_transition \
+        "$active_row" "$selected_state" "$row_count" "$total_options" \
+        "$num_groups" "${group_counts[@]}" "$event"
     )"
-    active_index="${transition%%$'\t'*}"
+    active_row="${transition%%$'\t'*}"
     remainder="${transition#*$'\t'}"
     selected_state="${remainder%%$'\t'*}"
     transition_status="${remainder#*$'\t'}"
@@ -6245,8 +4975,8 @@ EOF
     esac
 
     _moma_render_multi_select_groups \
-      "$title" "$active_index" "$selected_state" "$color" "$no_color" true \
-      "${#group_names[@]}" "${group_names[@]}" "${group_counts[@]}" \
+      "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
+      "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
       "${options[@]}"
   done
 }
@@ -6825,76 +5555,51 @@ EOF
 }
 
 # module: src/preview/web.sh
-# Embedded browser preview server.
-# Materialize embedded web assets and serve them from a temporary directory.
+# Hosted browser documentation preview.
+# Resolve the default-browser launcher command for a `uname -s` platform
+# name. Prints the launcher name on success; returns failure when the
+# platform is not one of the operating systems Moma officially targets.
+_moma_browser_launcher_for_platform() {
+  case "$1" in
+    Darwin) printf 'open' ;;
+    Linux) printf 'xdg-open' ;;
+    *) return 1 ;;
+  esac
+}
+
+# Open a URL with the platform's default-browser launcher. The URL is
+# passed as a single argument through an array so it is never re-split,
+# re-expanded, or interpreted by a shell.
+_moma_open_url() {
+  local url="$1"
+  local platform launcher status
+  local -a launch_cmd
+
+  platform="$(uname -s 2>/dev/null)"
+  if ! launcher="$(_moma_browser_launcher_for_platform "$platform")"; then
+    printf 'moma: unsupported platform for opening a browser: %s\n' \
+      "${platform:-unknown}" >&2
+    printf 'moma: open %s manually\n' "$url" >&2
+    return 1
+  fi
+
+  if ! command -v "$launcher" &>/dev/null; then
+    printf 'moma: %s is required to open %s\n' "$launcher" "$url" >&2
+    return 127
+  fi
+
+  launch_cmd=("$launcher" "$url")
+  "${launch_cmd[@]}" >/dev/null 2>&1
+  status=$?
+  if ((status != 0)); then
+    printf 'moma: %s could not open %s\n' "$launcher" "$url" >&2
+    return "$status"
+  fi
+}
+
+# Open the hosted Moma documentation website in the default browser.
 _moma_preview_web() {
-  local port="${MOMA_PREVIEW_PORT:-4173}"
-
-  if [[ ! "$port" =~ ^[0-9]+$ ]] || ((port < 1 || port > 65535)); then
-    printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
-    return 1
-  fi
-  if ! command -v python3 &>/dev/null; then
-    printf 'moma preview web: python3 is required\n' >&2
-    return 1
-  fi
-
-  local preview_dir
-  preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
-  _moma_preview_web_index >"$preview_dir/index.html"
-  _moma_preview_web_styles >"$preview_dir/styles.css"
-  _moma_preview_web_script >"$preview_dir/app.js"
-
-  (
-    trap 'rm -rf "$preview_dir"' EXIT
-    cd "$preview_dir" || exit 1
-    python3 - "$port" <<'PY'
-import errno
-import http.server
-import sys
-
-requested_port = int(sys.argv[1])
-last_port = min(requested_port + 100, 65535)
-server = None
-
-for candidate_port in range(requested_port, last_port + 1):
-    try:
-        server = http.server.ThreadingHTTPServer(
-            ("127.0.0.1", candidate_port),
-            http.server.SimpleHTTPRequestHandler,
-        )
-        break
-    except OSError as error:
-        if error.errno != errno.EADDRINUSE:
-            print(f"moma preview web: {error}", file=sys.stderr)
-            raise SystemExit(1) from None
-
-if server is None:
-    print(
-        f"moma preview web: no free port from {requested_port} to {last_port}",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
-
-selected_port = server.server_address[1]
-if selected_port != requested_port:
-    print(
-        f"Port {requested_port} is already in use; "
-        f"using {selected_port} instead.",
-        flush=True,
-    )
-
-print(f"Moma web preview: http://127.0.0.1:{selected_port}", flush=True)
-print("Press Ctrl+C to stop.", flush=True)
-
-try:
-    server.serve_forever()
-except KeyboardInterrupt:
-    pass
-finally:
-    server.server_close()
-PY
-  )
+  _moma_open_url 'https://mgldvd.github.io/moma/'
 }
 
 # module: src/preview/markdown.sh
@@ -7155,9 +5860,9 @@ _moma_preview_render_command_check() {
 # Print terminal-preview follow-up commands.
 _moma_preview_footer() {
   printf '%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '━')"
-  printf '  Browser docs  ./dist/moma preview web\n'
-  printf '  Markdown docs  ./dist/moma preview md\n'
-  printf '  Library help  ./dist/moma help\n'
+  printf '  Browser docs  moma preview web\n'
+  printf '  Markdown docs  moma preview md\n'
+  printf '  Library help  moma help\n'
   printf '%s%b\n\n' "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
 }
 
@@ -7218,15 +5923,15 @@ _moma_preview() {
     "Large-format headings for scripts and workflow stages."
   _moma_preview_component \
     "moma-header" "Pagga ASCII heading for a prominent script identity." \
-    'moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
+    'moma header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
     _moma_preview_render_header
   _moma_preview_component \
     "moma-title" "Primary script header." \
-    'moma-title "Moma" "Terminal UI library"' \
+    'moma title "Moma" "Terminal UI library"' \
     _moma_preview_render_title
   _moma_preview_component \
     "moma-title-sub" "Secondary workflow header." \
-    'moma-title-sub "Deployment" "Production environment"' \
+    'moma title-sub "Deployment" "Production environment"' \
     _moma_preview_render_title_sub
 
   _moma_preview_section \
@@ -7234,23 +5939,23 @@ _moma_preview() {
     "Semantic variants share one consistent visual language."
   _moma_preview_component \
     "moma-section" "Section headings in every semantic state." \
-    'moma-section "Dependencies ready" --success' \
+    'moma section "Dependencies ready" --success' \
     _moma_preview_render_sections
   _moma_preview_component \
     "moma-msg" "Compact inline feedback and custom icons." \
-    'moma-msg "Package installed" --success' \
+    'moma msg "Package installed" --success' \
     _moma_preview_render_messages
   _moma_preview_component \
     "moma-msg-simple" "A clean message with only a dot marker." \
-    'moma-msg-simple "Package installed"' \
+    'moma msg-simple "Package installed"' \
     _moma_preview_render_simple_message
   _moma_preview_component \
     "moma-list" "An unordered list with one marker per item." \
-    'moma-list "Clone repository" "Install dependencies"' \
+    'moma list "Clone repository" "Install dependencies"' \
     _moma_preview_render_list
   _moma_preview_component \
     "moma-box" "Notices that need stronger visual emphasis." \
-    'moma-box "Your configuration is ready." --success' \
+    'moma box "Your configuration is ready." --success' \
     _moma_preview_render_boxes
 
   _moma_preview_section \
@@ -7258,38 +5963,38 @@ _moma_preview() {
     "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
     "moma-prompt" "Question or confirmation lead-in." \
-    'moma-prompt "Continue?" --color pink' \
+    'moma prompt "Continue?" --color pink' \
     _moma_preview_render_prompt
   _moma_preview_component \
     "moma-label" "Decorated label aligned with input field headers." \
-    'moma-label "TEXT HERE"' \
+    'moma label "TEXT HERE"' \
     _moma_preview_render_label
   _moma_preview_component \
     "moma-input" "Display and interactive input states." \
-    'moma-input --title "Project name" --placeholder "my-project"' \
+    'moma input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
   _moma_preview_component \
     "moma-select" "Arrow-key selection with radio-style indicators." \
-    'moma-select "Development" "Staging" "Production" --title "Environment"' \
+    'moma select "Development" "Staging" "Production" --title "Environment"' \
     _moma_preview_render_select
   _moma_preview_component \
     "moma-single-select-groups" \
     "Radio-style selection organized under named group headings." \
-    'moma-single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
+    'moma single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
     _moma_preview_render_single_select_groups
   _moma_preview_component \
     "moma-multi-select" \
     "Toggle multiple choices with empty and filled square markers." \
-    'moma-multi-select "Docker" "CI" "Tests"' \
+    'moma multi-select "Docker" "CI" "Tests"' \
     _moma_preview_render_multi_select
   _moma_preview_component \
     "moma-multi-select-groups" \
     "Toggle multiple choices organized under named group headings." \
-    'moma-multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
+    'moma multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
     _moma_preview_render_multi_select_groups
   _moma_preview_component \
     "moma-rabbit" "Branded activity and completion feedback." \
-    'moma-rabbit "Preparing workspace" --info' \
+    'moma rabbit "Preparing workspace" --info' \
     _moma_preview_render_rabbits
 
   _moma_preview_section \
@@ -7298,9 +6003,9 @@ _moma_preview() {
   _moma_preview_component \
     "moma-confirm" \
     "Arrow-key Yes/No selection with y and n shortcuts." \
-    'moma-confirm "Continue?" --default yes' \
+    'moma confirm "Continue?" --default yes' \
     _moma_preview_render_confirm
-  local spinner_example="moma-spinner \"\$pid\" \"Preparing workspace\""
+  local spinner_example="moma spinner \"\$pid\" \"Preparing workspace\""
   _moma_preview_component \
     "moma-spinner" \
     "Process progress followed by a semantic completion message." \
@@ -7308,7 +6013,7 @@ _moma_preview() {
     _moma_preview_render_spinner
   _moma_preview_component \
     "moma-command-check" "Check one or more executable dependencies." \
-    'moma-command-check bash curl' \
+    'moma command-check bash curl' \
     _moma_preview_render_command_check
 
   _moma_preview_footer
@@ -7336,15 +6041,23 @@ EOF
   preview         Show terminal, Markdown, or browser previews.
 
 Options:
-  --theme NAME  Use a configured color theme.
-  -h, --help    Show this help.
+  --theme NAME     Use a configured color theme.
+  --version, -v    Print the installed version.
+  -h, --help       Show this help.
 
-Library example:
+Example:
+  moma msg "Ready" --success
+
+The `moma` command works the same way after sourcing the library or after
+installing the executable:
   source dist/moma
-  moma-msg "Ready" --success
+  moma msg "Ready" --success
 
-Binary example:
-  ./dist/moma msg "Ready" --success
+  moma msg "Ready" --success
+
+Backward compatibility:
+  Direct moma-* functions (for example moma-msg) remain available after
+  sourcing dist/moma for existing scripts.
 EOF
 }
 
@@ -7372,6 +6085,7 @@ _moma_main() {
   local command="${1:-}"
   local registered_function=""
   local theme_option=""
+  local version_requested=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -7387,11 +6101,23 @@ _moma_main() {
         theme_option="${1#*=}"
         shift
         ;;
+      --version | -v)
+        version_requested=true
+        shift
+        ;;
       *)
         break
         ;;
     esac
   done
+
+  # A leading --version/-v is a top-level control flag resolved before
+  # command dispatch; it never reinterprets a component's own -v option
+  # because dispatch has not selected a command yet at this point.
+  if $version_requested; then
+    moma-version "$@"
+    return $?
+  fi
 
   command="${1:-}"
   if [[ $# -gt 0 ]]; then
@@ -7468,6 +6194,14 @@ _moma_main() {
         "registered command has no dispatcher: $registered_function"
       ;;
   esac
+}
+
+# Public canonical dispatcher. Sourcing dist/moma defines this shell
+# function so `moma <command>` works identically to the installed
+# executable; both paths call _moma_main, so this never recurses into
+# itself and there is only one dispatcher implementation.
+moma() {
+  _moma_main "$@"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

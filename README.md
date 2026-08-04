@@ -56,6 +56,8 @@ current session.
 
 ```bash
 moma version
+moma --version
+moma -v
 ```
 
 2. Download the latest executable.
@@ -69,14 +71,18 @@ its directory.
 
 ## Usage
 
-### Load as a library
+Moma exposes one canonical command, `moma <command> [arguments] [options]`.
+It works the same way whether you source the library in a shell or install
+the executable.
+
+### Source the library
 
 ```bash
 source dist/moma
 
-moma-title "Moma" "Installer"
-moma-msg "Ready" --success
-moma-list "Clone repository" "Install dependencies"
+moma title "Moma" "Installer"
+moma msg "Ready" --success
+moma list "Clone repository" "Install dependencies"
 ```
 
 Load the library directly from GitHub when a local copy is not available.
@@ -85,17 +91,28 @@ Load the library directly from GitHub when a local copy is not available.
 source <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)
 ```
 
-### Run as an executable
+### Run the installed executable
 
 ```bash
-./dist/moma title "Moma" "Installer"
-./dist/moma msg "Ready" --success
-./dist/moma select "Development" "Staging" "Production"
-./dist/moma single-select-groups --title "Features" \
+moma title "Moma" "Installer"
+moma msg "Ready" --success
+moma select "Development" "Staging" "Production"
+moma single-select-groups --title "Features" \
   --group "Docker" --option "Up" --option "Down" --option "Stop" \
   --group "npm" --option "install" --option "run dev" --option "run deploy"
-./dist/moma confirm "Create this project?" --default yes
+moma confirm "Create this project?" --default yes
 ```
+
+Without installing, run the same commands against the repository copy with
+`./dist/moma <command>` in place of `moma <command>`.
+
+### Backward compatibility
+
+Existing scripts that call direct `moma-*` functions (for example
+`moma-msg-simple`) keep working unchanged after `source dist/moma`. These
+functions call the same implementation as `moma <command>` and remain
+supported, but new scripts should prefer the canonical `moma <command>` form
+used throughout this document.
 
 ### Run the component showcase
 
@@ -131,7 +148,7 @@ task build
 Open the complete component reference locally.
 
 ```bash
-./dist/moma preview
+moma preview
 ```
 
 The source reference is available in
@@ -256,15 +273,16 @@ take priority over configured theme roles.
 ## Help and previews
 
 ```bash
-./dist/moma help
-./dist/moma preview
-./dist/moma preview md
-./dist/moma preview web
+moma help
+moma preview
+moma preview md
+moma preview web
 ```
 
-The web preview starts at `http://127.0.0.1:4173`. Set `MOMA_PREVIEW_PORT` to
-change the starting port. Set `MOMA_HELP_WIDTH` or `MOMA_PREVIEW_WIDTH` to
-change Glow's render width.
+`preview web` opens the hosted documentation website
+(<https://mgldvd.github.io/moma/>) in the default browser using `open` on
+macOS or `xdg-open` on Linux; it does not start a local server. Set
+`MOMA_HELP_WIDTH` or `MOMA_PREVIEW_WIDTH` to change Glow's render width.
 
 ## Development
 
@@ -273,10 +291,10 @@ change Glow's render width.
 - Bash 4.0 or newer.
 - Task 3 for development workflows.
 - `rg` for the smoke suite.
-- Python 3 for `preview web`.
 - Bats-core and ShellCheck for the complete development checks.
 - Glow optionally for rendered Markdown.
 - `tput` optionally for the interactive spinner.
+- `xdg-open` (Linux) or `open` (macOS) optionally for `preview web`.
 
 ### Project structure
 
@@ -287,7 +305,7 @@ change Glow's render width.
 | `src/preview/` | Terminal, Markdown, and browser previews. |
 | `src/cli/` | Executable help and command dispatch. |
 | `docs/` | Embedded help, API reference, and architecture. |
-| `web/` | Embedded browser documentation. |
+| `web/` | Public documentation website, deployed to GitHub Pages. |
 | `examples/` | Installable configuration examples. |
 | `tests/` | Smoke, unit, integration, and contract tests. |
 | `dist/moma` | Generated library and executable. |

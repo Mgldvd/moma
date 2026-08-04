@@ -4,6 +4,7 @@ _moma_main() {
   local command="${1:-}"
   local registered_function=""
   local theme_option=""
+  local version_requested=false
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -19,11 +20,23 @@ _moma_main() {
         theme_option="${1#*=}"
         shift
         ;;
+      --version | -v)
+        version_requested=true
+        shift
+        ;;
       *)
         break
         ;;
     esac
   done
+
+  # A leading --version/-v is a top-level control flag resolved before
+  # command dispatch; it never reinterprets a component's own -v option
+  # because dispatch has not selected a command yet at this point.
+  if $version_requested; then
+    moma-version "$@"
+    return $?
+  fi
 
   command="${1:-}"
   if [[ $# -gt 0 ]]; then
@@ -100,4 +113,12 @@ _moma_main() {
         "registered command has no dispatcher: $registered_function"
       ;;
   esac
+}
+
+# Public canonical dispatcher. Sourcing dist/moma defines this shell
+# function so `moma <command>` works identically to the installed
+# executable; both paths call _moma_main, so this never recurses into
+# itself and there is only one dispatcher implementation.
+moma() {
+  _moma_main "$@"
 }

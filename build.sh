@@ -10,9 +10,6 @@ OUTPUT_DIR="$(dirname "$OUTPUT")"
 SOURCE_DIR="$ROOT_DIR/src"
 HELP_MARKDOWN="$ROOT_DIR/docs/moma-help.md"
 DOCS_MARKDOWN="$ROOT_DIR/docs/moma-docs.md"
-PREVIEW_HTML="$ROOT_DIR/web/index.html"
-PREVIEW_CSS="$ROOT_DIR/web/styles.css"
-PREVIEW_JS="$ROOT_DIR/web/app.js"
 
 modules=(
   core/version.sh
@@ -51,16 +48,10 @@ if [[ ! -f "$HELP_MARKDOWN" ]]; then
   exit 1
 fi
 
-for required_asset in \
-  "$DOCS_MARKDOWN" \
-  "$PREVIEW_HTML" \
-  "$PREVIEW_CSS" \
-  "$PREVIEW_JS"; do
-  if [[ ! -f "$required_asset" ]]; then
-    printf 'build: missing preview asset: %s\n' "$required_asset" >&2
-    exit 1
-  fi
-done
+if [[ ! -f "$DOCS_MARKDOWN" ]]; then
+  printf 'build: missing docs document: %s\n' "$DOCS_MARKDOWN" >&2
+  exit 1
+fi
 
 for module in "${modules[@]}"; do
   module_path="$SOURCE_DIR/$module"
@@ -105,42 +96,6 @@ cat >>"$tmp_file" <<'PREVIEW_MD_FOOTER'
 MOMA_DOCS_MARKDOWN_EOF
 }
 PREVIEW_MD_FOOTER
-
-cat >>"$tmp_file" <<'PREVIEW_HTML_HEADER'
-
-# embedded document: web/index.html
-_moma_preview_web_index () {
-    cat <<'MOMA_PREVIEW_HTML_EOF'
-PREVIEW_HTML_HEADER
-cat "$PREVIEW_HTML" >>"$tmp_file"
-cat >>"$tmp_file" <<'PREVIEW_HTML_FOOTER'
-MOMA_PREVIEW_HTML_EOF
-}
-PREVIEW_HTML_FOOTER
-
-cat >>"$tmp_file" <<'PREVIEW_CSS_HEADER'
-
-# embedded document: web/styles.css
-_moma_preview_web_styles () {
-    cat <<'MOMA_PREVIEW_CSS_EOF'
-PREVIEW_CSS_HEADER
-cat "$PREVIEW_CSS" >>"$tmp_file"
-cat >>"$tmp_file" <<'PREVIEW_CSS_FOOTER'
-MOMA_PREVIEW_CSS_EOF
-}
-PREVIEW_CSS_FOOTER
-
-cat >>"$tmp_file" <<'PREVIEW_JS_HEADER'
-
-# embedded document: web/app.js
-_moma_preview_web_script () {
-    cat <<'MOMA_PREVIEW_JS_EOF'
-PREVIEW_JS_HEADER
-cat "$PREVIEW_JS" >>"$tmp_file"
-cat >>"$tmp_file" <<'PREVIEW_JS_FOOTER'
-MOMA_PREVIEW_JS_EOF
-}
-PREVIEW_JS_FOOTER
 
 for module in "${modules[@]}"; do
   module_path="$SOURCE_DIR/$module"
