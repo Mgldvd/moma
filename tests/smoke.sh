@@ -37,7 +37,7 @@ plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"--version, -v"* ]]
 
 version_output="$("$MOMA_DIST" version)"
-[[ "$version_output" == "1.1.0" ]]
+[[ "$version_output" == "1.2.0" ]]
 
 version_flag_output="$("$MOMA_DIST" --version)"
 [[ "$version_flag_output" == "$version_output" ]]
@@ -1128,6 +1128,7 @@ fi
 site_version="$(rg -o 'data-moma-version="([^"]+)"' -r '$1' "$ROOT_DIR/web/index.html")"
 [[ "$site_version" == "$("$MOMA_DIST" version)" ]]
 rg -Fq ">v${site_version}<" "$ROOT_DIR/web/index.html"
+rg -Fq "class=\"terminal-window__body\">${site_version}</pre>" "$ROOT_DIR/web/index.html"
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
 [[ "$api_count" == "22" ]]
