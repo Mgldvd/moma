@@ -7,7 +7,7 @@ export const SITE = {
   description: 'Complete Moma Bash API and terminal component reference.',
   url: 'https://mgldvd.github.io/moma/',
   repoUrl: 'https://github.com/Mgldvd/moma',
-  version: '1.2.1',
+  version: '1.3.0',
   functionCount: 23,
   visualComponentCount: 19,
   workflowHelperCount: 4,

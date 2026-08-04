@@ -37,7 +37,7 @@ plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"--version, -v"* ]]
 
 version_output="$("$MOMA_DIST" version)"
-[[ "$version_output" == "1.2.1" ]]
+[[ "$version_output" == "1.3.0" ]]
 
 version_flag_output="$("$MOMA_DIST" --version)"
 [[ "$version_flag_output" == "$version_output" ]]
