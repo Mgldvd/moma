@@ -226,3 +226,55 @@ setup() {
   [[ "$output" == *"Alpha"* ]]
   [[ "$output" == *"Omicron"* ]]
 }
+
+@test "multi-select-groups render switches to a compact window when the full layout would not fit" {
+  # 3 groups (3/5/4 options: row_count 16, full_lines 26), active_row 8
+  # (Peru): max_visible is LINES(10) - 4 = 6, so the window scrolls to
+  # [3..8] (Canada..Peru), 3 rows hidden above and 7 hidden below. Compact
+  # mode drops group headings and blank separators so every row costs
+  # exactly one line.
+  # shellcheck disable=SC2016
+  run env LINES=10 NO_COLOR=1 bash -c '
+        source "$1"
+        _moma_render_multi_select_groups \
+          "Options" 8 "" "" false false true 3 \
+          NorthAmerica SouthAmerica Europe \
+          3 5 4 \
+          UnitedStates Canada Mexico \
+          Colombia Argentina Peru Chile Brazil \
+          Spain France Germany Italy
+    ' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  # 2 header lines + 1 scroll indicator + 6 rows + 1 footer.
+  [[ "$(printf '%s\n' "$output" | wc -l)" -eq 10 ]]
+  [[ "$output" == *"3 more above"* ]]
+  [[ "$output" == *"7 more below"* ]]
+  [[ "$output" == *"All · SouthAmerica"* ]]
+  [[ "$output" == *"› □ Peru"* ]]
+  [[ "$output" != *"Select All"* ]]
+  [[ "$output" != *"UnitedStates"* ]]
+  [[ "$output" != *"NorthAmerica"* ]]
+  [[ "$output" != *"Spain"* ]]
+}
+
+@test "multi-select-groups render stays unwindowed for non-interactive callers" {
+  # windowed=false (the --choose path) keeps the full layout, headings and
+  # all, even on a terminal too short to show it without scrolling.
+  # shellcheck disable=SC2016
+  run env LINES=10 NO_COLOR=1 bash -c '
+        source "$1"
+        _moma_render_multi_select_groups \
+          "Options" 0 "" "" false false false 3 \
+          NorthAmerica SouthAmerica Europe \
+          3 5 4 \
+          UnitedStates Canada Mexico \
+          Colombia Argentina Peru Chile Brazil \
+          Spain France Germany Italy
+    ' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ "$output" != *"more above"* ]]
+  [[ "$output" != *"more below"* ]]
+  [[ "$output" == *"Select All"* ]]
+  [[ "$output" == *"NorthAmerica"* ]]
+  [[ "$output" == *"Spain"* ]]
+}

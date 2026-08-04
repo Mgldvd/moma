@@ -10,13 +10,17 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
 
 ### Fixed
 
-- `moma-multi-select` no longer loses track of the active row when the
-  option list is taller than the terminal. Interactive navigation now
-  scrolls a fixed-size window with a "N more above/below" indicator instead
-  of relying on the terminal's own scrollback, which redrew the full list
-  on every keypress and made the highlighted row appear to jump around or
-  scroll away. `--choose` is unaffected and always renders the complete
-  list.
+- `moma-multi-select` and `moma-multi-select-groups` no longer lose track of
+  the active row when the option list is taller than the terminal.
+  Interactive navigation now scrolls a fixed-size window with a "N more
+  above/below" indicator instead of relying on the terminal's own
+  scrollback, which redrew the full list on every keypress and made the
+  highlighted row appear to jump around or scroll away.
+  `moma-multi-select-groups` switches to a compact layout while scrolled
+  (headings dropped, each group's All row labeled with its group name) so
+  every option, including ones scrolled well out of the initial view, stays
+  individually selectable. `--choose` is unaffected on both and always
+  renders the complete list.
 
 ## [1.2.0] - 2026-08-03
 

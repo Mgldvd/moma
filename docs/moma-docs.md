@@ -427,7 +427,7 @@ features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
 
 ### `moma-multi-select-groups`
 
-Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout.
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout. When the full layout is taller than the terminal, interactive navigation switches to a compact scrolling window (headings replaced by a "N more above/below" line and each group's All row labeled with its group name) so every option stays reachable and selectable; `--choose` always renders the full layout, unwindowed.
 
 ```text
 moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]

@@ -2,7 +2,13 @@
 # "All" toggle and a top-level "Select All" toggle. Group headings remain
 # display-only, but the All rows are real, focusable, toggleable rows.
 # Render a multiple-selection menu split across named groups from normalized
-# arguments.
+# arguments. Group headings and blank separators cost extra lines that vary
+# with where the list scrolls, so when windowed and the full layout would
+# not fit the terminal, this switches to a compact layout instead: headings
+# and blank separators are dropped, each group's All row is labeled with its
+# group name inline, and every navigable row costs exactly one line, which
+# lets a fixed-size scrolling window (the same math as moma-multi-select)
+# stay correct regardless of scroll position.
 _moma_render_multi_select_groups() {
   local title="$1"
   local active_row="$2"
@@ -10,17 +16,94 @@ _moma_render_multi_select_groups() {
   local color="$4"
   local no_color="$5"
   local redraw="$6"
-  local num_groups="$7"
-  shift 7
+  local windowed="$7"
+  local num_groups="$8"
+  shift 8
   local -a group_names=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a group_counts=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a options=("$@")
   local total_options="${#options[@]}"
+  local row_count=$((1 + num_groups + total_options))
+  local full_lines=$((total_options + num_groups * 3 + 5))
+
+  local compact=false window_start=0 window_count="$row_count" \
+    indicator_lines=0
+  if $windowed; then
+    local term_height max_visible
+    term_height="$(_moma_term_height)"
+    if ((full_lines > term_height)); then
+      compact=true
+      max_visible=$((term_height - 4))
+      ((max_visible < 1)) && max_visible=1
+      if ((max_visible < row_count)); then
+        indicator_lines=1
+        local window
+        window="$(_moma_select_window "$active_row" "$row_count" "$max_visible")"
+        window_start="${window%%$'\t'*}"
+        window_count="${window#*$'\t'}"
+      fi
+    fi
+  fi
+
+  if $compact; then
+    if $redraw; then
+      _moma_term_move_up "$((window_count + indicator_lines + 3))"
+    fi
+
+    _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
+
+    if ((indicator_lines > 0)); then
+      _moma_select_render_scroll_indicator \
+        "$window_start" "$((row_count - window_start - window_count))" \
+        "$redraw"
+    fi
+
+    local row resolved kind payload glyph label active offset
+    for ((row = window_start; row < window_start + window_count; row++)); do
+      resolved="$(
+        _moma_multi_groups_resolve_row "$row" "$num_groups" "${group_counts[@]}"
+      )"
+      kind="${resolved%% *}"
+      payload="${resolved#* }"
+      active=false
+      ((row != active_row)) || active=true
+      case "$kind" in
+        selectall)
+          glyph="$(
+            _moma_multi_groups_range_glyph "$selected_state" 0 "$total_options"
+          )"
+          label="Select All"
+          ;;
+        group)
+          offset="$(
+            _moma_multi_groups_group_offset "$payload" "$num_groups" \
+              "${group_counts[@]}"
+          )"
+          glyph="$(
+            _moma_multi_groups_range_glyph \
+              "$selected_state" "$offset" "${group_counts[$payload]}"
+          )"
+          label="All · ${group_names[$payload]}"
+          ;;
+        option)
+          glyph="□"
+          _moma_multi_is_selected "$selected_state" "$payload" && glyph="▣"
+          label="${options[$payload]}"
+          ;;
+      esac
+      _moma_select_render_row \
+        "$active" "$glyph" "$label" "$color" "$no_color" "$redraw"
+    done
+
+    _moma_select_render_footer \
+      "↑/↓ move · Space toggle · Enter confirm · q cancel" "$redraw"
+    return
+  fi
 
   if $redraw; then
-    _moma_term_move_up "$((total_options + num_groups * 3 + 5))"
+    _moma_term_move_up "$full_lines"
   fi
 
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
@@ -453,7 +536,7 @@ EOF
     fi
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-      "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
+      false "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
       "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
@@ -469,7 +552,7 @@ EOF
 
   _moma_render_multi_select_groups \
     "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-    "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
+    true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
     "${options[@]}"
 
   local event transition remainder transition_status
@@ -506,7 +589,7 @@ EOF
 
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
-      "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
+      true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
       "${options[@]}"
   done
 }

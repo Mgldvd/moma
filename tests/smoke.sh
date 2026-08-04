@@ -772,6 +772,31 @@ Lambda Mu Nu Xi Omicron --title Options" /dev/null
   [[ "$multi_select_overflow_tty_output" != *$'\033[18A'* ]]
   [[ "$multi_select_overflow_tty_output" == *$'Nu\r'* ]]
 
+  # The same fix, grouped: 3 groups / 12 options (row_count 16, full_lines
+  # 26) must scroll a compact, fixed-size window rather than the unwindowed
+  # 26-line layout, and a row deep inside a scrolled-out group (Peru, row 8)
+  # must stay individually selectable, not just reachable via Select All.
+  multi_select_groups_overflow_tty_output="$(
+    printf $'\033[B\033[B\033[B\033[B\033[B\033[B \n' |
+      script -qec \
+        "LINES=10 NO_COLOR=1 '$MOMA_DIST' multi-select-groups --title Overflow \
+--group NorthAmerica --option UnitedStates --option Canada --option Mexico \
+--group SouthAmerica --option Colombia --option Argentina --option Peru \
+--option Chile --option Brazil \
+--group Europe --option Spain --option France --option Germany --option Italy" \
+        /dev/null
+  )"
+  [[ "$multi_select_groups_overflow_tty_output" == *'more below'* ]]
+  [[ "$multi_select_groups_overflow_tty_output" == *$'\033[10A'* ]]
+  [[ "$multi_select_groups_overflow_tty_output" != *$'\033[26A'* ]]
+  [[ "$multi_select_groups_overflow_tty_output" == *'All · SouthAmerica'* ]]
+  # A bare, unindented "Peru" line is the emitted stdout value; every
+  # rendered row instead has "  " plus a pointer and glyph before the name,
+  # so this also proves Peru (scrolled well past the initial window) was
+  # actually selectable, not just visible via Select All.
+  [[ "$multi_select_groups_overflow_tty_output" == *$'\nPeru\r'* ]]
+  [[ "$multi_select_groups_overflow_tty_output" != *$'\nUnitedStates'* ]]
+
   set +e
   confirm_arrow_output="$(
     printf $'\033[B\n' |
