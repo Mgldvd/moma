@@ -73,9 +73,10 @@ html {
   margin: 0;
   overflow-x: clip;
   background:
-    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgb(120 115 125 / 8%) calc(100% - 1px)) 0 0 / 2rem 2rem,
-    linear-gradient(0deg, transparent 0, transparent calc(100% - 1px), rgb(120 115 125 / 8%) calc(100% - 1px)) 0 0 / 2rem 2rem,
+    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(214 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
+    linear-gradient(0deg, transparent 0, transparent calc(100% - 1px), rgba(120 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
     var(--canvas);
+  background-color: var(--canvas);
   color: var(--ink);
   font: 20px/1.65 var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -145,14 +146,10 @@ html {
 }
 
 .brand__mark {
-  display: grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  place-items: center;
-  border: 1px solid var(--pink);
-  color: var(--pink);
-  font-size: calc(0.8rem + 2px);
-  font-weight: 800;
+  width: 3.2rem;
+  height: 3.2rem;
+  border: 1px solid #F7BDC4;
+  object-fit: cover;
 }
 
 .brand__name {
@@ -227,6 +224,28 @@ html {
 }
 
 .theme-toggle__text {
+  display: none;
+  font: 700 calc(0.68rem + 2px) var(--font-mono);
+  text-transform: uppercase;
+}
+
+.github-link {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.github-link:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.github-link__text {
   display: none;
   font: 700 calc(0.68rem + 2px) var(--font-mono);
   text-transform: uppercase;
@@ -833,6 +852,13 @@ html {
 
 .footer__cursor { color: var(--pink); }
 .footer__copy { margin: 0; color: var(--muted); font-size: calc(0.82rem + 2px); }
+
+.footer__links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
 .footer__link { color: var(--pink); font-size: calc(0.82rem + 2px); text-decoration: none; }
 
 .page--screenshot {
@@ -981,6 +1007,7 @@ html {
   .brand__label { display: inline; }
   .theme-toggle__text { display: inline; }
   .nav-toggle__text { display: inline; }
+  .github-link__text { display: inline; }
   .docs-shell { width: min(100% - 3rem, var(--docs-max-width)); }
   .terminal-window__body { font-size: calc(0.9rem + 2px); }
 }
@@ -1051,7 +1078,6 @@ html {
   .docs-hero { padding-block: 2.5rem; }
   .docs-hero__title { white-space: nowrap; }
   .docs-hero__intro { font-size: calc(1.05rem + 2px); }
-  .quick-start { max-width: 42rem; }
   .api-entry { padding-block: 4rem; }
   .wireframe { padding-left: 2rem; }
   .function-row { grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 1.2fr); gap: 0.8rem 2rem; }
