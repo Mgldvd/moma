@@ -1,5 +1,5 @@
 # Bash runtime compatibility.
-MOMA_VERSION="1.1.0"
+MOMA_VERSION="1.2.0"
 MOMA_UPDATE_URL="${MOMA_UPDATE_URL:-https://github.com/Mgldvd/moma/releases/latest/download/moma}"
 
 # Verify that the running Bash version meets a requested minimum.

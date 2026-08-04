@@ -8,6 +8,8 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-03
+
 ### Added
 
 - Canonical `moma <command>` dispatcher (`moma() { _moma_main "$@"; }`),
@@ -38,7 +40,8 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
   website now use the canonical `moma <command>` form throughout instead of
   mixing it with `moma-*` and `./dist/moma`.
 - Website: hero quick-start commands now share the same background
-  treatment as the other code blocks on the page.
+  treatment as the other code blocks on the page, and the Preview/Load/
+  Install commands are grouped into distinct bordered cards for clarity.
 
 ### Removed
 
@@ -68,6 +71,7 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
   dispatcher, `moma version`, and `moma update` for self-updating an
   installed executable.
 
-[Unreleased]: https://github.com/Mgldvd/moma/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Mgldvd/moma/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Mgldvd/moma/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Mgldvd/moma/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Mgldvd/moma/releases/tag/v1.0.0
