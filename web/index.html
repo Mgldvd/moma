@@ -11,9 +11,10 @@
 <body class="page">
   <a class="skip-link" href="#top">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="Moma documentation home">
+    <a class="brand" href="#top" aria-label="Moma documentation home, version 1.1.0">
       <span class="brand__mark">M</span>
       <span class="brand__name">moma<span class="brand__cursor">_</span></span>
+      <span class="brand__version" data-moma-version="1.1.0">v1.1.0</span>
       <span class="brand__label">documentation</span>
     </a>
     <nav class="topbar__nav" aria-label="Documentation sections">
@@ -150,7 +151,6 @@
           <article class="api-entry" id="moma-header" data-api="moma-header pagga ascii art heading title color">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">ASCII heading component</p><h3 class="api-entry__name">moma-header</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">Three-line Pagga text for a prominent script or workflow identity, with one blank line above, two below, and no left indent by default.</p>
             <code class="signature">moma header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]</code>
@@ -158,7 +158,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-header output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -175,7 +175,6 @@
           <article class="api-entry" id="moma-title" data-api="moma-title primary script header title subtitle accent">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Heading component</p><h3 class="api-entry__name">moma-title</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">Primary identity block for the beginning of a script or major workflow.</p>
             <code class="signature">moma title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]</code>
@@ -183,7 +182,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-title output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -201,7 +200,6 @@
           <article class="api-entry" id="moma-title-sub" data-api="moma-title-sub secondary workflow header subtitle">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Heading component</p><h3 class="api-entry__name">moma-title-sub</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">Secondary heading for stages nested inside the main workflow.</p>
             <code class="signature">moma title-sub "Deployment" "Production environment" [--width number] [--max-width number]</code>
@@ -209,7 +207,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-title-sub output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -227,7 +225,6 @@
           <article class="api-entry" id="moma-section" data-api="moma-section semantic heading success error warning info">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Section component</p><h3 class="api-entry__name">moma-section</h3></div>
-              <span class="status status--variants">4 variants</span>
             </header>
             <p class="api-entry__description">Strong separator that gives semantic context to the content that follows.</p>
             <code class="signature">moma section "Dependencies ready" --success</code>
@@ -235,7 +232,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-section output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -265,7 +262,6 @@
           <article class="api-entry" id="moma-msg" data-api="moma-msg message inline feedback icon success error warning info">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Message component</p><h3 class="api-entry__name">moma-msg</h3></div>
-              <span class="status status--variants">Flexible</span>
             </header>
             <p class="api-entry__description">Compact feedback with semantic defaults or custom color and icon overrides.</p>
             <code class="signature">moma msg "Package installed" --success [--color value] [--icon value]</code>
@@ -273,7 +269,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-msg output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -291,7 +287,6 @@
           <article class="api-entry" id="moma-msg-simple" data-api="moma-msg-simple simple message dot marker no icon success error warning info semantic">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Simple message</p><h3 class="api-entry__name">moma-msg-simple</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">A quiet message with only a dot marker and no semantic icon.</p>
             <code class="signature">moma msg-simple "Package installed" [--success|--error|--warning|--info] [--color value]</code>
@@ -299,7 +294,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-msg-simple output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -315,7 +310,6 @@
           <article class="api-entry" id="moma-list" data-api="moma-list unordered list items dot marker success error warning info semantic">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">List component</p><h3 class="api-entry__name">moma-list</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">An unordered terminal list with a consistent marker for every item.</p>
             <code class="signature">moma list "Clone repository" "Install dependencies" [--success|--error|--warning|--info]</code>
@@ -323,7 +317,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-list output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -340,7 +334,6 @@
           <article class="api-entry" id="moma-box" data-api="moma-box framed boxed notice emphasis success warning info error width max-width MOMA_WIDTH MOMA_MAX_WIDTH">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Notice component</p><h3 class="api-entry__name">moma-box</h3></div>
-              <span class="status status--variants">4 variants</span>
             </header>
             <p class="api-entry__description">Framed notice with automatic, fixed, or maximum width. Long content wraps inside the border.</p>
             <code class="signature">moma box "Configuration is ready." --success [--width number] [--max-width number]</code>
@@ -348,7 +341,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-box output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -365,7 +358,6 @@
           <article class="api-entry" id="moma-prompt" data-api="moma-prompt question confirmation interaction">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Prompt component</p><h3 class="api-entry__name">moma-prompt</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">Question lead-in used before confirmation or free-form interaction.</p>
             <code class="signature">moma prompt "Continue with the installation?" --color pink [--width number] [--max-width number]</code>
@@ -373,7 +365,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-prompt output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -390,7 +382,6 @@
           <article class="api-entry" id="moma-label" data-api="moma-label decorated input header separator text width color semantic">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Label component</p><h3 class="api-entry__name">moma-label</h3></div>
-              <span class="status status--variants">4 variants</span>
             </header>
             <p class="api-entry__description">Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.</p>
             <code class="signature">moma label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]</code>
@@ -398,7 +389,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-label output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -414,7 +405,6 @@
           <article class="api-entry" id="moma-input" data-api="moma-input interactive field read value placeholder secret required default trim">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Input component</p><h3 class="api-entry__name">moma-input</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.</p>
             <code class="signature">moma input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]</code>
@@ -422,7 +412,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-input output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -443,7 +433,6 @@
           <article class="api-entry" id="moma-single-select" data-api="moma-single-select interactive selection list arrows up down radio choice">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.</p>
             <code class="signature">moma single-select "Development" "Staging" "Production" [--title text] [--initial number]</code>
@@ -451,7 +440,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-single-select output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -471,7 +460,6 @@
           <article class="api-entry" id="moma-select" data-api="moma-select interactive selection alias compatibility single-select">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-select</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Documented compatibility alias for <code>moma-single-select</code>. Same arguments, same rendering, kept for existing scripts and the <code>select</code> CLI command.</p>
             <code class="signature">moma select "Development" "Staging" "Production" [--title text] [--initial number]</code>
@@ -480,7 +468,6 @@
           <article class="api-entry" id="moma-single-select-groups" data-api="moma-single-select-groups interactive selection list arrows up down radio choice groups headings">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Select component</p><h3 class="api-entry__name">moma-single-select-groups</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Select one value organized under named, non-selectable group headings. Option numbers are one-based, count only options, and follow visual order across every group.</p>
             <code class="signature">moma single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]</code>
@@ -488,7 +475,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-single-select-groups output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -515,7 +502,6 @@
           <article class="api-entry" id="moma-multi-select" data-api="moma-multi-select interactive multiple selection list arrows space checkbox empty filled square">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Toggle multiple values below a decorated Moma heading and return every selection on its own line.</p>
             <code class="signature">moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]</code>
@@ -523,7 +509,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-multi-select output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -543,7 +529,6 @@
           <article class="api-entry" id="moma-multi-select-groups" data-api="moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Multiple select</p><h3 class="api-entry__name">moma-multi-select-groups</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.</p>
             <code class="signature">moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]</code>
@@ -551,7 +536,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-multi-select-groups output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -578,7 +563,6 @@
           <article class="api-entry" id="moma-confirm" data-api="moma-confirm interactive confirmation yes no selection arrows shortcut default answer">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Confirmation select</p><h3 class="api-entry__name">moma-confirm</h3></div>
-              <span class="status status--interactive">Interactive</span>
             </header>
             <p class="api-entry__description">Select Yes or No with the arrow keys, Enter, or the y and n shortcuts. A successful answer leaves one blank line below the controls.</p>
             <code class="signature">moma confirm "Create this project?" [--default yes|no] [--answer yes|no]</code>
@@ -586,7 +570,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-confirm output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -606,7 +590,6 @@
           <article class="api-entry" id="moma-rabbit" data-api="moma-rabbit branded progress activity mascot success info">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Activity component</p><h3 class="api-entry__name">moma-rabbit</h3></div>
-              <span class="status status--brand">Moma</span>
             </header>
             <p class="api-entry__description">Branded activity and completion feedback using Moma's rabbit signature.</p>
             <code class="signature">moma rabbit "Preparing workspace" --info</code>
@@ -614,7 +597,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-rabbit output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -643,7 +626,6 @@
           <article class="api-entry" id="moma-spinner" data-api="moma-spinner progress pid process completion">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Process helper</p><h3 class="api-entry__name">moma-spinner</h3></div>
-              <span class="status status--stable">Process</span>
             </header>
             <p class="api-entry__description">Display progress while a process is active, then print semantic completion feedback.</p>
             <code class="signature">moma spinner pid ["message"] [--delay seconds]</code>
@@ -651,7 +633,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-spinner output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -666,7 +648,6 @@
           <article class="api-entry" id="moma-command-check" data-api="moma-command-check dependency executable available missing quiet">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Dependency helper</p><h3 class="api-entry__name">moma-command-check</h3></div>
-              <span class="status status--stable">Safe</span>
             </header>
             <p class="api-entry__description">Check whether every requested executable is available and return a useful status.</p>
             <code class="signature">moma command-check bash curl git [--quiet]</code>
@@ -674,7 +655,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-command-check output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -691,7 +672,6 @@
           <article class="api-entry" id="moma-version" data-api="moma-version installed release version">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-version</h3></div>
-              <span class="status status--stable">Stable</span>
             </header>
             <p class="api-entry__description">Print the version embedded in the installed Moma executable.</p>
             <code class="signature">moma version</code>
@@ -699,7 +679,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-version output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -714,7 +694,6 @@
           <article class="api-entry" id="moma-update" data-api="moma-update upgrade download release curl">
             <header class="api-entry__header">
               <div><p class="api-entry__kind">Release helper</p><h3 class="api-entry__name">moma-update</h3></div>
-              <span class="status status--safe">Atomic</span>
             </header>
             <p class="api-entry__description">Download, validate, and atomically replace an executable Moma installation.</p>
             <code class="signature">moma update</code>
@@ -722,7 +701,7 @@
               <p class="wireframe__label">Output</p>
               <div class="terminal-window" role="group" aria-label="moma-update output">
                 <div class="terminal-window__chrome" aria-hidden="true">
-                  <span class="terminal-window__title">bash</span>
+                  <span class="terminal-window__title">preview</span>
                   <span class="terminal-window__controls">
                     <span class="terminal-window__control terminal-window__control--success"></span>
                     <span class="terminal-window__control terminal-window__control--warning"></span>
@@ -743,10 +722,10 @@
           </header>
 
           <div class="function-list">
-            <article class="function-row" id="cli-component-commands"><div class="function-row__name"><code class="function-row__function">Component commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit</code></article>
-            <article class="function-row" id="cli-helper-commands"><div class="function-row__name"><code class="function-row__function">Helper commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
-            <article class="function-row" id="cli-color-themes"><div class="function-row__name"><code class="function-row__function">Color themes</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
-            <article class="function-row" id="cli-documentation-commands"><div class="function-row__name"><code class="function-row__function">Documentation commands</code><span class="status status--internal">CLI</span></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
+            <article class="function-row" id="cli-component-commands"><div class="function-row__name"><code class="function-row__function">Component commands</code></div><p class="function-row__description">Call any visual component without sourcing the library.</p><code class="function-row__signature">moma title | title-sub | section | msg | msg-simple | list | box | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit</code></article>
+            <article class="function-row" id="cli-helper-commands"><div class="function-row__name"><code class="function-row__function">Helper commands</code></div><p class="function-row__description">Run confirmation, spinner, executable checks, and release operations.</p><code class="function-row__signature">moma confirm | spinner | command-check | version | update</code></article>
+            <article class="function-row" id="cli-color-themes"><div class="function-row__name"><code class="function-row__function">Color themes</code></div><p class="function-row__description">Load themes from ~/.config/momaui/moma.confg, list them, or select one for a command.</p><code class="function-row__signature">moma themes | moma --theme NAME msg "Ready"</code></article>
+            <article class="function-row" id="cli-documentation-commands"><div class="function-row__name"><code class="function-row__function">Documentation commands</code></div><p class="function-row__description">Open terminal, Markdown, web, or usage documentation.</p><code class="function-row__signature">moma preview [md|web] | help</code></article>
           </div>
         </section>
       </div>

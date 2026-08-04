@@ -69,6 +69,21 @@ moma update
 `moma update` requires `curl` and write permission for the installed file and
 its directory.
 
+### Versioning
+
+Moma follows [Semantic Versioning](https://semver.org/):
+`MAJOR.MINOR.PATCH`, where `MAJOR` marks a breaking change to the public
+`moma <command>` / `moma-*` interface, `MINOR` adds backward-compatible
+functionality, and `PATCH` covers backward-compatible fixes.
+`src/core/version.sh` is the single source of truth for the installed
+version (`MOMA_VERSION`); a release tags that exact value as
+`vMAJOR.MINOR.PATCH`, and the release workflow refuses to publish a tag that
+doesn't match `moma version`.
+
+Every notable change is recorded in [CHANGELOG.md](CHANGELOG.md), under an
+`Unreleased` heading as it lands and moved under the new version heading
+once a release is cut.
+
 ## Usage
 
 Moma exposes one canonical command, `moma <command> [arguments] [options]`.
@@ -309,6 +324,7 @@ macOS or `xdg-open` on Linux; it does not start a local server. Set
 | `examples/` | Installable configuration examples. |
 | `tests/` | Smoke, unit, integration, and contract tests. |
 | `dist/moma` | Generated library and executable. |
+| `CHANGELOG.md` | Notable changes per version; see [Versioning](#versioning). |
 
 Edit source modules and embedded assets. Do not edit `dist/moma` directly.
 

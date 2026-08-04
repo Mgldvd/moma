@@ -1116,6 +1116,19 @@ if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
   exit 1
 fi
 
+# The status badges ("Stable", "Interactive", "4 variants", ...) carried no
+# information the surrounding content didn't already state and are retired.
+if rg -q 'class="status' "$ROOT_DIR/web/index.html" "$ROOT_DIR/web/styles.css"; then
+  printf 'smoke: obsolete .status badge markup remains in web/\n' >&2
+  exit 1
+fi
+
+# The website's displayed version badge must match the library's actual
+# version so the two never silently drift apart.
+site_version="$(rg -o 'data-moma-version="([^"]+)"' -r '$1' "$ROOT_DIR/web/index.html")"
+[[ "$site_version" == "$("$MOMA_DIST" version)" ]]
+rg -Fq ">v${site_version}<" "$ROOT_DIR/web/index.html"
+
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
 [[ "$api_count" == "22" ]]
 
