@@ -1,71 +1,46 @@
-# Embedded browser preview server.
-# Materialize embedded web assets and serve them from a temporary directory.
+# Hosted browser documentation preview.
+# Resolve the default-browser launcher command for a `uname -s` platform
+# name. Prints the launcher name on success; returns failure when the
+# platform is not one of the operating systems Moma officially targets.
+_moma_browser_launcher_for_platform() {
+  case "$1" in
+    Darwin) printf 'open' ;;
+    Linux) printf 'xdg-open' ;;
+    *) return 1 ;;
+  esac
+}
+
+# Open a URL with the platform's default-browser launcher. The URL is
+# passed as a single argument through an array so it is never re-split,
+# re-expanded, or interpreted by a shell.
+_moma_open_url() {
+  local url="$1"
+  local platform launcher status
+  local -a launch_cmd
+
+  platform="$(uname -s 2>/dev/null)"
+  if ! launcher="$(_moma_browser_launcher_for_platform "$platform")"; then
+    printf 'moma: unsupported platform for opening a browser: %s\n' \
+      "${platform:-unknown}" >&2
+    printf 'moma: open %s manually\n' "$url" >&2
+    return 1
+  fi
+
+  if ! command -v "$launcher" &>/dev/null; then
+    printf 'moma: %s is required to open %s\n' "$launcher" "$url" >&2
+    return 127
+  fi
+
+  launch_cmd=("$launcher" "$url")
+  "${launch_cmd[@]}" >/dev/null 2>&1
+  status=$?
+  if ((status != 0)); then
+    printf 'moma: %s could not open %s\n' "$launcher" "$url" >&2
+    return "$status"
+  fi
+}
+
+# Open the hosted Moma documentation website in the default browser.
 _moma_preview_web() {
-  local port="${MOMA_PREVIEW_PORT:-4173}"
-
-  if [[ ! "$port" =~ ^[0-9]+$ ]] || ((port < 1 || port > 65535)); then
-    printf 'moma preview web: invalid MOMA_PREVIEW_PORT: %s\n' "$port" >&2
-    return 1
-  fi
-  if ! command -v python3 &>/dev/null; then
-    printf 'moma preview web: python3 is required\n' >&2
-    return 1
-  fi
-
-  local preview_dir
-  preview_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-web.XXXXXX")" || return 1
-  _moma_preview_web_index >"$preview_dir/index.html"
-  _moma_preview_web_styles >"$preview_dir/styles.css"
-  _moma_preview_web_script >"$preview_dir/app.js"
-
-  (
-    trap 'rm -rf "$preview_dir"' EXIT
-    cd "$preview_dir" || exit 1
-    python3 - "$port" <<'PY'
-import errno
-import http.server
-import sys
-
-requested_port = int(sys.argv[1])
-last_port = min(requested_port + 100, 65535)
-server = None
-
-for candidate_port in range(requested_port, last_port + 1):
-    try:
-        server = http.server.ThreadingHTTPServer(
-            ("127.0.0.1", candidate_port),
-            http.server.SimpleHTTPRequestHandler,
-        )
-        break
-    except OSError as error:
-        if error.errno != errno.EADDRINUSE:
-            print(f"moma preview web: {error}", file=sys.stderr)
-            raise SystemExit(1) from None
-
-if server is None:
-    print(
-        f"moma preview web: no free port from {requested_port} to {last_port}",
-        file=sys.stderr,
-    )
-    raise SystemExit(1)
-
-selected_port = server.server_address[1]
-if selected_port != requested_port:
-    print(
-        f"Port {requested_port} is already in use; "
-        f"using {selected_port} instead.",
-        flush=True,
-    )
-
-print(f"Moma web preview: http://127.0.0.1:{selected_port}", flush=True)
-print("Press Ctrl+C to stop.", flush=True)
-
-try:
-    server.serve_forever()
-except KeyboardInterrupt:
-    pass
-finally:
-    server.server_close()
-PY
-  )
+  _moma_open_url 'https://mgldvd.github.io/moma/'
 }

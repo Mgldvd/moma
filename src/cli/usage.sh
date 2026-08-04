@@ -19,15 +19,23 @@ EOF
   preview         Show terminal, Markdown, or browser previews.
 
 Options:
-  --theme NAME  Use a configured color theme.
-  -h, --help    Show this help.
+  --theme NAME     Use a configured color theme.
+  --version, -v    Print the installed version.
+  -h, --help       Show this help.
 
-Library example:
+Example:
+  moma msg "Ready" --success
+
+The `moma` command works the same way after sourcing the library or after
+installing the executable:
   source dist/moma
-  moma-msg "Ready" --success
+  moma msg "Ready" --success
 
-Binary example:
-  ./dist/moma msg "Ready" --success
+  moma msg "Ready" --success
+
+Backward compatibility:
+  Direct moma-* functions (for example moma-msg) remain available after
+  sourcing dist/moma for existing scripts.
 EOF
 }
 

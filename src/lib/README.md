@@ -3,6 +3,14 @@
 Moma uses layered source modules under `src/`. The legacy `src/lib` directory
 retains this index for source navigation and public API contract checks.
 
+`src/cli/main.sh` defines the explicit dispatcher `_moma_main` and the public
+`moma()` shell function (`moma() { _moma_main "$@"; }`). Sourcing `dist/moma`
+defines `moma`, so `moma <command>` works the same way whether the library is
+sourced or the generated file is run as the installed executable. Every
+public function below also remains directly callable (for example
+`moma-title`) for backward compatibility with existing scripts; both forms
+dispatch through the same implementation.
+
 ## Core
 
 | Path | Responsibility |

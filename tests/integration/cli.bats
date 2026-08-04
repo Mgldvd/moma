@@ -83,6 +83,70 @@ setup_file() {
   [[ "$output" == *"moma-multi-select-groups: every group requires at least one --option"* ]]
 }
 
+@test "version, --version, and -v produce identical stdout and empty stderr" {
+  version_stdout="$BATS_TEST_TMPDIR/version-stdout"
+  flag_stdout="$BATS_TEST_TMPDIR/flag-stdout"
+  short_stdout="$BATS_TEST_TMPDIR/short-stdout"
+  stderr_file="$BATS_TEST_TMPDIR/stderr"
+
+  "$MOMA_DIST" version >"$version_stdout" 2>"$stderr_file"
+  [[ ! -s "$stderr_file" ]]
+
+  "$MOMA_DIST" --version >"$flag_stdout" 2>"$stderr_file"
+  [[ ! -s "$stderr_file" ]]
+
+  "$MOMA_DIST" -v >"$short_stdout" 2>"$stderr_file"
+  [[ ! -s "$stderr_file" ]]
+
+  [[ "$(<"$version_stdout")" == "$(<"$flag_stdout")" ]]
+  [[ "$(<"$flag_stdout")" == "$(<"$short_stdout")" ]]
+}
+
+@test "extra arguments after a version flag return invalid-usage status" {
+  run "$MOMA_DIST" --version extra
+  [[ "$status" -eq 2 ]]
+
+  run "$MOMA_DIST" -v extra
+  [[ "$status" -eq 2 ]]
+}
+
+@test "a component's own -v option is not reinterpreted as a version flag" {
+  run env NO_COLOR=1 "$MOMA_DIST" msg "hi" -v
+  [[ "$status" -eq 1 ]]
+  [[ "$output" == *"moma-msg: unknown option: -v"* ]]
+}
+
+@test "preview web opens the hosted documentation with the platform launcher" {
+  stub_dir="$BATS_TEST_TMPDIR/stub"
+  mkdir -p "$stub_dir"
+  capture_file="$BATS_TEST_TMPDIR/capture"
+
+  cat >"$stub_dir/uname" <<'EOF'
+#!/bin/bash
+[[ "$1" == "-s" ]] && printf '%s\n' "$STUB_PLATFORM"
+EOF
+  cat >"$stub_dir/open" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$#" "$@" >"$STUB_CAPTURE"
+EOF
+  chmod +x "$stub_dir/uname" "$stub_dir/open"
+  cp "$stub_dir/open" "$stub_dir/xdg-open"
+
+  stdout_file="$BATS_TEST_TMPDIR/stdout"
+  env -u NO_COLOR STUB_PLATFORM=Darwin STUB_CAPTURE="$capture_file" \
+    PATH="$stub_dir" "$MOMA_DIST" preview web >"$stdout_file"
+  [[ ! -s "$stdout_file" ]]
+  [[ "$(<"$capture_file")" == $'1\nhttps://mgldvd.github.io/moma/' ]]
+}
+
+@test "preview and preview md are unaffected by the preview web change" {
+  terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
+  [[ "$terminal_preview" == *"COMPONENT GALLERY"* ]]
+
+  markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
+  [[ "$markdown_preview" == *"# Moma Documentation"* ]]
+}
+
 @test "unknown CLI commands retain status 1" {
   run "$MOMA_DIST" does-not-exist
   [[ "$status" -eq 1 ]]
