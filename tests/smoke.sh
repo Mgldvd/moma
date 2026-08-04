@@ -774,10 +774,11 @@ Lambda Mu Nu Xi Omicron --title Options" /dev/null
 
   # The same fix, grouped: 3 groups / 12 options (row_count 16, full_lines
   # 26) must scroll a bounded compact window rather than the unwindowed
-  # 26-line layout (its move_up count varies with how many group
-  # boundaries scroll into view, but always stays well under 26), and a row
-  # deep inside a scrolled-out group (Peru, row 8) must stay individually
-  # selectable, not just reachable via Select All.
+  # 26-line layout. The compact window reserves 1 row of prompt headroom
+  # below LINES, so its move_up count is a session-constant 9 (LINES - 1),
+  # never the unwindowed 26, and a row deep inside a scrolled-out group
+  # (Peru, row 8) must stay individually selectable, not just reachable via
+  # Select All.
   multi_select_groups_overflow_tty_output="$(
     printf $'\033[B\033[B\033[B\033[B\033[B\033[B \n' |
       script -qec \
@@ -789,7 +790,7 @@ Lambda Mu Nu Xi Omicron --title Options" /dev/null
         /dev/null
   )"
   [[ "$multi_select_groups_overflow_tty_output" == *'more below'* ]]
-  [[ "$multi_select_groups_overflow_tty_output" == *$'\033[10A'* ]]
+  [[ "$multi_select_groups_overflow_tty_output" == *$'\033[9A'* ]]
   [[ "$multi_select_groups_overflow_tty_output" != *$'\033[26A'* ]]
   [[ "$multi_select_groups_overflow_tty_output" == *'All · SouthAmerica'* ]]
   # A bare, unindented "Peru" line is the emitted stdout value; every
