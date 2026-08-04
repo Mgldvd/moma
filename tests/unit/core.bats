@@ -113,3 +113,25 @@ setup() {
   [[ "$status" -eq 0 ]]
   [[ "$output" == $'1\tconfirm' ]]
 }
+
+@test "browser launcher resolves per officially targeted platform" {
+  run _moma_browser_launcher_for_platform Darwin
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == "open" ]]
+
+  run _moma_browser_launcher_for_platform Linux
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == "xdg-open" ]]
+}
+
+@test "browser launcher rejects an unsupported platform" {
+  run _moma_browser_launcher_for_platform Plan9
+  [[ "$status" -ne 0 ]]
+  [[ -z "$output" ]]
+}
+
+@test "moma-version rejects unexpected arguments" {
+  run moma-version extra
+  [[ "$status" -eq 2 ]]
+  [[ "$output" == "moma-version: unexpected argument: extra" ]]
+}

@@ -15,26 +15,31 @@ fi
 # shellcheck disable=SC1090
 source "$MOMA"
 
-# moma-version reports the installed version; moma-update refreshes an executable installation.
+# Sourcing dist/moma defines the canonical `moma` command used below and
+# also defines every direct moma-* function (for example moma-title) for
+# scripts written against the legacy interface.
+#
+# moma version reports the installed version; moma update refreshes an
+# executable installation.
 
 # Keep every horizontal decoration aligned. Set MOMA_MAX_WIDTH instead when
 # decorations should grow with their content up to a common limit.
 MOMA_WIDTH="${MOMA_WIDTH:-48}"
 
-moma-header "Project setup" --color cyan
-moma-title "Project setup" "Interactive form example"
-moma-title-sub "Component showcase" "All public Moma components"
-moma-box "Complete the form to create a project configuration." --info
+moma header "Project setup" --color cyan
+moma title "Project setup" "Interactive form example"
+moma title-sub "Component showcase" "All public Moma components"
+moma box "Complete the form to create a project configuration." --info
 
-moma-section "Preflight" --success
-moma-command-check bash
-moma-msg-simple "All required commands are available." --success
+moma section "Preflight" --success
+moma command-check bash
+moma msg-simple "All required commands are available." --success
 
-moma-section "Project information" --info
-moma-label "Basic details" --color cyan
+moma section "Project information" --info
+moma label "Basic details" --color cyan
 
 project_name="$(
-  moma-input \
+  moma input \
     --title "Project name" \
     --placeholder "my-project" \
     --read \
@@ -42,7 +47,7 @@ project_name="$(
     --trim
 )"
 
-moma-prompt "Choose the target environment" --color pink
+moma prompt "Choose the target environment" --color pink
 select_args=(
   "Development"
   "Staging"
@@ -52,9 +57,9 @@ select_args=(
 if [[ ! -t 0 || ! -t 2 ]]; then
   select_args+=(--choose 1)
 fi
-environment="$(moma-select "${select_args[@]}")"
+environment="$(moma select "${select_args[@]}")"
 
-moma-prompt "Choose the deployment command" --color pink
+moma prompt "Choose the deployment command" --color pink
 single_group_args=(
   --title "Deployment command"
   --group "Docker" --option "Up" --option "Down" --option "Stop"
@@ -63,7 +68,7 @@ single_group_args=(
 if [[ ! -t 0 || ! -t 2 ]]; then
   single_group_args+=(--choose 1)
 fi
-deploy_command="$(moma-single-select-groups "${single_group_args[@]}")"
+deploy_command="$(moma single-select-groups "${single_group_args[@]}")"
 
 multi_select_args=(
   "Docker"
@@ -76,7 +81,7 @@ multi_select_args=(
 if [[ ! -t 0 || ! -t 2 ]]; then
   multi_select_args+=(--choose "1,3")
 fi
-selected_features="$(moma-multi-select "${multi_select_args[@]}")"
+selected_features="$(moma multi-select "${multi_select_args[@]}")"
 mapfile -t features <<<"$selected_features"
 features_summary=""
 for feature in "${features[@]}"; do
@@ -84,7 +89,7 @@ for feature in "${features[@]}"; do
   features_summary+="$feature"
 done
 
-moma-prompt "Choose the deployment regions" --color pink
+moma prompt "Choose the deployment regions" --color pink
 multi_group_args=(
   --title "Deployment regions"
   --group "North America" --option "United States" --option "Canada"
@@ -96,7 +101,7 @@ multi_group_args=(
 if [[ ! -t 0 || ! -t 2 ]]; then
   multi_group_args+=(--choose "1,4")
 fi
-selected_regions="$(moma-multi-select-groups "${multi_group_args[@]}")"
+selected_regions="$(moma multi-select-groups "${multi_group_args[@]}")"
 mapfile -t regions <<<"$selected_regions"
 regions_summary=""
 for region in "${regions[@]}"; do
@@ -104,16 +109,16 @@ for region in "${regions[@]}"; do
   regions_summary+="$region"
 done
 
-moma-prompt "Choose the log verbosity" --color pink
+moma prompt "Choose the log verbosity" --color pink
 log_level_args=("info" "debug" "warn" --title "Log level")
 if [[ ! -t 0 || ! -t 2 ]]; then
   log_level_args+=(--choose 1)
 fi
-log_level="$(moma-single-select "${log_level_args[@]}")"
+log_level="$(moma single-select "${log_level_args[@]}")"
 
-moma-label "Ownership and credentials" --color yellow
+moma label "Ownership and credentials" --color yellow
 owner="$(
-  moma-input \
+  moma input \
     --title "Owner" \
     --placeholder "team@example.com" \
     --read \
@@ -122,7 +127,7 @@ owner="$(
 )"
 
 secret="$(
-  moma-input \
+  moma input \
     --title "Secret" \
     --read \
     --secret \
@@ -132,8 +137,8 @@ secret="$(
 printf -v secret_mask '%*s' "${#secret}" ''
 secret_mask="${secret_mask// /•}"
 
-moma-section "Review" --warning
-moma-list \
+moma section "Review" --warning
+moma list \
   "Project: $project_name" \
   "Environment: $environment" \
   "Command: $deploy_command" \
@@ -143,13 +148,13 @@ moma-list \
   "Owner: $owner" \
   "Secret: $secret_mask"
 
-if moma-confirm "Create this project?" --default yes; then
+if moma confirm "Create this project?" --default yes; then
   sleep 0.15 &
   create_pid=$!
-  moma-spinner "$create_pid" "Creating project" --delay 0.03
-  moma-msg "Project configuration accepted" --success
-  moma-rabbit "Ready to continue" --success
+  moma spinner "$create_pid" "Creating project" --delay 0.03
+  moma msg "Project configuration accepted" --success
+  moma rabbit "Ready to continue" --success
 else
-  moma-msg "Project setup cancelled" --warning
+  moma msg "Project setup cancelled" --warning
   exit 1
 fi

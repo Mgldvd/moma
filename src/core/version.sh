@@ -25,8 +25,13 @@ if ! _moma_require_bash_version 4 0; then
   return 3 2>/dev/null || exit 3
 fi
 
-# Print the installed Moma version.
+# Print the installed Moma version. This is the single canonical source for
+# the `version` command and the top-level `--version`/`-v` flags.
 moma-version() {
+  if [[ $# -gt 0 ]]; then
+    _moma_usage_error moma-version "unexpected argument: $1"
+    return 2
+  fi
   printf '%s\n' "$MOMA_VERSION"
 }
 

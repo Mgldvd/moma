@@ -34,9 +34,49 @@ plain_help="$(PATH=/usr/bin:/bin "$MOMA_DIST" --help)"
 [[ "$plain_help" == *"command-check"* ]]
 [[ "$plain_help" == *"version"* ]]
 [[ "$plain_help" == *"update"* ]]
+[[ "$plain_help" == *"--version, -v"* ]]
 
 version_output="$("$MOMA_DIST" version)"
 [[ "$version_output" == "1.1.0" ]]
+
+version_flag_output="$("$MOMA_DIST" --version)"
+[[ "$version_flag_output" == "$version_output" ]]
+
+short_version_flag_output="$("$MOMA_DIST" -v)"
+[[ "$short_version_flag_output" == "$version_output" ]]
+
+version_status=0
+"$MOMA_DIST" version >/dev/null 2>/dev/null || version_status=$?
+[[ "$version_status" -eq 0 ]]
+version_flag_status=0
+"$MOMA_DIST" --version >/dev/null 2>/dev/null || version_flag_status=$?
+[[ "$version_flag_status" -eq 0 ]]
+short_version_flag_status=0
+"$MOMA_DIST" -v >/dev/null 2>/dev/null || short_version_flag_status=$?
+[[ "$short_version_flag_status" -eq 0 ]]
+
+version_stderr="$("$MOMA_DIST" version 2>&1 >/dev/null)"
+[[ -z "$version_stderr" ]]
+version_flag_stderr="$("$MOMA_DIST" --version 2>&1 >/dev/null)"
+[[ -z "$version_flag_stderr" ]]
+short_version_flag_stderr="$("$MOMA_DIST" -v 2>&1 >/dev/null)"
+[[ -z "$short_version_flag_stderr" ]]
+
+set +e
+"$MOMA_DIST" --version extra >/dev/null 2>&1
+version_flag_extra_status=$?
+"$MOMA_DIST" -v extra >/dev/null 2>&1
+short_version_flag_extra_status=$?
+set -e
+[[ "$version_flag_extra_status" -eq 2 ]]
+[[ "$short_version_flag_extra_status" -eq 2 ]]
+
+set +e
+component_dash_v_output="$(
+  NO_COLOR=1 "$MOMA_DIST" msg "hi" -v 2>&1 >/dev/null
+)"
+set -e
+[[ "$component_dash_v_output" == *"moma-msg: unknown option: -v"* ]]
 
 binary_output="$(NO_COLOR=1 "$MOMA_DIST" msg "Ready" --success)"
 [[ "$binary_output" == *"Ready"* ]]
@@ -311,6 +351,125 @@ bash -c '
     _moma_require_bash_version 4 0
 ' _ "$MOMA_DIST"
 
+# Unified `moma <command>` dispatcher: sourcing defines the function, it is
+# not auto-exported, repeated sourcing stays idempotent, and it produces
+# byte-identical stdout, stderr, and exit status to the executable for
+# representative commands. See tests/integration/dispatch-parity.bats for
+# the full registry-driven matrix.
+bash -c '
+    source "$1"
+    declare -F moma >/dev/null
+' _ "$MOMA_DIST"
+
+not_exported_status=0
+bash -c '
+    source "$1"
+    bash -c "declare -F moma" >/dev/null 2>&1
+' _ "$MOMA_DIST" || not_exported_status=$?
+[[ "$not_exported_status" -ne 0 ]]
+
+idempotent_source_output="$(
+  bash -euo pipefail -c '
+    source "$1"
+    source "$1"
+    declare -F moma | wc -l | tr -d " "
+    NO_COLOR=1 moma msg-simple "twice"
+  ' _ "$MOMA_DIST"
+)"
+[[ "$idempotent_source_output" == $'1\n  ▪   twice' ]]
+
+compare_dispatch_parity() {
+  local description="$1"
+  shift
+  local exec_stdout exec_stderr exec_status
+  local source_stdout source_stderr source_status
+  local exec_stdout_file exec_stderr_file source_stdout_file source_stderr_file
+  exec_stdout_file="$(mktemp)"
+  exec_stderr_file="$(mktemp)"
+  source_stdout_file="$(mktemp)"
+  source_stderr_file="$(mktemp)"
+
+  set +e
+  env NO_COLOR=1 "$MOMA_DIST" "$@" \
+    >"$exec_stdout_file" 2>"$exec_stderr_file"
+  exec_status=$?
+  # Positional parameters are intentionally expanded by the child Bash process.
+  # shellcheck disable=SC2016
+  env NO_COLOR=1 bash -c '
+      source "$1"
+      shift
+      moma "$@"
+  ' _ "$MOMA_DIST" "$@" >"$source_stdout_file" 2>"$source_stderr_file"
+  source_status=$?
+  set -e
+
+  exec_stdout="$(<"$exec_stdout_file")"
+  exec_stderr="$(<"$exec_stderr_file")"
+  source_stdout="$(<"$source_stdout_file")"
+  source_stderr="$(<"$source_stderr_file")"
+  rm -f \
+    "$exec_stdout_file" "$exec_stderr_file" \
+    "$source_stdout_file" "$source_stderr_file"
+
+  if [[ "$exec_stdout" != "$source_stdout" ]] ||
+    [[ "$exec_stderr" != "$source_stderr" ]] ||
+    [[ "$exec_status" != "$source_status" ]]; then
+    printf 'smoke: dispatch parity mismatch for %s\n' "$description" >&2
+    printf 'exec status=%s stdout=%q stderr=%q\n' \
+      "$exec_status" "$exec_stdout" "$exec_stderr" >&2
+    printf 'source status=%s stdout=%q stderr=%q\n' \
+      "$source_status" "$source_stdout" "$source_stderr" >&2
+    exit 1
+  fi
+}
+
+compare_dispatch_parity "msg-simple" msg-simple "Package installed"
+compare_dispatch_parity "msg-simple with empty argument" msg-simple ""
+compare_dispatch_parity "msg-simple with whitespace and glob text" \
+  msg-simple "  spaced *.sh value  "
+compare_dispatch_parity "msg-simple with a leading-dash-like value" \
+  msg-simple -- "--not-an-option"
+compare_dispatch_parity "single-select --choose" \
+  single-select "Development" "Staging" "Production" \
+  --title Environment --choose 2
+compare_dispatch_parity "confirm --answer yes" \
+  confirm "Continue?" --answer yes
+compare_dispatch_parity "confirm --answer no" \
+  confirm "Continue?" --answer no
+compare_dispatch_parity "unknown command" does-not-exist
+compare_dispatch_parity "missing required argument" single-select-groups \
+  --title Features --group Docker
+compare_dispatch_parity "help" --help
+compare_dispatch_parity "version" version
+compare_dispatch_parity "version flag" --version
+compare_dispatch_parity "short version flag" -v
+compare_dispatch_parity "themes" themes
+
+theme_config_parity="$ROOT_DIR/examples/moma.confg"
+exec_theme_stdout="$(
+  env -u NO_COLOR MOMA_CONFIG_FILE="$theme_config_parity" \
+    "$MOMA_DIST" --theme night msg-simple "Themed"
+)"
+source_theme_stdout="$(
+  # Positional parameters are intentionally expanded by the child Bash process.
+  # shellcheck disable=SC2016
+  env -u NO_COLOR MOMA_CONFIG_FILE="$theme_config_parity" bash -c '
+      source "$1"
+      moma --theme night msg-simple "Themed"
+  ' _ "$MOMA_DIST"
+)"
+[[ "$exec_theme_stdout" == "$source_theme_stdout" ]]
+
+legacy_output="$(NO_COLOR=1 bash -c '
+    source "$1"
+    moma-msg-simple "Package installed"
+' _ "$MOMA_DIST")"
+canonical_output="$(NO_COLOR=1 bash -c '
+    source "$1"
+    moma msg-simple "Package installed"
+' _ "$MOMA_DIST")"
+[[ "$legacy_output" == "$canonical_output" ]]
+
 input_output="$(
   printf '  project  \n' |
     NO_COLOR=1 "$MOMA_DIST" input \
@@ -431,9 +590,9 @@ multi_select_groups_visual="$(
     --option Peru \
     --choose 1,3 2>&1 >/dev/null
 )"
-expected_multi_groups=$'  ▪  Features\n  └──────────────────────────────\n\n'
-expected_multi_groups+=$'    North America\n  › ▣ United States\n    □ Canada\n    ▣ Mexico\n\n'
-expected_multi_groups+=$'    South America\n    □ Colombia\n    □ Argentina\n    □ Peru\n'
+expected_multi_groups=$'  ▪  Features\n  └──────────────────────────────\n\n    ▨ Select All\n\n'
+expected_multi_groups+=$'    North America\n    ▨ All\n  › ▣ United States\n    □ Canada\n    ▣ Mexico\n\n'
+expected_multi_groups+=$'    South America\n    □ All\n    □ Colombia\n    □ Argentina\n    □ Peru\n'
 expected_multi_groups+='  ↑/↓ move · Space toggle · Enter confirm · q cancel'
 [[ "$multi_select_groups_visual" == "$expected_multi_groups" ]]
 
@@ -572,6 +731,17 @@ if [[ "${MOMA_TEST_TTY:-1}" == "1" ]] && command -v script &>/dev/null; then
   [[ "$multi_select_groups_tty_output" == *'▣ Up'* ]]
   [[ "$multi_select_groups_tty_output" == *'▣ Stop'* ]]
   [[ "$multi_select_groups_tty_output" == *$'Up\r\nStop\r'* ]]
+
+  multi_select_groups_all_tty_output="$(
+    printf $'\033[A \033[B\033[B\033[B\033[B \n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' multi-select-groups --title Features \
+--group Docker --option Up --option Down --option Stop \
+--group npm --option install --option 'run dev' --option 'run deploy' \
+--required" /dev/null
+  )"
+  [[ "$multi_select_groups_all_tty_output" == *'▣ All'* ]]
+  [[ "$multi_select_groups_all_tty_output" == *$'Up\r\nDown\r\nStop\r\ninstall\r\nrun dev\r\nrun deploy\r'* ]]
 
   multi_select_tty_output="$(
     printf $' \033[B \n' |
@@ -712,7 +882,11 @@ for public_function in "${expected_functions[@]}"; do
     _ "$MOMA_DIST" "$public_function"
   rg -q "data-api=\"$public_function(?: |\")" "$ROOT_DIR/web/index.html"
   rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
-  rg -q "\\b$public_function\\b" "$ROOT_DIR/example.sh"
+  # example.sh uses the canonical `moma <command>` form; either that or the
+  # literal moma-* function name satisfies this cross-file contract.
+  canonical_command="${public_function#moma-}"
+  rg -q "\\bmoma $canonical_command\\b|\\b$public_function\\b" \
+    "$ROOT_DIR/example.sh"
 done
 
 example_output="$(
@@ -776,6 +950,103 @@ glow_help="$(
 [[ "$glow_help" == *"glow arguments: -w 72 -"* ]]
 [[ "$glow_help" == *"# Moma"* ]]
 
+browser_stub_dir="$(mktemp -d "${TMPDIR:-/tmp}/moma-browser.XXXXXX")"
+browser_capture="$browser_stub_dir/capture.txt"
+docs_website_url="https://mgldvd.github.io/moma/"
+
+cat >"$browser_stub_dir/uname" <<'EOF'
+#!/bin/bash
+[[ "$1" == "-s" ]] && printf '%s\n' "$STUB_PLATFORM"
+EOF
+chmod +x "$browser_stub_dir/uname"
+
+cat >"$browser_stub_dir/open" <<'EOF'
+#!/bin/bash
+printf '%s\n' "$#" "$@" >"$STUB_CAPTURE"
+exit "${STUB_EXIT:-0}"
+EOF
+chmod +x "$browser_stub_dir/open"
+cp "$browser_stub_dir/open" "$browser_stub_dir/xdg-open"
+
+macos_preview_web_out="$(
+  env -u NO_COLOR STUB_PLATFORM=Darwin STUB_CAPTURE="$browser_capture" \
+    PATH="$browser_stub_dir" "$MOMA_DIST" preview web
+)"
+macos_preview_web_status=$?
+[[ "$macos_preview_web_status" -eq 0 ]]
+[[ -z "$macos_preview_web_out" ]]
+[[ "$(<"$browser_capture")" == $'1\n'"$docs_website_url" ]]
+rm -f "$browser_capture"
+
+linux_preview_web_out="$(
+  env -u NO_COLOR STUB_PLATFORM=Linux STUB_CAPTURE="$browser_capture" \
+    PATH="$browser_stub_dir" "$MOMA_DIST" preview web
+)"
+linux_preview_web_status=$?
+[[ "$linux_preview_web_status" -eq 0 ]]
+[[ -z "$linux_preview_web_out" ]]
+[[ "$(<"$browser_capture")" == $'1\n'"$docs_website_url" ]]
+rm -f "$browser_capture"
+
+# MOMA_PREVIEW_PORT is obsolete for the hosted-website launcher and must be
+# ignored rather than rejected or acted upon.
+port_ignored_out="$(
+  env -u NO_COLOR STUB_PLATFORM=Linux STUB_CAPTURE="$browser_capture" \
+    MOMA_PREVIEW_PORT=not-a-port \
+    PATH="$browser_stub_dir" "$MOMA_DIST" preview web
+)"
+port_ignored_status=$?
+[[ "$port_ignored_status" -eq 0 ]]
+[[ -z "$port_ignored_out" ]]
+rm -f "$browser_capture"
+
+set +e
+launcher_failure_err="$(
+  env -u NO_COLOR STUB_PLATFORM=Linux STUB_CAPTURE="$browser_capture" \
+    STUB_EXIT=5 PATH="$browser_stub_dir" \
+    "$MOMA_DIST" preview web 2>&1 >/dev/null
+)"
+launcher_failure_status=$?
+set -e
+[[ "$launcher_failure_status" -eq 5 ]]
+[[ "$launcher_failure_err" == *"xdg-open"*"$docs_website_url"* ]]
+
+uname_only_dir="$browser_stub_dir/uname-only"
+mkdir -p "$uname_only_dir"
+cp "$browser_stub_dir/uname" "$uname_only_dir/uname"
+
+set +e
+missing_launcher_err="$(
+  env -u NO_COLOR STUB_PLATFORM=Linux \
+    PATH="$uname_only_dir" \
+    "$MOMA_DIST" preview web 2>&1 >/dev/null
+)"
+missing_launcher_status=$?
+set -e
+[[ "$missing_launcher_status" -eq 127 ]]
+[[ "$missing_launcher_err" == *"xdg-open"*"$docs_website_url"* ]]
+
+set +e
+unsupported_platform_err="$(
+  env -u NO_COLOR STUB_PLATFORM=Plan9 \
+    PATH="$browser_stub_dir" "$MOMA_DIST" preview web 2>&1 >/dev/null
+)"
+unsupported_platform_status=$?
+set -e
+[[ "$unsupported_platform_status" -ne 0 ]]
+[[ "$unsupported_platform_err" == *"$docs_website_url"* ]]
+
+no_local_server_output="$(
+  env -u NO_COLOR STUB_PLATFORM=Linux STUB_CAPTURE="$browser_capture" \
+    PATH="$browser_stub_dir" "$MOMA_DIST" preview web 2>&1
+)"
+[[ "$no_local_server_output" != *"127.0.0.1"* ]]
+[[ "$no_local_server_output" != *"http://"* ]]
+[[ "$no_local_server_output" != *"Press Ctrl+C"* ]]
+rm -f "$browser_capture"
+
+rm -rf "$browser_stub_dir"
+
 terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 [[ "$terminal_preview" == *"COMPONENT GALLERY"* ]]
 [[ "$terminal_preview" == *"moma-header"* ]]
@@ -805,8 +1076,8 @@ expected_legend+="  ${preview_cyan}● info${preview_reset}"
 [[ "$colored_terminal_preview" == *"${preview_gray}────────────────"* ]]
 [[ "$colored_terminal_preview" == *"  02  Status and feedback"* ]]
 [[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
-[[ "$colored_terminal_preview" == *'$ moma-section "Dependencies ready" --success'* ]]
-[[ "$colored_terminal_preview" == *'$ moma-select "Development" "Staging" "Production" --title "Environment"'* ]]
+[[ "$colored_terminal_preview" == *'$ moma section "Dependencies ready" --success'* ]]
+[[ "$colored_terminal_preview" == *'$ moma select "Development" "Staging" "Production" --title "Environment"'* ]]
 [[ "$colored_terminal_preview" == *"└─ ${preview_yellow}output${preview_reset}:"* ]]
 
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
@@ -823,7 +1094,7 @@ multi_select_groups_heading="### \`moma-multi-select-groups\`"
 [[ "$markdown_preview" == *"$single_select_groups_heading"* ]]
 [[ "$markdown_preview" == *"$multi_select_heading"* ]]
 [[ "$markdown_preview" == *"$multi_select_groups_heading"* ]]
-[[ "$markdown_preview" == *"./dist/moma preview web"* ]]
+[[ "$markdown_preview" == *"moma preview web"* ]]
 
 glow_preview="$(
   PATH="$fake_bin:/usr/bin:/bin" \
@@ -840,12 +1111,108 @@ rg -Fq '<span class="quick-start__label">Preview</span>' "$ROOT_DIR/web/index.ht
 rg -Fq '<span class="quick-start__label">Load</span>' "$ROOT_DIR/web/index.html"
 rg -Fq '<span class="quick-start__label">Install</span>' "$ROOT_DIR/web/index.html"
 rg -Fq 'source &lt;(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma)' "$ROOT_DIR/web/index.html"
-rg -Fq 'moma-msg "Ready" --success' "$ROOT_DIR/web/index.html"
+rg -Fq 'moma msg "Ready" --success' "$ROOT_DIR/web/index.html"
 if rg -Fq 'Load from GitHub' "$ROOT_DIR/web/index.html"; then
   exit 1
 fi
 
 api_count="$(rg -o 'data-api=' "$ROOT_DIR/web/index.html" | wc -l | tr -d ' ')"
 [[ "$api_count" == "22" ]]
+
+# Terminal-preview structure: one reusable pattern for every literal
+# terminal output, with obsolete per-system visual classes fully retired.
+web_index="$ROOT_DIR/web/index.html"
+web_styles="$ROOT_DIR/web/styles.css"
+web_app="$ROOT_DIR/web/app.js"
+
+terminal_window_count="$(rg -c 'class="terminal-window"' "$web_index")"
+terminal_body_count="$(rg -c 'class="terminal-window__body\b' "$web_index")"
+terminal_chrome_count="$(rg -c 'class="terminal-window__chrome" aria-hidden="true"' "$web_index")"
+[[ "$terminal_window_count" == "$terminal_body_count" ]]
+[[ "$terminal_window_count" == "$terminal_chrome_count" ]]
+((terminal_window_count >= 20))
+
+if rg -q 'class="(terminal-art|semantic-list|terminal-lines|dot-lines|select-list)' \
+  "$web_index" "$web_styles"; then
+  printf 'smoke: obsolete terminal preview classes remain in web/\n' >&2
+  exit 1
+fi
+
+# Decorative window controls must be hidden from assistive technology.
+control_count="$(rg -c 'class="terminal-window__control ' "$web_index")"
+chrome_hidden_count="$(
+  rg -o '<div class="terminal-window__chrome" aria-hidden="true">' "$web_index" | wc -l | tr -d ' '
+)"
+((control_count > 0))
+[[ "$chrome_hidden_count" == "$terminal_window_count" ]]
+
+# Every sidebar link must resolve to exactly one element id, ids must be
+# unique, and every documented public component must appear in the sidebar.
+mapfile -t nav_hrefs < <(
+  rg -o 'class="docs-nav__link"[^>]*href="#([a-zA-Z0-9_-]+)"' -r '$1' "$web_index"
+)
+((${#nav_hrefs[@]} > 0))
+for nav_href in "${nav_hrefs[@]}"; do
+  id_matches="$(rg -c "id=\"$nav_href\"" "$web_index" || true)"
+  if [[ "$id_matches" != "1" ]]; then
+    printf 'smoke: sidebar link #%s resolves to %s elements, expected 1\n' \
+      "$nav_href" "${id_matches:-0}" >&2
+    exit 1
+  fi
+done
+
+all_ids="$(rg -o 'id="[a-zA-Z0-9_-]+"' "$web_index" | sort)"
+duplicate_ids="$(printf '%s\n' "$all_ids" | uniq -d)"
+[[ -z "$duplicate_ids" ]]
+
+mapfile -t nav_for_components < <(
+  rg -o 'data-nav-for="([a-z0-9-]+)"' -r '$1' "$web_index" | sort -u
+)
+mapfile -t documented_components < <(
+  rg -o 'data-api="([a-z0-9-]+)' -r '$1' "$web_index" | sort -u
+)
+[[ "${#nav_for_components[@]}" == "${#documented_components[@]}" ]]
+for documented_component in "${documented_components[@]}"; do
+  found_in_nav=false
+  for nav_component in "${nav_for_components[@]}"; do
+    [[ "$nav_component" == "$documented_component" ]] && found_in_nav=true && break
+  done
+  if ! $found_in_nav; then
+    printf 'smoke: %s is missing from the sidebar navigation\n' \
+      "$documented_component" >&2
+    exit 1
+  fi
+done
+
+# Mobile navigation trigger accessibility contract.
+rg -Fq 'class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"' \
+  "$web_index"
+rg -Fq 'id="docs-nav"' "$web_index"
+
+# Active-navigation implementation uses aria-current, driven from app.js.
+rg -Fq "aria-current', 'location'" "$web_app"
+rg -Fq 'IntersectionObserver' "$web_app"
+
+# Filtering hides matching sidebar entries and empty groups.
+rg -Fq 'navGroupEls.forEach' "$web_app"
+rg -Fq 'isNavLinkVisible' "$web_app"
+
+# Screenshot mode hides the sidebar, mobile trigger, and terminal chrome.
+rg -Fq '.page--screenshot .docs-nav,' "$web_styles"
+rg -Fq '.page--screenshot .nav-toggle,' "$web_styles"
+rg -Fq '.page--screenshot .terminal-window__chrome' "$web_styles"
+
+# No external runtime dependency: only the bundled stylesheet and script,
+# and only relative or well-known documentation asset URLs.
+if rg -q '<link[^>]*href="https?://' "$web_index"; then
+  printf 'smoke: web/index.html references an external stylesheet or font\n' >&2
+  exit 1
+fi
+if rg -q '<script[^>]*src="https?://' "$web_index"; then
+  printf 'smoke: web/index.html references an external script\n' >&2
+  exit 1
+fi
+rg -Fq '<link rel="stylesheet" href="styles.css">' "$web_index"
+rg -Fq '<script src="app.js" defer></script>' "$web_index"
 
 printf 'Smoke tests passed.\n'

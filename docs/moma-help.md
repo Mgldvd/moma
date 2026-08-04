@@ -10,8 +10,19 @@ Repository: <https://github.com/Mgldvd/moma>
 
 ```bash
 moma <command> [arguments] [options]
-source dist/moma
 ```
+
+Use the installed executable directly, or source the library first to make
+the same `moma` command available as a shell function in the current shell:
+
+```bash
+source dist/moma
+moma <command> [arguments] [options]
+```
+
+Existing scripts that call direct `moma-*` functions (for example
+`moma-msg-simple`) keep working after `source dist/moma`; they remain
+supported for backward compatibility but are not the recommended interface.
 
 ## Component commands
 
@@ -53,7 +64,7 @@ source dist/moma
 | `themes` | List configured color themes. |
 | `preview` | Show the terminal reference. |
 | `preview md` | Show the Markdown reference with Glow when available. |
-| `preview web` | Serve the browser reference. |
+| `preview web` | Open the hosted Moma documentation website in the default browser. |
 
 ## Remote preview
 
@@ -64,6 +75,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Mgldvd/moma/master/dist/moma
 ## Global options
 
 - `--theme <name>`: Use a configured color theme for this command.
+- `--version`, `-v`: Print the installed version and exit. Recognized only
+  as a leading argument, before a command is selected.
 - `-h`, `--help`: Show help.
 
 ## Color themes
@@ -110,7 +123,17 @@ are display-only: they never receive focus, are never toggled, are never
 counted as options, and are never printed on stdout. `--initial`, `--choose`,
 and `--selected` use one-based indexes that count only options, in visual
 order across every group. Up and down navigation skips headings and wraps
-between the first and last option across all groups.
+between the first and last focusable row across all groups.
+
+`moma-multi-select-groups` also renders a focusable "All" row above each
+group's options and a focusable "Select All" row above every group. Space on
+an "All" row toggles every option in that group; Space on "Select All"
+toggles every option across all groups. Both fill (`▣`) once every option in
+their scope is selected, show a hatched glyph (`▨`) once some but not all
+are, and are otherwise empty (`□`); toggling clears a fully selected scope
+and otherwise fills whatever is still unselected. Neither row counts as an
+option or is ever printed on stdout, so `--initial`, `--choose`, and
+`--selected` numbering is unaffected.
 
 ## Decoration width
 
@@ -145,6 +168,10 @@ width is 8 columns and box padding may require a larger value.
 ./dist/moma command-check bash curl
 ./dist/moma themes
 ./dist/moma preview
+./dist/moma preview web
+./dist/moma version
+./dist/moma --version
+./dist/moma -v
 ```
 
 ## Library examples
@@ -179,6 +206,8 @@ Run these commands from an executable installation.
 
 ```bash
 moma version
+moma --version
+moma -v
 moma update
 ```
 

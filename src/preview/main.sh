@@ -226,9 +226,9 @@ _moma_preview_render_command_check() {
 # Print terminal-preview follow-up commands.
 _moma_preview_footer() {
   printf '%b%s\n' "$MOMA_COLOR_GRAY" "$(_moma_preview_line '━')"
-  printf '  Browser docs  ./dist/moma preview web\n'
-  printf '  Markdown docs  ./dist/moma preview md\n'
-  printf '  Library help  ./dist/moma help\n'
+  printf '  Browser docs  moma preview web\n'
+  printf '  Markdown docs  moma preview md\n'
+  printf '  Library help  moma help\n'
   printf '%s%b\n\n' "$(_moma_preview_line '━')" "$MOMA_COLOR_RESET"
 }
 
@@ -289,15 +289,15 @@ _moma_preview() {
     "Large-format headings for scripts and workflow stages."
   _moma_preview_component \
     "moma-header" "Pagga ASCII heading for a prominent script identity." \
-    'moma-header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
+    'moma header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
     _moma_preview_render_header
   _moma_preview_component \
     "moma-title" "Primary script header." \
-    'moma-title "Moma" "Terminal UI library"' \
+    'moma title "Moma" "Terminal UI library"' \
     _moma_preview_render_title
   _moma_preview_component \
     "moma-title-sub" "Secondary workflow header." \
-    'moma-title-sub "Deployment" "Production environment"' \
+    'moma title-sub "Deployment" "Production environment"' \
     _moma_preview_render_title_sub
 
   _moma_preview_section \
@@ -305,23 +305,23 @@ _moma_preview() {
     "Semantic variants share one consistent visual language."
   _moma_preview_component \
     "moma-section" "Section headings in every semantic state." \
-    'moma-section "Dependencies ready" --success' \
+    'moma section "Dependencies ready" --success' \
     _moma_preview_render_sections
   _moma_preview_component \
     "moma-msg" "Compact inline feedback and custom icons." \
-    'moma-msg "Package installed" --success' \
+    'moma msg "Package installed" --success' \
     _moma_preview_render_messages
   _moma_preview_component \
     "moma-msg-simple" "A clean message with only a dot marker." \
-    'moma-msg-simple "Package installed"' \
+    'moma msg-simple "Package installed"' \
     _moma_preview_render_simple_message
   _moma_preview_component \
     "moma-list" "An unordered list with one marker per item." \
-    'moma-list "Clone repository" "Install dependencies"' \
+    'moma list "Clone repository" "Install dependencies"' \
     _moma_preview_render_list
   _moma_preview_component \
     "moma-box" "Notices that need stronger visual emphasis." \
-    'moma-box "Your configuration is ready." --success' \
+    'moma box "Your configuration is ready." --success' \
     _moma_preview_render_boxes
 
   _moma_preview_section \
@@ -329,38 +329,38 @@ _moma_preview() {
     "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
     "moma-prompt" "Question or confirmation lead-in." \
-    'moma-prompt "Continue?" --color pink' \
+    'moma prompt "Continue?" --color pink' \
     _moma_preview_render_prompt
   _moma_preview_component \
     "moma-label" "Decorated label aligned with input field headers." \
-    'moma-label "TEXT HERE"' \
+    'moma label "TEXT HERE"' \
     _moma_preview_render_label
   _moma_preview_component \
     "moma-input" "Display and interactive input states." \
-    'moma-input --title "Project name" --placeholder "my-project"' \
+    'moma input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
   _moma_preview_component \
     "moma-select" "Arrow-key selection with radio-style indicators." \
-    'moma-select "Development" "Staging" "Production" --title "Environment"' \
+    'moma select "Development" "Staging" "Production" --title "Environment"' \
     _moma_preview_render_select
   _moma_preview_component \
     "moma-single-select-groups" \
     "Radio-style selection organized under named group headings." \
-    'moma-single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
+    'moma single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
     _moma_preview_render_single_select_groups
   _moma_preview_component \
     "moma-multi-select" \
     "Toggle multiple choices with empty and filled square markers." \
-    'moma-multi-select "Docker" "CI" "Tests"' \
+    'moma multi-select "Docker" "CI" "Tests"' \
     _moma_preview_render_multi_select
   _moma_preview_component \
     "moma-multi-select-groups" \
     "Toggle multiple choices organized under named group headings." \
-    'moma-multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
+    'moma multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
     _moma_preview_render_multi_select_groups
   _moma_preview_component \
     "moma-rabbit" "Branded activity and completion feedback." \
-    'moma-rabbit "Preparing workspace" --info' \
+    'moma rabbit "Preparing workspace" --info' \
     _moma_preview_render_rabbits
 
   _moma_preview_section \
@@ -369,9 +369,9 @@ _moma_preview() {
   _moma_preview_component \
     "moma-confirm" \
     "Arrow-key Yes/No selection with y and n shortcuts." \
-    'moma-confirm "Continue?" --default yes' \
+    'moma confirm "Continue?" --default yes' \
     _moma_preview_render_confirm
-  local spinner_example="moma-spinner \"\$pid\" \"Preparing workspace\""
+  local spinner_example="moma spinner \"\$pid\" \"Preparing workspace\""
   _moma_preview_component \
     "moma-spinner" \
     "Process progress followed by a semantic completion message." \
@@ -379,7 +379,7 @@ _moma_preview() {
     _moma_preview_render_spinner
   _moma_preview_component \
     "moma-command-check" "Check one or more executable dependencies." \
-    'moma-command-check bash curl' \
+    'moma command-check bash curl' \
     _moma_preview_render_command_check
 
   _moma_preview_footer

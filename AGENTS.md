@@ -5,6 +5,7 @@
 - Treat `src/{core,components,preview,cli}/*.sh`, `docs/moma-help.md`, `docs/moma-docs.md`, and `web/{index.html,styles.css,app.js}` as sources. `dist/moma` is generated; never edit it directly.
 - `build.sh` concatenates an explicit, ordered module list and embeds the docs and preview assets. Add or reorder a module in that list, not merely under `src/`.
 - Keep public functions named `moma-*`; `_moma_*` is the private namespace. The generated file must remain safe both to source under `set -euo pipefail` and to execute as a CLI.
+- `src/cli/main.sh` defines the explicit dispatcher `_moma_main` and the public `moma()` shell function (`moma() { _moma_main "$@"; }`). Sourcing `dist/moma` defines both `moma` and every `moma-*` function without executing anything; the executable-only guard at the end of the generated file calls `_moma_main` directly (never `moma`) so there is one dispatcher and no recursion. Canonical usage (`moma <command>`) works identically whether the file is sourced or run as the installed executable; keep documentation and examples on that canonical form and treat direct `moma-*` calls as a documented backward-compatibility path, not the primary interface.
 
 ## Shell Style And Static Analysis
 
@@ -23,7 +24,7 @@
 
 ## Cross-File Contracts
 
-- When adding or removing a public `moma-*` function, update `tests/smoke.sh`'s `expected_functions`, `web/index.html` (`data-api`), `src/lib/README.md`, and `example.sh`; the smoke suite requires all four to match.
+- When adding or removing a public `moma-*` function, update `tests/smoke.sh`'s `expected_functions`, `web/index.html` (`data-api`), `src/lib/README.md`, and `example.sh`; the smoke suite requires all four to match. `example.sh` and other user-facing examples use the canonical `moma <command>` invocation; the smoke check accepts either that form or the literal `moma-*` name.
 - Preserve stdout as the return channel for interactive values. Prompts and controls use stderr where needed so command substitution captures only the selected or entered value.
 - Use `NO_COLOR=1` and non-interactive options such as `--choose` or `--answer` in deterministic checks; tests assert exact Unicode layout and blank-line composition.
 - Rebuild after changing source modules, embedded Markdown, or preview assets, and include the resulting `dist/moma` update with the source change.

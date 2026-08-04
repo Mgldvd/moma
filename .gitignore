@@ -52,3 +52,7 @@ node_modules/
 
 .tmp
 .tasks/bin/
+
+skills-lock.json
+.claude/
+.agents/
