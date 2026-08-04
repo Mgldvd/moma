@@ -375,7 +375,7 @@ html {
 .quick-start__command {
   display: block;
   overflow-x: hidden;
-  padding: 0.55rem 1rem;
+  padding: 0.55rem 3.75rem 0.55rem 1rem;
   color: var(--ink);
   font: calc(0.84rem + 2px)/1.5 var(--font-mono);
   white-space: pre-wrap;
@@ -589,12 +589,44 @@ html {
 .signature {
   display: block;
   overflow-x: auto;
-  padding: 1rem 0;
+  padding: 1rem 3.75rem 1rem 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   color: var(--pink);
   font: calc(0.82rem + 2px)/1.6 var(--font-mono);
   white-space: nowrap;
+}
+
+/* Wrapper JS adds around .signature and .quick-start__command so the copy
+   button has a stable, non-scrolling position to anchor to. */
+.code-block {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+  font: 700 calc(0.6rem + 2px) var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.copy-btn:hover,
+.copy-btn:focus-visible {
+  border-color: var(--pink);
+  color: var(--pink);
+}
+
+.copy-btn[data-copied="true"] {
+  border-color: var(--green);
+  color: var(--green);
 }
 
 .api-examples {
@@ -617,8 +649,9 @@ html {
 }
 
 .api-examples__example {
+  position: relative;
   margin: 0;
-  padding: 0.8rem 1rem;
+  padding: 0.8rem 3.75rem 0.8rem 1rem;
   background: var(--pink-soft);
   border-left: 2px solid var(--pink);
   overflow-x: hidden;

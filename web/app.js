@@ -351,6 +351,74 @@ if (savedTheme === 'light' || savedTheme === 'dark') {
   root.dataset.theme = savedTheme;
 }
 
+// Copy a code block's plain text (never the highlighted HTML) to the
+// clipboard, falling back to the legacy execCommand path for browsers
+// without the async Clipboard API, and show a transient "Copied" state on
+// the triggering button either way.
+function copyCodeToClipboard(codeEl, button) {
+  const text = codeEl.textContent;
+
+  function announceCopied() {
+    window.clearTimeout(button.dataset.copyResetTimer);
+    button.textContent = 'Copied';
+    button.dataset.copied = 'true';
+    button.setAttribute('aria-label', 'Copied to clipboard');
+    button.dataset.copyResetTimer = window.setTimeout(() => {
+      button.textContent = 'Copy';
+      delete button.dataset.copied;
+      button.setAttribute('aria-label', 'Copy command to clipboard');
+    }, 1500);
+  }
+
+  function legacyCopy() {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.append(textarea);
+    textarea.select();
+    try {
+      if (document.execCommand('copy')) {
+        announceCopied();
+      }
+    } catch {
+      // Copying is unsupported in this browser; leave the button as-is.
+    } finally {
+      textarea.remove();
+    }
+  }
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(announceCopied, legacyCopy);
+  } else {
+    legacyCopy();
+  }
+}
+
+// Add a "Copy" button to a code block's container, positioned by CSS
+// relative to that container (.code-block or .api-examples__example).
+function addCopyButton(container, codeEl) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'copy-btn';
+  button.textContent = 'Copy';
+  button.setAttribute('aria-label', 'Copy command to clipboard');
+  button.addEventListener('click', () => copyCodeToClipboard(codeEl, button));
+  container.append(button);
+}
+
+// Give a bare <code> block (.signature, .quick-start__command) a
+// positioned wrapper so its copy button has a stable anchor even when the
+// code itself scrolls horizontally.
+function wrapCodeWithCopyButton(codeEl) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'code-block';
+  codeEl.replaceWith(wrapper);
+  wrapper.append(codeEl);
+  addCopyButton(wrapper, codeEl);
+}
+
 entries.forEach((entry) => {
   const componentName = entry.dataset.api.split(' ')[0];
   const examples = componentExamples[componentName];
@@ -376,6 +444,7 @@ entries.forEach((entry) => {
     exampleCode.className = 'api-examples__code';
     exampleCode.innerHTML = highlightBashSyntax(example);
     exampleBlock.append(exampleCode);
+    addCopyButton(exampleBlock, exampleCode);
     exampleList.append(exampleBlock);
   });
 
@@ -385,6 +454,11 @@ entries.forEach((entry) => {
 
 document.querySelectorAll('.quick-start__command').forEach((command) => {
   command.innerHTML = highlightBashSyntax(command.textContent);
+  wrapCodeWithCopyButton(command);
+});
+
+document.querySelectorAll('.signature').forEach((signature) => {
+  wrapCodeWithCopyButton(signature);
 });
 
 if (screenshotName) {
