@@ -374,11 +374,12 @@ html {
 
 .quick-start__command {
   display: block;
-  overflow-x: auto;
+  overflow-x: hidden;
   padding: 0.55rem 1rem;
   color: var(--ink);
   font: calc(0.84rem + 2px)/1.5 var(--font-mono);
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .docs-index {
@@ -620,14 +621,29 @@ html {
   padding: 0.8rem 1rem;
   background: var(--pink-soft);
   border-left: 2px solid var(--pink);
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .api-examples__code {
+  display: block;
   color: var(--ink);
   font: calc(0.76rem + 2px)/1.6 var(--font-mono);
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
+
+/* Bash syntax highlighting tokens, applied by app.js to .api-examples__code
+   and .quick-start__command. Colors reuse the page's existing accent
+   palette so highlighted code stays in sync with the active theme. */
+.tok-command { color: var(--pink); font-weight: 700; }
+.tok-flag { color: var(--cyan); }
+.tok-string { color: var(--green); }
+.tok-string .tok-variable { color: var(--yellow); }
+.tok-variable { color: var(--yellow); }
+.tok-keyword { color: var(--muted); font-weight: 700; }
+.tok-comment { color: var(--faint); font-style: italic; }
+.tok-number { color: var(--cyan); }
+.tok-subst { color: var(--faint); }
 
 .wireframe {
   margin-top: 1.75rem;
