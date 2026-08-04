@@ -1,7 +1,7 @@
 # Moma
 
 <div align="center">
-  <img src="./.img/moma.png" alt="Moma logo" height="300px">
+  <img src="./.img/moma.jpg" alt="Moma logo" height="300px">
 </div>
 
 Moma is a standalone Bash library and executable for terminal UI components.
