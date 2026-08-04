@@ -755,6 +755,23 @@ if [[ "${MOMA_TEST_TTY:-1}" == "1" ]] && command -v script &>/dev/null; then
   [[ "$multi_select_tty_output" == *'▣ CI'* ]]
   [[ "$multi_select_tty_output" == *$'Docker\r\nCI\r'* ]]
 
+  # A list taller than the terminal must scroll a fixed-size window instead
+  # of losing track of the active row: every redraw moves the cursor up by
+  # the same, bounded line count (never the full, ever-growing option
+  # count), and the active pointer stays inside the window at every step.
+  multi_select_overflow_tty_output="$(
+    printf $'\033[B\033[B\033[B\033[B\033[B\033[B\033[B\033[B\033[B\033[B\033[B\033[B \n' |
+      script -qec \
+        "LINES=10 NO_COLOR=1 '$MOMA_DIST' multi-select \
+Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa \
+Lambda Mu Nu Xi Omicron --title Options" /dev/null
+  )"
+  [[ "$multi_select_overflow_tty_output" == *'more above'* ]]
+  [[ "$multi_select_overflow_tty_output" == *'more below'* ]]
+  [[ "$multi_select_overflow_tty_output" == *$'\033[10A'* ]]
+  [[ "$multi_select_overflow_tty_output" != *$'\033[18A'* ]]
+  [[ "$multi_select_overflow_tty_output" == *$'Nu\r'* ]]
+
   set +e
   confirm_arrow_output="$(
     printf $'\033[B\n' |

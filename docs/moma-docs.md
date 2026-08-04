@@ -406,7 +406,7 @@ action="$(
 
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
 
 ```text
 moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]

@@ -135,3 +135,94 @@ setup() {
   [[ "$status" -eq 2 ]]
   [[ "$output" == "moma-version: unexpected argument: extra" ]]
 }
+
+@test "terminal height honors a LINES override before falling back" {
+  # Positional parameters are intentionally expanded by the child Bash process.
+  # shellcheck disable=SC2016
+  run env LINES=15 bash -c 'source "$1"; _moma_term_height' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == "15" ]]
+
+  # A tput that reports nothing exercises the fallback; tput itself is
+  # shadowed with a function since command -v already treats a real tput
+  # binary on PATH as available.
+  # shellcheck disable=SC2016
+  run env -u LINES bash -c '
+        tput() { return 1; }
+        source "$1"
+        _moma_term_height 40
+    ' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == "40" ]]
+}
+
+@test "select window shows every row when the full list already fits" {
+  run _moma_select_window 0 5 5
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'0\t5' ]]
+
+  run _moma_select_window 3 5 10
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'0\t5' ]]
+
+  run _moma_select_window 0 5 0
+  [[ "$status" -eq 0 ]]
+  [[ "$output" == $'0\t5' ]]
+}
+
+@test "select window scrolls to keep the active row visible" {
+  # Top of the list: the window starts at 0 without scrolling past it.
+  run _moma_select_window 0 20 5
+  [[ "$output" == $'0\t5' ]]
+  run _moma_select_window 4 20 5
+  [[ "$output" == $'0\t5' ]]
+
+  # Middle of the list: the window trails the active row by max_visible - 1.
+  run _moma_select_window 10 20 5
+  [[ "$output" == $'6\t5' ]]
+
+  # Bottom of the list: the window clamps so it never scrolls past the end.
+  run _moma_select_window 19 20 5
+  [[ "$output" == $'15\t5' ]]
+}
+
+@test "multi-select render windows a list taller than the terminal" {
+  # 15 options, active_index 10 (Lambda): max_visible is LINES(10) - 4 = 6,
+  # so the window scrolls to [5..10] (Zeta..Lambda), 5 rows hidden above and
+  # 4 hidden below.
+  # shellcheck disable=SC2016
+  run env LINES=10 NO_COLOR=1 bash -c '
+        source "$1"
+        _moma_render_multi_select \
+          "Options" 10 "" "" false false true \
+          Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa \
+          Lambda Mu Nu Xi Omicron
+    ' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  # 2 header lines + 1 scroll indicator + 6 option rows + 1 footer.
+  [[ "$(printf '%s\n' "$output" | wc -l)" -eq 10 ]]
+  [[ "$output" == *"5 more above"* ]]
+  [[ "$output" == *"4 more below"* ]]
+  [[ "$output" == *"› □ Lambda"* ]]
+  [[ "$output" != *"Alpha"* ]]
+  [[ "$output" != *"Omicron"* ]]
+}
+
+@test "multi-select render stays unwindowed for non-interactive callers" {
+  # windowed=false (the --choose path) always renders the complete list,
+  # even on a terminal too short to show it without scrolling, so scripted
+  # and documented output stays deterministic.
+  # shellcheck disable=SC2016
+  run env LINES=10 NO_COLOR=1 bash -c '
+        source "$1"
+        _moma_render_multi_select \
+          "Options" 0 "" "" false false false \
+          Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa \
+          Lambda Mu Nu Xi Omicron
+    ' _ "$MOMA_DIST"
+  [[ "$status" -eq 0 ]]
+  [[ "$output" != *"more above"* ]]
+  [[ "$output" != *"more below"* ]]
+  [[ "$output" == *"Alpha"* ]]
+  [[ "$output" == *"Omicron"* ]]
+}

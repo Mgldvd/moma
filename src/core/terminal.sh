@@ -18,6 +18,18 @@ _moma_term_width() {
   printf '%s' "$width"
 }
 
+# Print the terminal height or a supplied fallback height.
+_moma_term_height() {
+  local fallback="${1:-24}"
+  local height="${LINES:-}"
+  if ! _moma_is_positive_int "$height" && command -v tput &>/dev/null; then
+    height="$(tput lines 2>/dev/null || true)"
+  fi
+  _moma_is_positive_int "$fallback" || fallback=24
+  _moma_is_positive_int "$height" || height="$fallback"
+  printf '%s' "$height"
+}
+
 # Hide the cursor on a terminal output channel.
 _moma_term_hide_cursor() {
   _moma_term_is_tty 2 || return 0

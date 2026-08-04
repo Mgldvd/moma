@@ -124,6 +124,14 @@ to load a different configuration file.
 both accept the same arguments and render identically. `moma-multi-select`
 keeps its existing arguments and behavior.
 
+When an option list is taller than the terminal, `moma-multi-select` scrolls
+a fixed-size window instead of letting the terminal's own scrollback carry
+the active row out of view. A "N more above" / "N more below" line replaces
+the hidden rows, up and down keep the active row inside the visible window,
+and every redraw moves the cursor by the same number of lines regardless of
+the total option count. `--choose` always prints every option, unwindowed,
+so scripted and documented output stays complete and deterministic.
+
 `moma-single-select-groups` and `moma-multi-select-groups` organize options
 under repeated `--group <name>` and `--option <value>` pairs. Group headings
 are display-only: they never receive focus, are never toggled, are never
@@ -648,7 +656,7 @@ action="$(
 
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
 
 ```text
 moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
@@ -1633,6 +1641,18 @@ _moma_term_width() {
   _moma_is_positive_int "$fallback" || fallback=80
   _moma_is_positive_int "$width" || width="$fallback"
   printf '%s' "$width"
+}
+
+# Print the terminal height or a supplied fallback height.
+_moma_term_height() {
+  local fallback="${1:-24}"
+  local height="${LINES:-}"
+  if ! _moma_is_positive_int "$height" && command -v tput &>/dev/null; then
+    height="$(tput lines 2>/dev/null || true)"
+  fi
+  _moma_is_positive_int "$fallback" || fallback=24
+  _moma_is_positive_int "$height" || height="$fallback"
+  printf '%s' "$height"
 }
 
 # Hide the cursor on a terminal output channel.
@@ -3631,6 +3651,55 @@ _moma_select_render_header() {
     "$reset" >&2
 }
 
+# Resolve the scrollable window for a navigable list so a terminal shorter
+# than the full list still renders the same number of lines on every
+# redraw: _moma_term_move_up only works by counting lines, so the printed
+# line count must stay constant for the life of one component invocation.
+# Prints "start\tcount" on stdout: the zero-based first visible row and how
+# many rows are visible. Shows every row, unwindowed, when the full list
+# already fits within max_visible.
+_moma_select_window() {
+  local active_row="$1"
+  local total_rows="$2"
+  local max_visible="$3"
+  local start max_start
+
+  if ((max_visible <= 0 || total_rows <= max_visible)); then
+    printf '0\t%s\n' "$total_rows"
+    return
+  fi
+
+  start=$((active_row - max_visible + 1))
+  ((start < 0)) && start=0
+  max_start=$((total_rows - max_visible))
+  ((start > max_start)) && start=$max_start
+
+  printf '%s\t%s\n' "$start" "$max_visible"
+}
+
+# Render the "more above/below" indicator line shown in place of a group
+# heading when a list has scrolled to fit a shorter terminal. Always one
+# line, printed whenever the caller has determined the list is windowed, so
+# the reserved line count matches every redraw regardless of scroll
+# position.
+_moma_select_render_scroll_indicator() {
+  local above="$1"
+  local below="$2"
+  local redraw="$3"
+  local text
+
+  if ((above > 0 && below > 0)); then
+    text="↑ ${above} more above · ↓ ${below} more below"
+  elif ((above > 0)); then
+    text="↑ ${above} more above"
+  else
+    text="↓ ${below} more below"
+  fi
+
+  if $redraw; then _moma_term_clear_line; fi
+  printf '  %s\n' "$text" >&2
+}
+
 # Render one selectable row with a focus pointer and a state glyph.
 _moma_select_render_row() {
   local active="$1"
@@ -4234,7 +4303,12 @@ EOF
 
 # module: src/components/multi-select.sh
 # Multiple-selection component with checkbox-style indicators.
-# Render a multiple-selection menu from normalized arguments.
+# Render a multiple-selection menu from normalized arguments. When windowed
+# and the terminal is shorter than the full option list, only a scrolling
+# slice around active_index is drawn, with a "more above/below" indicator,
+# so a redraw always rewrites the same number of lines regardless of list
+# length. Non-interactive callers (--choose) pass windowed=false so their
+# output stays complete and deterministic.
 _moma_render_multi_select() {
   local title="$1"
   local active_index="$2"
@@ -4242,23 +4316,45 @@ _moma_render_multi_select() {
   local color="$4"
   local no_color="$5"
   local redraw="$6"
-  shift 6
+  local windowed="$7"
+  shift 7
   local -a options=("$@")
+  local total="${#options[@]}"
+
+  local window_start=0 window_count="$total" indicator_lines=0
+  if $windowed; then
+    local term_height max_visible window
+    term_height="$(_moma_term_height)"
+    max_visible=$((term_height - 4))
+    if ((max_visible > 0 && max_visible < total)); then
+      indicator_lines=1
+      window="$(_moma_select_window "$active_index" "$total" "$max_visible")"
+      window_start="${window%%$'\t'*}"
+      window_count="${window#*$'\t'}"
+    fi
+  fi
 
   if $redraw; then
-    _moma_term_move_up "$((${#options[@]} + 3))"
+    _moma_term_move_up "$((window_count + indicator_lines + 3))"
   fi
 
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
 
-  local index glyph active
-  for index in "${!options[@]}"; do
+  if ((indicator_lines > 0)); then
+    _moma_select_render_scroll_indicator \
+      "$window_start" "$((total - window_start - window_count))" "$redraw"
+  fi
+
+  local row flat_index glyph active
+  for ((row = 0; row < window_count; row++)); do
+    flat_index=$((window_start + row))
     glyph="□"
-    _moma_multi_is_selected "$selected_state" "$index" && glyph="▣"
+    _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
     active=false
-    ((index != active_index)) || active=true
+    ((flat_index != active_index)) || active=true
     _moma_select_render_row \
-      "$active" "$glyph" "${options[$index]}" "$color" "$no_color" "$redraw"
+      "$active" "$glyph" "${options[$flat_index]}" \
+      "$color" "$no_color" "$redraw"
   done
 
   _moma_select_render_footer \
@@ -4413,7 +4509,7 @@ EOF
     fi
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" false "${options[@]}"
+      "$no_color" false false "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -4428,7 +4524,7 @@ EOF
 
   _moma_render_multi_select \
     "$title" "$active_index" "$selected_state" "$color" \
-    "$no_color" false "${options[@]}"
+    "$no_color" false true "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -4463,7 +4559,7 @@ EOF
 
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" true "${options[@]}"
+      "$no_color" true true "${options[@]}"
   done
 }
 

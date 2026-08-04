@@ -24,6 +24,55 @@ _moma_select_render_header() {
     "$reset" >&2
 }
 
+# Resolve the scrollable window for a navigable list so a terminal shorter
+# than the full list still renders the same number of lines on every
+# redraw: _moma_term_move_up only works by counting lines, so the printed
+# line count must stay constant for the life of one component invocation.
+# Prints "start\tcount" on stdout: the zero-based first visible row and how
+# many rows are visible. Shows every row, unwindowed, when the full list
+# already fits within max_visible.
+_moma_select_window() {
+  local active_row="$1"
+  local total_rows="$2"
+  local max_visible="$3"
+  local start max_start
+
+  if ((max_visible <= 0 || total_rows <= max_visible)); then
+    printf '0\t%s\n' "$total_rows"
+    return
+  fi
+
+  start=$((active_row - max_visible + 1))
+  ((start < 0)) && start=0
+  max_start=$((total_rows - max_visible))
+  ((start > max_start)) && start=$max_start
+
+  printf '%s\t%s\n' "$start" "$max_visible"
+}
+
+# Render the "more above/below" indicator line shown in place of a group
+# heading when a list has scrolled to fit a shorter terminal. Always one
+# line, printed whenever the caller has determined the list is windowed, so
+# the reserved line count matches every redraw regardless of scroll
+# position.
+_moma_select_render_scroll_indicator() {
+  local above="$1"
+  local below="$2"
+  local redraw="$3"
+  local text
+
+  if ((above > 0 && below > 0)); then
+    text="↑ ${above} more above · ↓ ${below} more below"
+  elif ((above > 0)); then
+    text="↑ ${above} more above"
+  else
+    text="↓ ${below} more below"
+  fi
+
+  if $redraw; then _moma_term_clear_line; fi
+  printf '  %s\n' "$text" >&2
+}
+
 # Render one selectable row with a focus pointer and a state glyph.
 _moma_select_render_row() {
   local active="$1"

@@ -117,6 +117,14 @@ to load a different configuration file.
 both accept the same arguments and render identically. `moma-multi-select`
 keeps its existing arguments and behavior.
 
+When an option list is taller than the terminal, `moma-multi-select` scrolls
+a fixed-size window instead of letting the terminal's own scrollback carry
+the active row out of view. A "N more above" / "N more below" line replaces
+the hidden rows, up and down keep the active row inside the visible window,
+and every redraw moves the cursor by the same number of lines regardless of
+the total option count. `--choose` always prints every option, unwindowed,
+so scripted and documented output stays complete and deterministic.
+
 `moma-single-select-groups` and `moma-multi-select-groups` organize options
 under repeated `--group <name>` and `--option <value>` pairs. Group headings
 are display-only: they never receive focus, are never toggled, are never

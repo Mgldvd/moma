@@ -1,5 +1,10 @@
 # Multiple-selection component with checkbox-style indicators.
-# Render a multiple-selection menu from normalized arguments.
+# Render a multiple-selection menu from normalized arguments. When windowed
+# and the terminal is shorter than the full option list, only a scrolling
+# slice around active_index is drawn, with a "more above/below" indicator,
+# so a redraw always rewrites the same number of lines regardless of list
+# length. Non-interactive callers (--choose) pass windowed=false so their
+# output stays complete and deterministic.
 _moma_render_multi_select() {
   local title="$1"
   local active_index="$2"
@@ -7,23 +12,45 @@ _moma_render_multi_select() {
   local color="$4"
   local no_color="$5"
   local redraw="$6"
-  shift 6
+  local windowed="$7"
+  shift 7
   local -a options=("$@")
+  local total="${#options[@]}"
+
+  local window_start=0 window_count="$total" indicator_lines=0
+  if $windowed; then
+    local term_height max_visible window
+    term_height="$(_moma_term_height)"
+    max_visible=$((term_height - 4))
+    if ((max_visible > 0 && max_visible < total)); then
+      indicator_lines=1
+      window="$(_moma_select_window "$active_index" "$total" "$max_visible")"
+      window_start="${window%%$'\t'*}"
+      window_count="${window#*$'\t'}"
+    fi
+  fi
 
   if $redraw; then
-    _moma_term_move_up "$((${#options[@]} + 3))"
+    _moma_term_move_up "$((window_count + indicator_lines + 3))"
   fi
 
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
 
-  local index glyph active
-  for index in "${!options[@]}"; do
+  if ((indicator_lines > 0)); then
+    _moma_select_render_scroll_indicator \
+      "$window_start" "$((total - window_start - window_count))" "$redraw"
+  fi
+
+  local row flat_index glyph active
+  for ((row = 0; row < window_count; row++)); do
+    flat_index=$((window_start + row))
     glyph="□"
-    _moma_multi_is_selected "$selected_state" "$index" && glyph="▣"
+    _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
     active=false
-    ((index != active_index)) || active=true
+    ((flat_index != active_index)) || active=true
     _moma_select_render_row \
-      "$active" "$glyph" "${options[$index]}" "$color" "$no_color" "$redraw"
+      "$active" "$glyph" "${options[$flat_index]}" \
+      "$color" "$no_color" "$redraw"
   done
 
   _moma_select_render_footer \
@@ -178,7 +205,7 @@ EOF
     fi
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" false "${options[@]}"
+      "$no_color" false false "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -193,7 +220,7 @@ EOF
 
   _moma_render_multi_select \
     "$title" "$active_index" "$selected_state" "$color" \
-    "$no_color" false "${options[@]}"
+    "$no_color" false true "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -228,6 +255,6 @@ EOF
 
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" true "${options[@]}"
+      "$no_color" true true "${options[@]}"
   done
 }

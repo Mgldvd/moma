@@ -8,6 +8,16 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
 
 ## [Unreleased]
 
+### Fixed
+
+- `moma-multi-select` no longer loses track of the active row when the
+  option list is taller than the terminal. Interactive navigation now
+  scrolls a fixed-size window with a "N more above/below" indicator instead
+  of relying on the terminal's own scrollback, which redrew the full list
+  on every keypress and made the highlighted row appear to jump around or
+  scroll away. `--choose` is unaffected and always renders the complete
+  list.
+
 ## [1.2.0] - 2026-08-03
 
 ### Added
