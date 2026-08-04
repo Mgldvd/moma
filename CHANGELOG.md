@@ -6,7 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Moma follows [Semantic Versioning](https://semver.org/). See
 [Versioning](README.md#versioning) in the README for the release policy.
 
-## [Unreleased]
+## [1.3.0] - 2026-08-04
 
 ### Added
 
