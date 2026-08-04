@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header/Header.astro';
+import DocsNav from '../components/DocsNav/DocsNav.astro';
+import Hero from '../components/Hero/Hero.astro';
+import DocsIndex from '../components/DocsIndex/DocsIndex.astro';
+import ApiSection from '../components/ApiSection/ApiSection.astro';
+import ApiEntry from '../components/ApiEntry/ApiEntry.astro';
+import FunctionRow from '../components/FunctionRow/FunctionRow.astro';
+import EmptyState from '../components/EmptyState/EmptyState.astro';
+import Footer from '../components/Footer/Footer.astro';
+import '../styles/pages/index.scss';
+import '../styles/pages/index-screenshot.scss';
+import { SITE } from '../data/site';
+import { API_ENTRIES } from '../data/apiEntries';
+import { FUNCTION_ROWS } from '../data/functionRows';
+
+// The source page groups the same 22 API entries into "Visual components"
+// (the first 18) and "Workflow helpers" (the last 4) - see
+// src/data/apiEntries.ts for the full, ordered list.
+const visualEntries = API_ENTRIES.slice(0, 18);
+const helperEntries = API_ENTRIES.slice(18);
+
+const indexLinks = [
+  { href: '#components', number: '01', label: 'Visual components', count: SITE.visualComponentCount },
+  { href: '#helpers', number: '02', label: 'Workflow helpers', count: SITE.workflowHelperCount },
+  { href: '#cli', number: '03', label: 'Command interface', count: SITE.functionCount },
+];
+---
+
+<BaseLayout>
+  <Header version={SITE.version} repoUrl={SITE.repoUrl} />
+
+  <div class="docs-shell">
+    <DocsNav />
+
+    <main class="docs" id="top">
+      <Hero />
+
+      <DocsIndex totalCount={SITE.functionCount} links={indexLinks} />
+
+      <div class="api-sections">
+        <ApiSection
+          id="components"
+          number="01 / 03"
+          title="Visual components"
+          intro="Each function names a visible terminal component; semantic meaning is selected with flags."
+          filterable
+        >
+          {visualEntries.map((entry) => <ApiEntry {...entry} />)}
+        </ApiSection>
+
+        <ApiSection
+          id="helpers"
+          number="02 / 03"
+          title="Workflow helpers"
+          intro="Small reusable helpers for process feedback and dependency checks."
+          filterable
+        >
+          {helperEntries.map((entry) => <ApiEntry {...entry} />)}
+        </ApiSection>
+
+        <ApiSection
+          id="cli"
+          number="03 / 03"
+          title="Command interface"
+          intro="The standalone file exposes every library function as a command and keeps documentation previews in the same entrypoint."
+        >
+          <div class="function-list">
+            {FUNCTION_ROWS.map((row) => <FunctionRow {...row} />)}
+          </div>
+        </ApiSection>
+      </div>
+
+      <EmptyState />
+    </main>
+  </div>
+
+  <Footer repoUrl={SITE.repoUrl} functionCount={SITE.functionCount} />
+</BaseLayout>

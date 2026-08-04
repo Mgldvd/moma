@@ -1,0 +1,42 @@
+// Page composition for the (only) route: how DocsNav and the main content
+// column are arranged together, not any single component's internal
+// design.
+@use '../breakpoints' as bp;
+
+.docs-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(100% - 2rem, var(--docs-max-width));
+  margin: 0 auto;
+
+  @include bp.mq-up(bp.$bp-cursor) {
+    width: min(100% - 3rem, var(--docs-max-width));
+  }
+
+  @include bp.mq-up(bp.$bp-nav) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2.5rem;
+  }
+}
+
+.docs {
+  min-width: 0;
+
+  @include bp.mq-up(bp.$bp-nav) {
+    flex: 1;
+  }
+}
+
+.api-sections {
+  padding-bottom: 5rem;
+}
+
+// Wraps the CLI section's FunctionRow rows. Authored here (rather than in
+// FunctionRow or ApiSection) because it is purely the page's own choice of
+// how to arrange FunctionRow instances in the CLI section, not part of
+// either component's own design.
+.function-list {
+  display: flex;
+  flex-direction: column;
+}

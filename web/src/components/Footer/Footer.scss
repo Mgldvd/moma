@@ -1,0 +1,43 @@
+@use '../../styles/breakpoints' as bp;
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 2.5rem max(1rem, calc((100% - var(--docs-max-width)) / 2));
+  border-top: 2px solid var(--ink);
+  background: var(--paper);
+
+  @include bp.mq-up(bp.$bp-tablet) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__brand {
+    margin: 0;
+    font: 800 calc(1rem + 2px) var(--font-mono);
+  }
+
+  &__cursor {
+    color: var(--pink);
+  }
+
+  &__copy {
+    margin: 0;
+    color: var(--muted);
+    font-size: calc(0.82rem + 2px);
+  }
+
+  &__links {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  &__link {
+    color: var(--pink);
+    font-size: calc(0.82rem + 2px);
+    text-decoration: none;
+  }
+}

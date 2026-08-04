@@ -1,0 +1,30 @@
+---
+import './DocsIndex.scss';
+import type { Props } from './DocsIndex.types';
+
+const { totalCount, links } = Astro.props as Props;
+---
+
+<section class="docs-index" aria-labelledby="index-title">
+  <div class="docs-index__heading">
+    <h2 class="docs-index__title" id="index-title">API index</h2>
+    <p class="docs-index__total"><span class="docs-index__count">{totalCount}</span> library functions</p>
+  </div>
+  <label class="search">
+    <span class="search__icon" aria-hidden="true">⌕</span>
+    <span class="search__label">Filter API</span>
+    <input class="search__input" type="search" placeholder="Filter functions…" autocomplete="off">
+    <kbd class="search__shortcut">/</kbd>
+  </label>
+  <div class="index-links">
+    {links.map((link) => (
+      <a class="index-links__item" href={link.href}>
+        <span class="index-links__number">{link.number}</span> {link.label} <strong class="index-links__count">{link.count}</strong>
+      </a>
+    ))}
+  </div>
+</section>
+
+<script>
+  import './DocsIndex.client';
+</script>

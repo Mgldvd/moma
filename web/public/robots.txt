@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mgldvd.github.io/moma/sitemap-index.xml

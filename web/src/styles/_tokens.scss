@@ -1,0 +1,70 @@
+// Global design tokens. These are CSS custom properties (not SCSS
+// variables) because the color tokens are swapped at runtime between
+// light and dark themes via the `data-theme` attribute on <html>.
+:root {
+  color-scheme: light;
+  --canvas: #f6f4ef;
+  --paper: #fffefa;
+  --ink: #151419;
+  --muted: #66636b;
+  --faint: #8d8992;
+  --line: #cbc7c0;
+  --line-strong: #6d6971;
+  --pink: #c41f9f;
+  --pink-soft: #fae8f6;
+  --cyan: #007d96;
+  --green: #147d35;
+  --red: #bd3040;
+  --yellow: #876600;
+  --terminal: #0f2038;
+  --terminal-ink: #f5f1f7;
+  --terminal-chrome: #0d3168;
+  --terminal-chrome-ink: #8fb4e8;
+  --terminal-border: #2f6fd1;
+  --terminal-control-success: #2ecc71;
+  --terminal-control-warning: #f5c451;
+  --terminal-control-error: #ff5f57;
+  --terminal-primary: #68e4ff;
+  --terminal-accent: #ff90e7;
+  --terminal-muted: #a9acb8;
+  --terminal-success: #73f59a;
+  --terminal-error: #ff7676;
+  --terminal-warning: #f9dc66;
+  --terminal-info: #68e4ff;
+  --terminal-focus: #68e4ff;
+  --terminal-selected: #73f59a;
+  --topbar-height: 4.5rem;
+  --docs-max-width: 58rem;
+  --docs-nav-width: 15.5rem;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #0c0d11;
+  --paper: #12141a;
+  --ink: #f5f2ee;
+  --muted: #aaa6b0;
+  --faint: #777481;
+  --line: #353740;
+  --line-strong: #777a85;
+  --pink: #ff90e7;
+  --pink-soft: #2c1b2a;
+  --cyan: #68e4ff;
+  --green: #73f59a;
+  --red: #ff7676;
+  --yellow: #f9dc66;
+  --terminal-border: #4f8be0;
+}
+
+// --docs-max-width widens as the two-column layout (DocsNav + main
+// content) gets room to breathe. A page-level layout token, not any one
+// component's concern.
+@media (min-width: 960px) {
+  :root { --docs-max-width: 78rem; }
+}
+
+@media (min-width: 1200px) {
+  :root { --docs-max-width: 82rem; }
+}

@@ -1,0 +1,35 @@
+---
+import './DocsNav.scss';
+import { NAV_GROUPS } from './DocsNav.data';
+---
+
+<div class="docs-nav-backdrop" data-open="false" hidden></div>
+<nav class="docs-nav" id="docs-nav" aria-label="Component navigation" data-open="false">
+  <div class="docs-nav__top">
+    <p class="docs-nav__title">Components</p>
+    <button class="docs-nav__close" type="button">Close ✕</button>
+  </div>
+
+  {NAV_GROUPS.map((group) => (
+    <div class="docs-nav__group" data-nav-group={group.key}>
+      <p class="docs-nav__heading">{group.heading}</p>
+      <ul class="docs-nav__list">
+        {group.links.map((link) => (
+          <li class="docs-nav__item">
+            <a
+              class="docs-nav__link"
+              data-nav-for={link.filterable ? link.targetId : undefined}
+              href={`#${link.targetId}`}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</nav>
+
+<script>
+  import './DocsNav.client';
+</script>

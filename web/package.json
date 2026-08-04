@@ -1,0 +1,22 @@
+{
+  "name": "moma-docs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "^7.1.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.7.3",
+    "sass": "^1.102.0",
+    "typescript": "^5.9.2"
+  }
+}

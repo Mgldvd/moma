@@ -1,0 +1,8 @@
+// Minimal reset. The original stylesheet relies on the browser default
+// box model being overridden per element rather than a broad global
+// reset, so only the one universal rule it declared is reproduced here -
+// anything more would risk changing spacing that individual components
+// depend on the UA defaults for.
+* {
+  box-sizing: border-box;
+}

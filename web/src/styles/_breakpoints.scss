@@ -1,0 +1,25 @@
+// Shared breakpoints, preserved from the original stylesheet's raw
+// media-query values.
+$bp-cursor: 480px;
+$bp-tablet: 768px;
+$bp-nav-max: 959.98px;
+$bp-nav: 960px;
+$bp-wide: 1200px;
+
+@mixin mq-up($width) {
+  @media (min-width: $width) {
+    @content;
+  }
+}
+
+@mixin mq-down($width) {
+  @media (max-width: $width) {
+    @content;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

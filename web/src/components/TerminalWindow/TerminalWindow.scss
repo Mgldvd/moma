@@ -1,0 +1,78 @@
+@use '../../styles/breakpoints' as bp;
+
+// One reusable pattern for every literal terminal output shown in the API
+// reference. Reusable text-role classes (.tw-*) are scoped under this
+// component's root so they can't leak into or be relied on by other
+// components.
+.terminal-window {
+  overflow: hidden;
+  margin: 0;
+  border: 1px solid var(--terminal-border);
+  border-radius: 0.35rem;
+  background: var(--terminal);
+
+  &__chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--terminal-border);
+    background: var(--terminal-chrome);
+  }
+
+  &__controls {
+    display: flex;
+    flex: none;
+    gap: 0.4rem;
+    margin-left: auto;
+  }
+
+  &__control {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+
+    &--success { background: var(--terminal-control-success); }
+    &--warning { background: var(--terminal-control-warning); }
+    &--error { background: var(--terminal-control-error); }
+  }
+
+  &__title {
+    overflow: hidden;
+    color: var(--terminal-chrome-ink);
+    font: 700 calc(0.66rem + 2px) var(--font-mono);
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Pagga glyph rows must sit flush with no line-height gap, or the pixel
+  // art tears apart.
+  &__body--pagga {
+    line-height: 1;
+  }
+
+  &__body {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    color: var(--terminal-ink);
+    font: calc(0.8rem + 2px)/1.55 var(--font-mono);
+    white-space: pre;
+
+    @include bp.mq-up(bp.$bp-cursor) {
+      font-size: calc(0.9rem + 2px);
+    }
+  }
+
+  // Reusable terminal text roles, shared by every terminal window body.
+  .tw-primary { color: var(--terminal-primary); }
+  .tw-accent { color: var(--terminal-accent); }
+  .tw-muted { color: var(--terminal-muted); }
+  .tw-success { color: var(--terminal-success); }
+  .tw-error { color: var(--terminal-error); }
+  .tw-warning { color: var(--terminal-warning); }
+  .tw-info { color: var(--terminal-info); }
+  .tw-focus { color: var(--terminal-focus); }
+  .tw-selected { color: var(--terminal-selected); }
+}

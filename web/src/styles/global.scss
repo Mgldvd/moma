@@ -1,0 +1,58 @@
+@use './tokens';
+@use './breakpoints' as bp;
+
+html {
+  overflow-x: clip;
+  scroll-behavior: smooth;
+
+  @include bp.reduced-motion {
+    scroll-behavior: auto;
+  }
+}
+
+.page {
+  min-width: 320px;
+  margin: 0;
+  overflow-x: clip;
+  background:
+    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(214 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
+    linear-gradient(0deg, transparent 0, transparent calc(100% - 1px), rgba(120 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
+    var(--canvas);
+  background-color: var(--canvas);
+  color: var(--ink);
+  font: 20px/1.65 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 100;
+  top: -3rem;
+  left: 1rem;
+  padding: 0.6rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  font: 700 calc(0.8rem + 2px) var(--font-mono);
+  text-decoration: none;
+  transition: top 0.15s ease;
+
+  &:focus {
+    top: 1rem;
+  }
+}
+
+// Bash syntax-highlighting token theme, applied by src/utils/bashHighlight
+// to command snippets. Global (rather than owned by one component)
+// because it is a shared content-type theme reused independently by both
+// Hero's quick-start commands and ApiEntry's example commands - the same
+// relationship a global code-block theme has to the components that embed
+// code in any conventional design system.
+.tok-command { color: var(--pink); font-weight: 700; }
+.tok-flag { color: var(--cyan); }
+.tok-string { color: var(--green); }
+.tok-string .tok-variable { color: var(--yellow); }
+.tok-variable { color: var(--yellow); }
+.tok-keyword { color: var(--muted); font-weight: 700; }
+.tok-comment { color: var(--faint); font-style: italic; }
+.tok-number { color: var(--cyan); }
+.tok-subst { color: var(--faint); }

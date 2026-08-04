@@ -1,0 +1,53 @@
+---
+import './ApiEntry.scss';
+import CopyButton from '../CopyButton/CopyButton.astro';
+import TerminalWindow from '../TerminalWindow/TerminalWindow.astro';
+import type { Props } from './ApiEntry.types';
+
+const { id, kind, name, descriptionHtml, signature, searchText, examples, wireframe } = Astro.props as Props;
+
+// Matches the source site's own behavior: every entry has example
+// snippets defined, but they are only displayed alongside a wireframe
+// (the source's DOM-insertion logic anchored the examples block to the
+// wireframe and silently no-ops without one - moma-select is the one
+// entry with examples that were never shown).
+const showExamples = Boolean(wireframe && examples && examples.length > 0);
+---
+
+<article class="api-entry" id={id} data-api={searchText}>
+  <header class="api-entry__header">
+    <div>
+      <p class="api-entry__kind">{kind}</p>
+      <h3 class="api-entry__name">{name}</h3>
+    </div>
+  </header>
+  <p class="api-entry__description" set:html={descriptionHtml} />
+  <div class="code-block">
+    <code class="signature">{signature}</code>
+    <CopyButton text={signature} />
+  </div>
+
+  {showExamples && (
+    <section class="api-examples">
+      <p class="api-examples__title">Bash examples</p>
+      <div class="api-examples__list">
+        {examples!.map((example) => (
+          <pre class="api-examples__example"><code class="api-examples__code">{example}</code><CopyButton text={example} /></pre>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {wireframe && (
+    <div class="wireframe">
+      <p class="wireframe__label">Output</p>
+      <TerminalWindow ariaLabel={`${name} output`} variant={wireframe.variant}>
+        <Fragment set:html={wireframe.bodyHtml} />
+      </TerminalWindow>
+    </div>
+  )}
+</article>
+
+<script>
+  import './ApiEntry.client';
+</script>

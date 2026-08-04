@@ -1,0 +1,114 @@
+@use '../../styles/breakpoints' as bp;
+
+.api-entry {
+  scroll-margin-top: 5.5rem;
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--line-strong);
+
+  &[hidden] {
+    display: none;
+  }
+
+  @include bp.mq-up(bp.$bp-tablet) {
+    padding-block: 4rem;
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__kind {
+    margin: 0 0 0.35rem;
+    color: var(--faint);
+    font: 800 calc(0.65rem + 2px) var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__name {
+    margin: 0;
+    font: 800 clamp(1.45rem, 6vw, 2.25rem) var(--font-mono);
+    letter-spacing: -0.04em;
+  }
+
+  &__description {
+    max-width: 43rem;
+    margin: 1.2rem 0;
+    color: var(--muted);
+    font-size: calc(1rem + 2px);
+  }
+}
+
+.signature {
+  display: block;
+  overflow-x: auto;
+  padding: 1rem 3.75rem 1rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--pink);
+  font: calc(0.82rem + 2px)/1.6 var(--font-mono);
+  white-space: nowrap;
+}
+
+// Wrapper around .signature so its CopyButton has a stable, non-scrolling
+// position to anchor to.
+.code-block {
+  position: relative;
+}
+
+.api-examples {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--line);
+
+  &__title {
+    margin: 0 0 0.8rem;
+    color: var(--faint);
+    font: 800 calc(0.64rem + 2px) var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  &__example {
+    position: relative;
+    margin: 0;
+    padding: 0.8rem 3.75rem 0.8rem 1rem;
+    background: var(--pink-soft);
+    border-left: 2px solid var(--pink);
+    overflow-x: hidden;
+  }
+
+  &__code {
+    display: block;
+    color: var(--ink);
+    font: calc(0.76rem + 2px)/1.6 var(--font-mono);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.wireframe {
+  margin-top: 1.75rem;
+  padding-left: 1.25rem;
+  border-left: 1px dashed var(--line-strong);
+
+  @include bp.mq-up(bp.$bp-tablet) {
+    padding-left: 2rem;
+  }
+
+  &__label {
+    margin: 0 0 1rem;
+    color: var(--faint);
+    font: 800 calc(0.64rem + 2px) var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}

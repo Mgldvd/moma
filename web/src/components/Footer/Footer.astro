@@ -1,0 +1,15 @@
+---
+import './Footer.scss';
+import type { Props } from './Footer.types';
+
+const { repoUrl, functionCount } = Astro.props as Props;
+---
+
+<footer class="footer">
+  <p class="footer__brand">moma<span class="footer__cursor">_</span></p>
+  <p class="footer__copy">{functionCount} library functions · one standalone Bash file</p>
+  <div class="footer__links">
+    <a class="footer__link" href={repoUrl} target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a class="footer__link" href="#top">Back to top ↑</a>
+  </div>
+</footer>

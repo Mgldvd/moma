@@ -1,0 +1,12 @@
+// Shared, generic style logic reused by more than one component.
+
+// Visually hides an element from sighted users while keeping it available
+// to assistive technology. Used for form labels with a redundant visible
+// icon, e.g. the search field.
+@mixin visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+}

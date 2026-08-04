@@ -1,0 +1,12 @@
+---
+import './FunctionRow.scss';
+import type { Props } from './FunctionRow.types';
+
+const { id, name, description, signature } = Astro.props as Props;
+---
+
+<article class="function-row" id={id}>
+  <div class="function-row__name"><code class="function-row__function">{name}</code></div>
+  <p class="function-row__description">{description}</p>
+  <code class="function-row__signature">{signature}</code>
+</article>
