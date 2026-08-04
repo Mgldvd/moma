@@ -164,6 +164,15 @@ html {
   animation: blink 1s steps(2, start) infinite;
 }
 
+.brand__version {
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--line);
+  color: var(--faint);
+  font-size: calc(0.62rem + 2px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brand__cursor { animation: none; }
 }
@@ -359,7 +368,7 @@ html {
 .quick-start {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 2px;
   margin: 1.25rem 0 0;
   border-left: 3px solid var(--pink);
 }
@@ -376,6 +385,7 @@ html {
   display: block;
   overflow-x: hidden;
   padding: 0.55rem 3.75rem 0.55rem 1rem;
+  background: var(--pink-soft);
   color: var(--ink);
   font: calc(0.84rem + 2px)/1.5 var(--font-mono);
   white-space: pre-wrap;
@@ -568,23 +578,6 @@ html {
   color: var(--muted);
   font-size: calc(1rem + 2px);
 }
-
-.status {
-  display: inline-block;
-  flex: none;
-  padding: 0.25rem 0.45rem;
-  border: 1px solid currentColor;
-  font: 800 calc(0.58rem + 2px) var(--font-mono);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.status--stable { color: var(--green); }
-.status--variants { color: var(--cyan); }
-.status--interactive { color: var(--yellow); }
-.status--brand { color: var(--pink); }
-.status--safe { color: var(--green); }
-.status--internal { color: var(--faint); }
 
 .signature {
   display: block;
@@ -881,7 +874,6 @@ html {
 .page--screenshot .empty-state,
 .page--screenshot .api-entry__kind,
 .page--screenshot .api-entry__description,
-.page--screenshot .status,
 .page--screenshot .signature,
 .page--screenshot .api-examples,
 .page--screenshot .function-row__description,
