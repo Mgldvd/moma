@@ -368,17 +368,24 @@ html {
 .quick-start {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin: 1.25rem 0 0;
+  gap: 0;
+  margin: 1.75rem 0 0;
+  border: 1px solid var(--line);
   border-left: 3px solid var(--pink);
 }
 
 .quick-start__label {
-  padding: 0.4rem 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
   color: var(--pink);
   font: 800 calc(0.68rem + 2px) var(--font-mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.quick-start .code-block + .code-block {
+  border-top: 1px solid var(--line);
 }
 
 .quick-start__command {
