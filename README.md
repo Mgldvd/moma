@@ -169,6 +169,45 @@ moma preview
 The source reference is available in
 [`docs/moma-docs.md`](docs/moma-docs.md).
 
+### Previews
+
+<table>
+<tr>
+<td align="center"><img src="./.img/moma-title.png" width="300" alt="moma-title preview"><br><code>moma-title</code></td>
+<td align="center"><img src="./.img/moma-title-sub.png" width="300" alt="moma-title-sub preview"><br><code>moma-title-sub</code></td>
+<td align="center"><img src="./.img/moma-section.png" width="300" alt="moma-section preview"><br><code>moma-section</code></td>
+</tr>
+<tr>
+<td align="center"><img src="./.img/moma-msg.png" width="300" alt="moma-msg preview"><br><code>moma-msg</code></td>
+<td align="center"><img src="./.img/moma-msg-simple.png" width="300" alt="moma-msg-simple preview"><br><code>moma-msg-simple</code></td>
+<td align="center"><img src="./.img/moma-list.png" width="300" alt="moma-list preview"><br><code>moma-list</code></td>
+</tr>
+<tr>
+<td align="center"><img src="./.img/moma-box.png" width="300" alt="moma-box preview"><br><code>moma-box</code></td>
+<td align="center"><img src="./.img/moma-prompt.png" width="300" alt="moma-prompt preview"><br><code>moma-prompt</code></td>
+<td align="center"><img src="./.img/moma-label.png" width="300" alt="moma-label preview"><br><code>moma-label</code></td>
+</tr>
+<tr>
+<td align="center"><img src="./.img/moma-rabbit.png" width="300" alt="moma-rabbit preview"><br><code>moma-rabbit</code></td>
+<td align="center"><img src="./.img/moma-input.png" width="300" alt="moma-input preview"><br><code>moma-input</code></td>
+<td align="center"><img src="./.img/moma-select.png" width="300" alt="moma-select preview"><br><code>moma-select</code> / <code>moma-single-select</code></td>
+</tr>
+<tr>
+<td align="center"><img src="./.img/moma-multi-select.png" width="300" alt="moma-multi-select preview"><br><code>moma-multi-select</code></td>
+<td align="center"><img src="./.img/moma-confirm.png" width="300" alt="moma-confirm preview"><br><code>moma-confirm</code></td>
+<td align="center"><img src="./.img/moma-spinner.png" width="300" alt="moma-spinner preview"><br><code>moma-spinner</code></td>
+</tr>
+<tr>
+<td align="center"><img src="./.img/moma-command-check.png" width="300" alt="moma-command-check preview"><br><code>moma-command-check</code></td>
+<td></td>
+<td></td>
+</tr>
+</table>
+
+`moma-single-select-groups` and `moma-multi-select-groups` render like their
+non-grouped counterparts above with named group headings added; run
+`moma preview` to see them live.
+
 ## Configuration
 
 ### Decoration widths
