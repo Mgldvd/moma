@@ -1,54 +1,64 @@
 ---
-import { Image } from 'astro:assets';
-import './OutputCarousel.scss';
-import type { Props } from './OutputCarousel.types';
+import { Image } from "astro:assets";
+import "./OutputCarousel.scss";
+import type { Props } from "./OutputCarousel.types";
 
 const { name, frames } = Astro.props as Props;
 ---
 
 <div class="output-carousel" data-current-frame="0">
-  <button
-    type="button"
-    class="wireframe__trigger output-carousel__trigger"
-    data-lightbox-trigger
-    data-lightbox-caption={name}
-    aria-label={`View ${name} output full-size`}
-  >
-    <Image
-      class="wireframe__screenshot output-carousel__image"
-      src={frames[0]}
-      alt={`${name} output, example 1 of ${frames.length}`}
-      loading="lazy"
-    />
-  </button>
-
-  <div class="output-carousel__thumbnails">
-    {frames.map((frame, index) => (
-      <button
+    <button
         type="button"
-        class="output-carousel__thumbnail"
-        aria-current={index === 0 ? 'true' : 'false'}
-        aria-label={`Show example ${index + 1} of ${frames.length}`}
-      >
-        <Image src={frame} width={128} alt="" loading="lazy" />
-      </button>
-    ))}
-  </div>
+        class="wireframe__trigger output-carousel__trigger"
+        data-lightbox-trigger
+        data-lightbox-caption={name}
+        aria-label={`View ${name} output full-size`}
+    >
+        <Image
+            class="wireframe__screenshot output-carousel__image"
+            src={frames[0]}
+            alt={`${name} output, example 1 of ${frames.length}`}
+            loading="lazy"
+        />
+    </button>
 
-  {/* All N frames, including frame 0 (already visible above), are
+    <div class="output-carousel__thumbnails">
+        {
+            frames.map((frame, index) => (
+                <button
+                    type="button"
+                    class="output-carousel__thumbnail"
+                    aria-current={index === 0 ? "true" : "false"}
+                    aria-label={`Show example ${index + 1} of ${frames.length}`}
+                >
+                    <Image src={frame} width={128} alt="" loading="lazy" />
+                </button>
+            ))
+        }
+    </div>
+
+    {
+        /* All N frames, including frame 0 (already visible above), are
       Astro-optimized here too but stashed inert inside <template> - never
       fetched until cloned, and always correct regardless of which one the
       live <img> currently shows. This is the one source of truth both
       OutputCarousel.client's own paging and Lightbox.client's thumbnail
       strip (see utils/outputFrames.ts) read frames from, so neither has to
-      special-case "whichever frame happens to be showing right now." */}
-  <template class="output-carousel__frame-data">
-    {frames.map((frame, index) => (
-      <Image src={frame} alt={`${name} output, example ${index + 1} of ${frames.length}`} loading="lazy" />
-    ))}
-  </template>
+      special-case "whichever frame happens to be showing right now." */
+    }
+    <template class="output-carousel__frame-data">
+        {
+            frames.map((frame, index) => (
+                <Image
+                    src={frame}
+                    alt={`${name} output, example ${index + 1} of ${frames.length}`}
+                    loading="lazy"
+                />
+            ))
+        }
+    </template>
 </div>
 
 <script>
-  import './OutputCarousel.client';
+    import "./OutputCarousel.client";
 </script>

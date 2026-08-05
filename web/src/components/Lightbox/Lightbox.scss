@@ -1,174 +1,180 @@
-@use '../../styles/breakpoints' as bp;
+@use "../../styles/breakpoints" as bp;
 
 // A single shared overlay for every ApiEntry screenshot (see
 // Lightbox.client.ts). Sits above the mobile docs-nav drawer (z-index 25)
 // and its backdrop (20).
 .lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  align-items: center;
-  justify-content: center;
-  padding: 3.5rem 1.25rem;
-  background: rgb(6 7 10 / 0%);
-  opacity: 0;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
-
-  // The `hidden` attribute (toggled by Lightbox.client.ts) is the real
-  // show/hide switch - true display:none, out of layout and the a11y
-  // tree at rest. `display` can't itself be transitioned, so once JS
-  // removes `hidden` to start opening, the opacity/background fade above
-  // takes over; JS re-adds `hidden` only after that fade finishes closing.
-  &:not([hidden]) {
-    display: flex;
-  }
-
-  &[data-open='true'] {
-    opacity: 1;
-    background: rgb(6 7 10 / 88%);
-  }
-
-  &__figure {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 100%;
-    max-height: 100%;
-    margin: 0;
-  }
-
-  &__image {
-    display: block;
-    max-width: min(90vw, 70rem);
-    max-height: 78vh;
-    width: auto;
-    height: auto;
-    border-radius: 0.5rem;
-    box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 55%);
-  }
-
-  &__caption {
-    margin-top: 1rem;
-    color: #f5f2ee;
-    font: 800 calc(0.7rem + 2px) var(--font-mono);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  // One thumbnail per example of the currently-open component's own
-  // OutputCarousel (see Lightbox.client.ts's renderThumbnails) - hidden
-  // entirely for triggers that aren't a carousel (only ever 0 or 1 frame).
-  &__thumbnails {
-    display: flex;
-    gap: 0.6rem;
-    max-width: min(90vw, 70rem);
-    margin-top: 1.1rem;
-    overflow-x: auto;
-
-    &[hidden] {
-      display: none;
-    }
-  }
-
-  &__thumbnail {
-    flex: none;
-    width: 4.5rem;
-    padding: 0;
-    overflow: hidden;
-    border: 2px solid transparent;
-    border-radius: 0.35rem;
-    background: none;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.15s ease, border-color 0.15s ease;
-
-    img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    &:hover {
-      opacity: 0.85;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--pink);
-      outline-offset: 2px;
-    }
-
-    &[aria-current='true'] {
-      opacity: 1;
-      border-color: var(--pink);
-    }
-  }
-
-  &__close,
-  &__nav {
-    position: absolute;
-    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    border: 1px solid rgb(255 255 255 / 25%);
-    border-radius: 50%;
-    background: rgb(255 255 255 / 10%);
-    color: #f5f2ee;
-    cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    padding: 3.5rem 1.25rem;
+    background: rgb(6 7 10 / 0%);
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        background-color 0.2s ease;
 
-    &:hover {
-      background: rgb(255 255 255 / 22%);
-      border-color: rgb(255 255 255 / 45%);
+    // The `hidden` attribute (toggled by Lightbox.client.ts) is the real
+    // show/hide switch - true display:none, out of layout and the a11y
+    // tree at rest. `display` can't itself be transitioned, so once JS
+    // removes `hidden` to start opening, the opacity/background fade above
+    // takes over; JS re-adds `hidden` only after that fade finishes closing.
+    &:not([hidden]) {
+        display: flex;
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--pink);
-      outline-offset: 2px;
-    }
-  }
-
-  &__close {
-    top: 1rem;
-    right: 1rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.1rem;
-  }
-
-  &__nav {
-    top: 50%;
-    width: 3rem;
-    height: 3rem;
-    font-size: 1.75rem;
-    line-height: 1;
-    transform: translateY(-50%);
-
-    &--prev {
-      left: 1rem;
+    &[data-open="true"] {
+        opacity: 1;
+        background: rgb(6 7 10 / 88%);
     }
 
-    &--next {
-      right: 1rem;
+    &__figure {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        max-height: 100%;
+        margin: 0;
     }
-  }
 
-  @include bp.mq-up(bp.$bp-tablet) {
+    &__image {
+        display: block;
+        max-width: min(90vw, 70rem);
+        max-height: 78vh;
+        width: auto;
+        height: auto;
+        border-radius: 0.5rem;
+        box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 55%);
+    }
+
+    &__caption {
+        margin-top: 1rem;
+        color: #f5f2ee;
+        font: 800 calc(0.7rem + 2px) var(--font-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    // One thumbnail per example of the currently-open component's own
+    // OutputCarousel (see Lightbox.client.ts's renderThumbnails) - hidden
+    // entirely for triggers that aren't a carousel (only ever 0 or 1 frame).
+    &__thumbnails {
+        display: flex;
+        gap: 0.6rem;
+        max-width: min(90vw, 70rem);
+        margin-top: 1.1rem;
+        overflow-x: auto;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    &__thumbnail {
+        flex: none;
+        width: 4.5rem;
+        padding: 0;
+        overflow: hidden;
+        border: 2px solid transparent;
+        border-radius: 0.35rem;
+        background: none;
+        cursor: pointer;
+        opacity: 0.6;
+        transition:
+            opacity 0.15s ease,
+            border-color 0.15s ease;
+
+        img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        &:hover {
+            opacity: 0.85;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--pink);
+            outline-offset: 2px;
+        }
+
+        &[aria-current="true"] {
+            opacity: 1;
+            border-color: var(--pink);
+        }
+    }
+
+    &__close,
     &__nav {
-      width: 3.5rem;
-      height: 3.5rem;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid rgb(255 255 255 / 25%);
+        border-radius: 50%;
+        background: rgb(255 255 255 / 10%);
+        color: #f5f2ee;
+        cursor: pointer;
+        transition:
+            background-color 0.15s ease,
+            border-color 0.15s ease;
 
-      &--prev {
-        left: 1.5rem;
-      }
+        &:hover {
+            background: rgb(255 255 255 / 22%);
+            border-color: rgb(255 255 255 / 45%);
+        }
 
-      &--next {
-        right: 1.5rem;
-      }
+        &:focus-visible {
+            outline: 2px solid var(--pink);
+            outline-offset: 2px;
+        }
     }
-  }
 
-  @include bp.reduced-motion {
-    transition: none;
-  }
+    &__close {
+        top: 1rem;
+        right: 1rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    &__nav {
+        top: 50%;
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.75rem;
+        line-height: 1;
+        transform: translateY(-50%);
+
+        &--prev {
+            left: 1rem;
+        }
+
+        &--next {
+            right: 1rem;
+        }
+    }
+
+    @include bp.mq-up(bp.$bp-tablet) {
+        &__nav {
+            width: 3.5rem;
+            height: 3.5rem;
+
+            &--prev {
+                left: 1.5rem;
+            }
+
+            &--next {
+                right: 1.5rem;
+            }
+        }
+    }
+
+    @include bp.reduced-motion {
+        transition: none;
+    }
 }

@@ -1,20 +1,20 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header/Header.astro';
-import DocsNav from '../components/DocsNav/DocsNav.astro';
-import Hero from '../components/Hero/Hero.astro';
-import ApiSection from '../components/ApiSection/ApiSection.astro';
-import ApiEntry from '../components/ApiEntry/ApiEntry.astro';
-import ColorsReference from '../components/ColorsReference/ColorsReference.astro';
-import FunctionRow from '../components/FunctionRow/FunctionRow.astro';
-import EmptyState from '../components/EmptyState/EmptyState.astro';
-import Lightbox from '../components/Lightbox/Lightbox.astro';
-import Footer from '../components/Footer/Footer.astro';
-import '../styles/pages/index.scss';
-import '../styles/pages/index-screenshot.scss';
-import { SITE } from '../data/site';
-import { API_ENTRIES } from '../data/apiEntries';
-import { FUNCTION_ROWS } from '../data/functionRows';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header/Header.astro";
+import DocsNav from "../components/DocsNav/DocsNav.astro";
+import Hero from "../components/Hero/Hero.astro";
+import ApiSection from "../components/ApiSection/ApiSection.astro";
+import ApiEntry from "../components/ApiEntry/ApiEntry.astro";
+import ColorsReference from "../components/ColorsReference/ColorsReference.astro";
+import FunctionRow from "../components/FunctionRow/FunctionRow.astro";
+import EmptyState from "../components/EmptyState/EmptyState.astro";
+import Lightbox from "../components/Lightbox/Lightbox.astro";
+import Footer from "../components/Footer/Footer.astro";
+import "../styles/pages/index.scss";
+import "../styles/pages/index-screenshot.scss";
+import { SITE } from "../data/site";
+import { API_ENTRIES } from "../data/apiEntries";
+import { FUNCTION_ROWS } from "../data/functionRows";
 
 // Which ApiSection each entry renders in comes from its own `group` field
 // (see apiEntries.ts and DocsNav.data.ts, which derives the sidebar's
@@ -22,101 +22,107 @@ import { FUNCTION_ROWS } from '../data/functionRows';
 // slice boundary, so inserting, reordering, or regrouping an entry there is
 // enough on its own to move it between sections; nothing here needs to
 // change to match.
-const visualEntries = API_ENTRIES.filter((entry) => entry.group === 'visual');
-const interactiveEntries = API_ENTRIES.filter((entry) => entry.group === 'interactive');
-const selectionEntries = API_ENTRIES.filter((entry) => entry.group === 'selection');
-const decorativeEntries = API_ENTRIES.filter((entry) => entry.group === 'decorative');
-const utilsEntries = API_ENTRIES.filter((entry) => entry.group === 'utils');
-const selfEntries = API_ENTRIES.filter((entry) => entry.group === 'self');
+const visualEntries = API_ENTRIES.filter((entry) => entry.group === "visual");
+const interactiveEntries = API_ENTRIES.filter(
+    (entry) => entry.group === "interactive",
+);
+const selectionEntries = API_ENTRIES.filter(
+    (entry) => entry.group === "selection",
+);
+const decorativeEntries = API_ENTRIES.filter(
+    (entry) => entry.group === "decorative",
+);
+const utilsEntries = API_ENTRIES.filter((entry) => entry.group === "utils");
+const selfEntries = API_ENTRIES.filter((entry) => entry.group === "self");
 ---
 
 <BaseLayout>
-  <Header version={SITE.version} repoUrl={SITE.repoUrl} />
+    <Header version={SITE.version} repoUrl={SITE.repoUrl} />
 
-  <div class="docs-shell">
-    <DocsNav />
+    <div class="docs-shell">
+        <DocsNav />
 
-    <main class="docs" id="top">
-      <Hero />
+        <main class="docs" id="top">
+            <Hero />
 
-      <div class="api-sections">
-        <ApiSection
-          id="colors"
-          title="Colors"
-          intro="Every component accepts a semantic state or any named color through --color. Nothing here needs to be memorized case by case - it's the same small palette everywhere."
-        >
-          <ColorsReference />
-        </ApiSection>
+            <div class="api-sections">
+                <ApiSection
+                    id="colors"
+                    title="Colors"
+                    intro="Every component accepts a semantic state or any named color through --color. Nothing here needs to be memorized case by case - it's the same small palette everywhere."
+                >
+                    <ColorsReference />
+                </ApiSection>
 
-        <ApiSection
-          id="visual"
-          title="Visual"
-          intro="Each function names a visible terminal component; semantic meaning is selected with flags."
-          filterable
-        >
-          {visualEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="visual"
+                    title="Visual"
+                    intro="Each function names a visible terminal component; semantic meaning is selected with flags."
+                    filterable
+                >
+                    {visualEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="interactive"
-          title="Interactive"
-          intro="Read a value from the user, as free-form text or a yes/no confirmation."
-          filterable
-        >
-          {interactiveEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="interactive"
+                    title="Interactive"
+                    intro="Read a value from the user, as free-form text or a yes/no confirmation."
+                    filterable
+                >
+                    {interactiveEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="selection"
-          title="Selection"
-          intro="Choose one or several values from a list with the arrow keys."
-          filterable
-        >
-          {selectionEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="selection"
+                    title="Selection"
+                    intro="Choose one or several values from a list with the arrow keys."
+                    filterable
+                >
+                    {selectionEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="decorative"
-          title="Decorative"
-          intro="A branded flourish with no functional purpose beyond identity."
-          filterable
-        >
-          {decorativeEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="decorative"
+                    title="Decorative"
+                    intro="A branded flourish with no functional purpose beyond identity."
+                    filterable
+                >
+                    {decorativeEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="utils"
-          title="Utils"
-          intro="Small reusable helpers for process feedback and dependency checks."
-          filterable
-        >
-          {utilsEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="utils"
+                    title="Utils"
+                    intro="Small reusable helpers for process feedback and dependency checks."
+                    filterable
+                >
+                    {utilsEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="self"
-          title="Self"
-          intro="Commands moma runs about itself: checking its version, updating, and browsing its own documentation."
-          filterable
-        >
-          {selfEntries.map((entry) => <ApiEntry {...entry} />)}
-        </ApiSection>
+                <ApiSection
+                    id="self"
+                    title="Self"
+                    intro="Commands moma runs about itself: checking its version, updating, and browsing its own documentation."
+                    filterable
+                >
+                    {selfEntries.map((entry) => <ApiEntry {...entry} />)}
+                </ApiSection>
 
-        <ApiSection
-          id="cli"
-          title="Command interface"
-          intro="The standalone file exposes every library function as a command and keeps documentation previews in the same entrypoint."
-        >
-          <div class="function-list">
-            {FUNCTION_ROWS.map((row) => <FunctionRow {...row} />)}
-          </div>
-        </ApiSection>
-      </div>
+                <ApiSection
+                    id="cli"
+                    title="Command interface"
+                    intro="The standalone file exposes every library function as a command and keeps documentation previews in the same entrypoint."
+                >
+                    <div class="function-list">
+                        {FUNCTION_ROWS.map((row) => <FunctionRow {...row} />)}
+                    </div>
+                </ApiSection>
+            </div>
 
-      <EmptyState />
-    </main>
-  </div>
+            <EmptyState />
+        </main>
+    </div>
 
-  <Footer repoUrl={SITE.repoUrl} functionCount={SITE.functionCount} />
-  <Lightbox />
+    <Footer repoUrl={SITE.repoUrl} functionCount={SITE.functionCount} />
+    <Lightbox />
 </BaseLayout>

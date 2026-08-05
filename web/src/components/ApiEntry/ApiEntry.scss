@@ -1,71 +1,70 @@
-@use '../../styles/breakpoints' as bp;
+@use "../../styles/breakpoints" as bp;
 
 .api-entry {
-  scroll-margin-top: 5.5rem;
-  padding: 3rem 0;
-  border-bottom: 1px solid var(--line-strong);
+    scroll-margin-top: 5.5rem;
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--line-strong);
 
-  &[hidden] {
-    display: none;
-  }
+    &[hidden] {
+        display: none;
+    }
 
-  @include bp.mq-up(bp.$bp-tablet) {
-    padding-block: 4rem;
-  }
+    @include bp.mq-up(bp.$bp-tablet) {
+        padding-block: 4rem;
+    }
 
-  &__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-  }
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
 
-  &__kind {
-    margin: 0 0 0.35rem;
-    color: var(--faint);
-    font: 800 calc(0.65rem + 2px) var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+    &__kind {
+        margin: 0 0 0.35rem;
+        color: var(--faint);
+        font: 800 calc(0.65rem + 2px) var(--font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
 
-  &__name {
-    margin: 0;
-    font: 800 clamp(1.45rem, 6vw, 2.25rem) var(--font-mono);
-    letter-spacing: -0.04em;
-  }
+    &__name {
+        margin: 0;
+        font: 800 clamp(1.45rem, 6vw, 2.25rem) var(--font-mono);
+        letter-spacing: -0.04em;
+    }
 
-  &__description {
-    max-width: 43rem;
-    margin: 1.2rem 0;
-    color: var(--muted);
-    font-size: calc(1rem + 2px);
-  }
+    &__description {
+        max-width: 43rem;
+        margin: 1.2rem 0;
+        color: var(--muted);
+        font-size: calc(1rem + 2px);
+    }
 }
 
 .signature {
-  flex: 1 1 auto;
-  min-width: 0;
-  margin: 0;
-  color: var(--pink);
-  font: calc(0.82rem + 2px)/1.6 var(--font-mono);
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    color: var(--pink);
+    font: calc(0.82rem + 2px)/1.6 var(--font-mono);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 
 // Lets .signature wrap onto multiple lines - rather than scroll
 // horizontally - while the toggle button (when present) sits beside it on
 // wide viewports and drops to its own line, via flex-wrap, on narrow ones.
 .code-block {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  padding: 1rem 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
 }
 
 // Expands/collapses .signature-options below (see ApiEntry.client.ts).
@@ -74,48 +73,48 @@
 // literal runnable command the way each bash example already is - so a
 // details toggle is more useful here than copy-to-clipboard.
 .signature-toggle {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid #f6f4ef;
-  background: #f6f4ef;
-  color: var(--muted);
-  cursor: pointer;
-  font: 700 calc(0.68rem + 2px) var(--font-mono);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #f6f4ef;
+    background: #f6f4ef;
+    color: var(--muted);
+    cursor: pointer;
+    font: 700 calc(0.68rem + 2px) var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 
-  position: absolute;
-  bottom: -15px;
-  right: 0;
+    position: absolute;
+    bottom: -15px;
+    right: 0;
 
-  &:hover {
-    border-color: var(--pink);
-    color: var(--pink);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--pink);
-    outline-offset: 2px;
-  }
-
-  &__icon {
-    display: inline-block;
-    transition: transform 0.15s ease;
-    transform-origin: center;
-  }
-
-  &[aria-expanded='true'] .signature-toggle__icon {
-    transform: rotate(180deg);
-  }
-
-  @include bp.reduced-motion {
-    .signature-toggle__icon {
-      transition: none;
+    &:hover {
+        border-color: var(--pink);
+        color: var(--pink);
     }
-  }
+
+    &:focus-visible {
+        outline: 2px solid var(--pink);
+        outline-offset: 2px;
+    }
+
+    &__icon {
+        display: inline-block;
+        transition: transform 0.15s ease;
+        transform-origin: center;
+    }
+
+    &[aria-expanded="true"] .signature-toggle__icon {
+        transform: rotate(180deg);
+    }
+
+    @include bp.reduced-motion {
+        .signature-toggle__icon {
+            transition: none;
+        }
+    }
 }
 
 // Animates open/closed via a grid-template-rows 0fr->1fr transition, which
@@ -128,157 +127,157 @@
 // same two-step reveal Lightbox.client.ts and DocsNav.client.ts already
 // use for their own transitions.
 .signature-options {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.2s ease;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
 
-  &[data-open='true'] {
-    grid-template-rows: 1fr;
-  }
-
-  &[hidden] {
-    display: none;
-  }
-
-  &__inner {
-    overflow: hidden;
-    min-height: 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: calc(0.82rem + 2px);
-  }
-
-  tr {
-    border-bottom: 1px dotted var(--line);
-
-    &:last-child {
-      border-bottom: 0;
-    }
-  }
-
-  td {
-    padding: 0.6rem 0.75rem 0.6rem 0;
-    overflow-wrap: anywhere;
-    vertical-align: top;
-
-    &:first-child {
-      color: var(--pink);
-      font: 700 calc(0.8rem + 2px) var(--font-mono);
+    &[data-open="true"] {
+        grid-template-rows: 1fr;
     }
 
-    &:last-child {
-      padding-right: 0;
-      color: var(--muted);
+    &[hidden] {
+        display: none;
     }
-  }
 
-  @include bp.reduced-motion {
-    transition: none;
-  }
+    &__inner {
+        overflow: hidden;
+        min-height: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: calc(0.82rem + 2px);
+    }
+
+    tr {
+        border-bottom: 1px dotted var(--line);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+    }
+
+    td {
+        padding: 0.6rem 0.75rem 0.6rem 0;
+        overflow-wrap: anywhere;
+        vertical-align: top;
+
+        &:first-child {
+            color: var(--pink);
+            font: 700 calc(0.8rem + 2px) var(--font-mono);
+        }
+
+        &:last-child {
+            padding-right: 0;
+            color: var(--muted);
+        }
+    }
+
+    @include bp.reduced-motion {
+        transition: none;
+    }
 }
 
 .api-examples {
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--line);
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--line);
 
-  &__title {
-    margin: 0 0 0.8rem;
-    color: var(--faint);
-    font: 800 calc(0.64rem + 2px) var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+    &__title {
+        margin: 0 0 0.8rem;
+        color: var(--faint);
+        font: 800 calc(0.64rem + 2px) var(--font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
 
-  &__list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-  }
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
 
-  &__example {
-    position: relative;
-    margin: 0;
-    padding: 0.8rem 3.75rem 0.8rem 1rem;
-    background: var(--pink-soft);
-    border-left: 2px solid var(--pink);
-    overflow-x: hidden;
-  }
+    &__example {
+        position: relative;
+        margin: 0;
+        padding: 0.8rem 3.75rem 0.8rem 1rem;
+        background: var(--pink-soft);
+        border-left: 2px solid var(--pink);
+        overflow-x: hidden;
+    }
 
-  &__code {
-    display: block;
-    color: var(--ink);
-    font: calc(0.76rem + 2px)/1.6 var(--font-mono);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
+    &__code {
+        display: block;
+        color: var(--ink);
+        font: calc(0.76rem + 2px)/1.6 var(--font-mono);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
 }
 
 .wireframe {
-  margin-top: 1.75rem;
-  padding-left: 1.25rem;
-  border-left: 1px dashed var(--line-strong);
+    margin-top: 1.75rem;
+    padding-left: 1.25rem;
+    border-left: 1px dashed var(--line-strong);
 
-  @include bp.mq-up(bp.$bp-tablet) {
-    padding-left: 2rem;
-  }
-
-  &__label {
-    margin: 0 0 1rem;
-    color: var(--faint);
-    font: 800 calc(0.64rem + 2px) var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  // A plain button around the screenshot, reset back to an unstyled
-  // clickable image so it opens the Lightbox (see Lightbox.client.ts,
-  // which discovers every [data-lightbox-trigger] on the page). The zoom
-  // cursor is gated behind `.js` since Lightbox.client.ts is what actually
-  // makes the click do something.
-  &__trigger {
-    display: block;
-    // Buttons don't reliably fill their container's width the way a <div>
-    // does; without this, the width:100% screenshot below has an
-    // indeterminate percentage basis and collapses to 0x0 before it loads,
-    // which (with height:auto and no other height source) causes the page
-    // to grow underneath any hash-linked destination further down as lazy
-    // images load in and strands the browser's native smooth-scroll well
-    // short of an anchor target opened directly (e.g. #moma-prompt).
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: none;
-
-    .js & {
-      cursor: zoom-in;
+    @include bp.mq-up(bp.$bp-tablet) {
+        padding-left: 2rem;
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--pink);
-      outline-offset: 3px;
+    &__label {
+        margin: 0 0 1rem;
+        color: var(--faint);
+        font: 800 calc(0.64rem + 2px) var(--font-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
-  }
 
-  // Real terminal screenshots (see screenshots.ts) always render at the
-  // capture tool's fixed canvas size (932x665); scale down to fit the
-  // column - well under that native size, so it never looks upscaled -
-  // instead of shipping oversized markup like the old TerminalWindow
-  // mockup did. Click through to the Lightbox for the full-size view.
-  &__screenshot {
-    display: block;
-    width: 100%;
-    max-width: 48rem;
-    height: auto;
-    border-radius: 0.35rem;
-    transition: opacity 0.15s ease;
+    // A plain button around the screenshot, reset back to an unstyled
+    // clickable image so it opens the Lightbox (see Lightbox.client.ts,
+    // which discovers every [data-lightbox-trigger] on the page). The zoom
+    // cursor is gated behind `.js` since Lightbox.client.ts is what actually
+    // makes the click do something.
+    &__trigger {
+        display: block;
+        // Buttons don't reliably fill their container's width the way a <div>
+        // does; without this, the width:100% screenshot below has an
+        // indeterminate percentage basis and collapses to 0x0 before it loads,
+        // which (with height:auto and no other height source) causes the page
+        // to grow underneath any hash-linked destination further down as lazy
+        // images load in and strands the browser's native smooth-scroll well
+        // short of an anchor target opened directly (e.g. #moma-prompt).
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: none;
 
-    .wireframe__trigger:hover &,
-    .wireframe__trigger:focus-visible & {
-      opacity: 0.88;
+        .js & {
+            cursor: zoom-in;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--pink);
+            outline-offset: 3px;
+        }
     }
-  }
+
+    // Real terminal screenshots (see screenshots.ts) always render at the
+    // capture tool's fixed canvas size (932x665); scale down to fit the
+    // column - well under that native size, so it never looks upscaled -
+    // instead of shipping oversized markup like the old TerminalWindow
+    // mockup did. Click through to the Lightbox for the full-size view.
+    &__screenshot {
+        display: block;
+        width: 100%;
+        max-width: 48rem;
+        height: auto;
+        border-radius: 0.35rem;
+        transition: opacity 0.15s ease;
+
+        .wireframe__trigger:hover &,
+        .wireframe__trigger:focus-visible & {
+            opacity: 0.88;
+        }
+    }
 }

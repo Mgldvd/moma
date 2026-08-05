@@ -1,89 +1,112 @@
 ---
-import '../styles/reset.scss';
-import '../styles/global.scss';
-import brandMark from '../assets/moma-1m2vh.png';
-import { SITE } from '../data/site';
+import "../styles/reset.scss";
+import "../styles/global.scss";
+import brandMark from "../assets/moma-1m2vh.png";
+import { SITE } from "../data/site";
 
 export interface Props {
-  title?: string;
-  description?: string;
-  /** Set on the 404 page so it's never indexed or treated as a canonical
-   * URL of its own. */
-  noindex?: boolean;
+    title?: string;
+    description?: string;
+    /** Set on the 404 page so it's never indexed or treated as a canonical
+     * URL of its own. */
+    noindex?: boolean;
 }
 
-const { title = SITE.title, description = SITE.description, noindex = false } = Astro.props as Props;
+const {
+    title = SITE.title,
+    description = SITE.description,
+    noindex = false,
+} = Astro.props as Props;
 const canonicalUrl = new URL(Astro.url.pathname, SITE.url).toString();
 const socialImageUrl = new URL(brandMark.src, SITE.url).toString();
 ---
 
 <!doctype html>
 <html lang="en" data-theme="light" class="no-js">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content={description} />
-  {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonicalUrl} />}
-  <title>{title}</title>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={description} />
+        {
+            noindex ? (
+                <meta name="robots" content="noindex, follow" />
+            ) : (
+                <link rel="canonical" href={canonicalUrl} />
+            )
+        }
+        <title>{title}</title>
 
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonicalUrl} />
-  <meta property="og:image" content={socialImageUrl} />
-  <meta property="og:site_name" content="Moma" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={socialImageUrl} />
+        <meta property="og:site_name" content="Moma" />
 
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content={title} />
-  <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={socialImageUrl} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={socialImageUrl} />
 
-  <link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}favicon.png`} />
-  <link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
+        <link
+            rel="icon"
+            type="image/png"
+            href={`${import.meta.env.BASE_URL}favicon.png`}
+        />
+        <link
+            rel="apple-touch-icon"
+            href={`${import.meta.env.BASE_URL}apple-touch-icon.png`}
+        />
 
-  <script type="application/ld+json" is:inline set:html={JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareSourceCode',
-    name: 'Moma',
-    description: SITE.description,
-    codeRepository: SITE.repoUrl,
-    programmingLanguage: 'Shell',
-    softwareVersion: SITE.version,
-    url: SITE.url,
-  })} />
-</head>
-<body class="page">
-  <script is:inline>
-    // Runs synchronously, before first paint, to avoid a flash of the
-    // wrong theme or of interactive-only chrome. Kept intentionally tiny
-    // and framework-free: it only sets attributes/classes the rest of the
-    // app (and its CSS) already knows how to read.
-    (function () {
-      var root = document.documentElement;
-      root.classList.remove('no-js');
-      root.classList.add('js');
+        <script
+            type="application/ld+json"
+            is:inline
+            set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "SoftwareSourceCode",
+                name: "Moma",
+                description: SITE.description,
+                codeRepository: SITE.repoUrl,
+                programmingLanguage: "Shell",
+                softwareVersion: SITE.version,
+                url: SITE.url,
+            })}
+        />
+    </head>
+    <body class="page">
+        <script is:inline>
+            // Runs synchronously, before first paint, to avoid a flash of the
+            // wrong theme or of interactive-only chrome. Kept intentionally tiny
+            // and framework-free: it only sets attributes/classes the rest of the
+            // app (and its CSS) already knows how to read.
+            (function () {
+                var root = document.documentElement;
+                root.classList.remove("no-js");
+                root.classList.add("js");
 
-      var savedTheme = localStorage.getItem('moma-preview-theme');
-      if (savedTheme === 'light' || savedTheme === 'dark') {
-        root.dataset.theme = savedTheme;
-      }
+                var savedTheme = localStorage.getItem("moma-preview-theme");
+                if (savedTheme === "light" || savedTheme === "dark") {
+                    root.dataset.theme = savedTheme;
+                }
 
-      // The screenshot tool (generate-screenshots.sh) always renders in
-      // light mode against one isolated component - see
-      // src/styles/pages/index-screenshot.scss and ApiEntry.client.ts.
-      var screenshotName = new URLSearchParams(window.location.search).get('component');
-      if (screenshotName) {
-        root.dataset.theme = 'light';
-        document.body.classList.add('page--screenshot');
-      }
-    })();
-  </script>
+                // The screenshot tool (generate-screenshots.sh) always renders in
+                // light mode against one isolated component - see
+                // src/styles/pages/index-screenshot.scss and ApiEntry.client.ts.
+                var screenshotName = new URLSearchParams(
+                    window.location.search,
+                ).get("component");
+                if (screenshotName) {
+                    root.dataset.theme = "light";
+                    document.body.classList.add("page--screenshot");
+                }
+            })();
+        </script>
 
-  <a class="skip-link" href="#top">Skip to content</a>
-  <slot />
+        <a class="skip-link" href="#top">Skip to content</a>
+        <slot />
 
-  <script>
-    import '../utils/anchorFocus.client';
-  </script>
-</body>
+        <script>
+            import "../utils/anchorFocus.client";
+        </script>
+    </body>
 </html>
