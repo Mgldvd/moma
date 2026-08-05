@@ -1,46 +1,68 @@
 ---
-import './Hero.scss';
-import CopyButton from '../CopyButton/CopyButton.astro';
-import QuickStartIcon from './QuickStartIcon.astro';
-import { QUICK_START_GROUPS } from './Hero.data';
-import type { Props } from './Hero.types';
+import "./Hero.scss";
+import CopyButton from "../CopyButton/CopyButton.astro";
+import QuickStartIcon from "./QuickStartIcon.astro";
+import { QUICK_START_GROUPS } from "./Hero.data";
+import type { Props } from "./Hero.types";
 
-const { eyebrow = 'MOMA / API REFERENCE', quickStartGroups = QUICK_START_GROUPS } = Astro.props as Props;
+const {
+    eyebrow = "MOMA / API REFERENCE",
+    quickStartGroups = QUICK_START_GROUPS,
+} = Astro.props as Props;
 ---
 
 <header class="docs-hero">
-  <p class="docs-hero__eyebrow">{eyebrow}</p>
-  <h1 class="docs-hero__title">Moma <span class="docs-hero__accent">Terminal components</span></h1>
-  <p class="docs-hero__intro">Complete visual and functional reference for the Moma Bash library. Every public function is listed below with its signature, purpose, and terminal output where applicable.</p>
+    <p class="docs-hero__eyebrow">{eyebrow}</p>
+    <h1 class="docs-hero__title">
+        Moma <span class="docs-hero__accent">Terminal components</span>
+    </h1>
+    <p class="docs-hero__intro">
+        Complete visual and functional reference for the Moma Bash library.
+        Every public function is listed below with its signature, purpose, and
+        terminal output where applicable.
+    </p>
 
-  {quickStartGroups.map((group) => (
-    <div class="quick-start">
-      <span class="quick-start__label">
-        {group.label}
+    {
+        quickStartGroups.map((group) => (
+            <div class="quick-start">
+                <span class="quick-start__label">
+                    {group.label}
 
+                    <span class="quick-start__actions">
+                        <span class="quick-start__icons">
+                            {group.icons?.map((icon) => (
+                                <QuickStartIcon name={icon} />
+                            ))}
+                        </span>
 
-        <span class="quick-start__actions">
+                        <CopyButton
+                            variant="inline"
+                            text={group.commands.join("\n")}
+                            label={`Copy ${group.label} commands to clipboard`}
+                        />
+                    </span>
+                </span>
+                {group.commands.map((command) => (
+                    <code
+                        class="quick-start__command"
+                        data-bash-source={command}
+                    >
+                        {command}
+                    </code>
+                ))}
+            </div>
+        ))
+    }
 
-        <span class="quick-start__icons">
-          {group.icons?.map((icon) => <QuickStartIcon name={icon} />)}
-        </span>
-
-          <CopyButton
-            variant="inline"
-            text={group.commands.join('\n')}
-            label={`Copy ${group.label} commands to clipboard`}
-          />
-        </span>
-      </span>
-      {group.commands.map((command) => (
-        <code class="quick-start__command" data-bash-source={command}>{command}</code>
-      ))}
-    </div>
-  ))}
-
-  <p class="docs-hero__intro">The <code>moma &lt;command&gt;</code> syntax works the same way whether the library is sourced or the executable is installed. Direct <code>moma-*</code> functions (for example <code>moma-msg</code>) remain available after sourcing, for backward compatibility with existing scripts.</p>
+    <p class="docs-hero__intro">
+        The <code>moma &lt;command&gt;</code> syntax works the same way whether the
+        library is sourced or the executable is installed. Direct <code
+            >moma-*</code
+        > functions (for example <code>moma-msg</code>) remain available after
+        sourcing, for backward compatibility with existing scripts.
+    </p>
 </header>
 
 <script>
-  import './Hero.client';
+    import "./Hero.client";
 </script>

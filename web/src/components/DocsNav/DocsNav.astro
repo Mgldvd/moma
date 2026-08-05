@@ -1,47 +1,61 @@
 ---
-import './DocsNav.scss';
-import { NAV_GROUPS } from './DocsNav.data';
+import "./DocsNav.scss";
+import { NAV_GROUPS } from "./DocsNav.data";
 ---
 
 <div class="docs-nav-backdrop" data-open="false" hidden></div>
-<nav class="docs-nav" id="docs-nav" aria-label="Component navigation" data-open="false">
-  <div class="docs-nav__top">
-    <p class="docs-nav__title">Components</p>
-    <button class="docs-nav__close" type="button">Close ✕</button>
-  </div>
-
-  <div class="docs-nav__quicklinks">
-    <a class="docs-nav__link" href="#top">Overview</a>
-    <a class="docs-nav__link" href="#colors">Colors</a>
-  </div>
-
-  <label class="docs-nav__search">
-    <span class="docs-nav__search-icon" aria-hidden="true">⌕</span>
-    <span class="docs-nav__search-label">Filter API</span>
-    <input class="docs-nav__search-input" type="search" placeholder="Filter…" autocomplete="off">
-    <kbd class="docs-nav__search-shortcut">/</kbd>
-  </label>
-
-  {NAV_GROUPS.map((group) => (
-    <div class="docs-nav__group" data-nav-group={group.key}>
-      <p class="docs-nav__heading">{group.heading}</p>
-      <ul class="docs-nav__list">
-        {group.links.map((link) => (
-          <li class="docs-nav__item">
-            <a
-              class="docs-nav__link"
-              data-nav-for={link.filterable ? link.targetId : undefined}
-              href={`#${link.targetId}`}
-            >
-              {link.label}
-            </a>
-          </li>
-        ))}
-      </ul>
+<nav
+    class="docs-nav"
+    id="docs-nav"
+    aria-label="Component navigation"
+    data-open="false"
+>
+    <div class="docs-nav__top">
+        <p class="docs-nav__title">Components</p>
+        <button class="docs-nav__close" type="button">Close ✕</button>
     </div>
-  ))}
+
+    <div class="docs-nav__quicklinks">
+        <a class="docs-nav__link" href="#top">Overview</a>
+        <a class="docs-nav__link" href="#colors">Colors</a>
+    </div>
+
+    <label class="docs-nav__search">
+        <span class="docs-nav__search-icon" aria-hidden="true">⌕</span>
+        <span class="docs-nav__search-label">Filter API</span>
+        <input
+            class="docs-nav__search-input"
+            type="search"
+            placeholder="Filter…"
+            autocomplete="off"
+        />
+        <kbd class="docs-nav__search-shortcut">/</kbd>
+    </label>
+
+    {
+        NAV_GROUPS.map((group) => (
+            <div class="docs-nav__group" data-nav-group={group.key}>
+                <p class="docs-nav__heading">{group.heading}</p>
+                <ul class="docs-nav__list">
+                    {group.links.map((link) => (
+                        <li class="docs-nav__item">
+                            <a
+                                class="docs-nav__link"
+                                data-nav-for={
+                                    link.filterable ? link.targetId : undefined
+                                }
+                                href={`#${link.targetId}`}
+                            >
+                                {link.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        ))
+    }
 </nav>
 
 <script>
-  import './DocsNav.client';
+    import "./DocsNav.client";
 </script>

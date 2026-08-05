@@ -1,48 +1,48 @@
-@use '../../styles/breakpoints' as bp;
+@use "../../styles/breakpoints" as bp;
 
 .function-row {
-  scroll-margin-top: 5.5rem;
-  display: grid;
-  gap: 0.7rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid var(--line);
+    scroll-margin-top: 5.5rem;
+    display: grid;
+    gap: 0.7rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--line);
 
-  &[hidden] {
-    display: none;
-  }
-
-  @include bp.mq-up(bp.$bp-tablet) {
-    grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 1.2fr);
-    gap: 0.8rem 2rem;
-  }
-
-  &__name {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-    align-items: center;
-  }
-
-  &__function {
-    color: var(--ink);
-    font: 800 calc(1rem + 2px) var(--font-mono);
-  }
-
-  &__description {
-    margin: 0;
-    color: var(--muted);
-    font-size: calc(0.92rem + 2px);
-  }
-
-  &__signature {
-    min-width: 0;
-    overflow-x: auto;
-    color: var(--pink);
-    font: calc(0.76rem + 2px)/1.6 var(--font-mono);
-    white-space: nowrap;
+    &[hidden] {
+        display: none;
+    }
 
     @include bp.mq-up(bp.$bp-tablet) {
-      grid-column: 2;
+        grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 1.2fr);
+        gap: 0.8rem 2rem;
     }
-  }
+
+    &__name {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: center;
+    }
+
+    &__function {
+        color: var(--ink);
+        font: 800 calc(1rem + 2px) var(--font-mono);
+    }
+
+    &__description {
+        margin: 0;
+        color: var(--muted);
+        font-size: calc(0.92rem + 2px);
+    }
+
+    &__signature {
+        min-width: 0;
+        overflow-x: auto;
+        color: var(--pink);
+        font: calc(0.76rem + 2px)/1.6 var(--font-mono);
+        white-space: nowrap;
+
+        @include bp.mq-up(bp.$bp-tablet) {
+            grid-column: 2;
+        }
+    }
 }

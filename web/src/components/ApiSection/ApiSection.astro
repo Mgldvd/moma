@@ -1,25 +1,31 @@
 ---
-import './ApiSection.scss';
-import type { Props } from './ApiSection.types';
+import "./ApiSection.scss";
+import type { Props } from "./ApiSection.types";
 
 const { id, title, intro, filterable = false } = Astro.props as Props;
 ---
 
-{/* data-filterable must be omitted, not set to "false", when not
+{
+    /* data-filterable must be omitted, not set to "false", when not
     filterable: unlike native boolean attributes, a data-* attribute set to
     boolean false still renders as the literal string data-filterable="false"
     in Astro, which - being present - still matches the [data-filterable]
     selector ApiSection.client.ts uses to auto-hide empty sections. That
     used to permanently hide this section (id="cli" has no .api-entry
-    children to ever satisfy the "not empty" check). */}
-<section class="api-section" id={id} data-filterable={filterable ? 'true' : undefined}>
-  <header class="api-section__header">
-    <h2 class="api-section__title">{title}</h2>
-    <p class="api-section__intro">{intro}</p>
-  </header>
-  <slot />
+    children to ever satisfy the "not empty" check). */
+}
+<section
+    class="api-section"
+    id={id}
+    data-filterable={filterable ? "true" : undefined}
+>
+    <header class="api-section__header">
+        <h2 class="api-section__title">{title}</h2>
+        <p class="api-section__intro">{intro}</p>
+    </header>
+    <slot />
 </section>
 
 <script>
-  import './ApiSection.client';
+    import "./ApiSection.client";
 </script>

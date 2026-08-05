@@ -1,134 +1,136 @@
-@use '../../styles/breakpoints' as bp;
+@use "../../styles/breakpoints" as bp;
 
 .topbar {
-  position: sticky;
-  z-index: 30;
-  top: 0;
-  display: flex;
-  min-height: var(--topbar-height);
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem max(1rem, calc((100% - var(--docs-max-width)) / 2));
-  border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--canvas) 92%, transparent);
-  backdrop-filter: blur(16px);
-
-  &__actions {
+    position: sticky;
+    z-index: 30;
+    top: 0;
     display: flex;
+    min-height: var(--topbar-height);
     align-items: center;
-    gap: 0.5rem;
-  }
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem max(1rem, calc((100% - var(--docs-max-width)) / 2));
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--canvas) 92%, transparent);
+    backdrop-filter: blur(16px);
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 }
 
 .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    text-decoration: none;
 
-  &__mark {
-    width: 3.2rem;
-    height: 3.2rem;
-    object-fit: cover;
-  }
-
-  &__name {
-    font-weight: 800;
-  }
-
-  &__cursor {
-    color: var(--pink);
-    animation: brand-cursor-blink 1s steps(2, start) infinite;
-
-    @include bp.reduced-motion {
-      animation: none;
+    &__mark {
+        width: 3.2rem;
+        height: 3.2rem;
+        object-fit: cover;
     }
-  }
 
-  &__version {
-    padding: 0.15rem 0.4rem;
-    border: 1px solid var(--line);
-    color: var(--faint);
-    font-size: calc(0.62rem + 2px);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-  }
+    &__name {
+        font-weight: 800;
+    }
+
+    &__cursor {
+        color: var(--pink);
+        animation: brand-cursor-blink 1s steps(2, start) infinite;
+
+        @include bp.reduced-motion {
+            animation: none;
+        }
+    }
+
+    &__version {
+        padding: 0.15rem 0.4rem;
+        border: 1px solid var(--line);
+        color: var(--faint);
+        font-size: calc(0.62rem + 2px);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
 }
 
 .brand__name {
-  font-size: calc(0.82rem + 2px);
-  font-weight: 800;
-  margin: 0 15px 0 10px;
+    font-size: calc(0.82rem + 2px);
+    font-weight: 800;
+    margin: 0 15px 0 10px;
 }
 
 @keyframes brand-cursor-blink {
-  50% { opacity: 0; }
+    50% {
+        opacity: 0;
+    }
 }
 
 .brand__label {
-  display: none;
-  color: var(--faint);
-  font-size: calc(0.72rem + 2px);
+    display: none;
+    color: var(--faint);
+    font-size: calc(0.72rem + 2px);
 
-  @include bp.mq-up(bp.$bp-cursor) {
-    display: inline;
-  }
+    @include bp.mq-up(bp.$bp-cursor) {
+        display: inline;
+    }
 }
 
 .nav-toggle {
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-  font: 700 calc(0.72rem + 2px) var(--font-mono);
+    display: inline-flex;
+    min-height: 2.4rem;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    font: 700 calc(0.72rem + 2px) var(--font-mono);
 
-  &__icon {
-    font-size: calc(0.95rem + 2px);
-  }
-
-  &__text {
-    display: none;
-
-    @include bp.mq-up(bp.$bp-cursor) {
-      display: inline;
+    &__icon {
+        font-size: calc(0.95rem + 2px);
     }
-  }
 
-  .no-js & {
-    display: none;
-  }
+    &__text {
+        display: none;
+
+        @include bp.mq-up(bp.$bp-cursor) {
+            display: inline;
+        }
+    }
+
+    .no-js & {
+        display: none;
+    }
 }
 
 .github-link {
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--line);
-  color: var(--ink);
-  text-decoration: none;
+    display: inline-flex;
+    min-height: 2.4rem;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
 
-  &:hover {
-    border-color: var(--pink);
-    color: var(--pink);
-  }
-
-  &__text {
-    display: none;
-    font: 700 calc(0.68rem + 2px) var(--font-mono);
-    text-transform: uppercase;
-
-    @include bp.mq-up(bp.$bp-cursor) {
-      display: inline;
+    &:hover {
+        border-color: var(--pink);
+        color: var(--pink);
     }
-  }
+
+    &__text {
+        display: none;
+        font: 700 calc(0.68rem + 2px) var(--font-mono);
+        text-transform: uppercase;
+
+        @include bp.mq-up(bp.$bp-cursor) {
+            display: inline;
+        }
+    }
 }

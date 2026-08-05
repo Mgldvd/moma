@@ -7,140 +7,142 @@
 // It is intentionally kept here, as a page-level, plain (non-scoped)
 // stylesheet, rather than duplicated into each affected component.
 .page--screenshot {
-  position: relative;
-  min-height: 100vh;
-  padding-top: 2.75rem;
-  color: var(--terminal-ink);
-  background: var(--terminal);
-  border: 1px solid var(--terminal-border);
-  border-radius: 0.35rem;
-  overflow: hidden;
-
-  &::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 2.75rem;
-    color: var(--terminal-chrome-ink);
-    font: calc(0.72rem + 2px)/1 var(--font-sans);
-    background: var(--terminal-chrome);
-    content: 'Moma';
-  }
-
-  &::after {
-    position: absolute;
-    top: 1.05rem;
-    right: 1.25rem;
-    z-index: 2;
-    width: 0.65rem;
-    height: 0.65rem;
-    background: var(--terminal-control-error);
-    border-radius: 50%;
-    box-shadow: -1.15rem 0 var(--terminal-control-warning), -2.3rem 0 var(--terminal-control-success);
-    content: '';
-  }
-
-  .topbar,
-  .nav-toggle,
-  .docs-nav,
-  .docs-nav-backdrop,
-  .docs-hero,
-  .api-section__header,
-  .empty-state,
-  .api-entry__kind,
-  .api-entry__description,
-  .signature,
-  .signature-toggle,
-  .signature-options,
-  .api-examples,
-  .function-row__description,
-  .function-row__signature,
-  .wireframe__label,
-  .terminal-window__chrome,
-  .output-carousel__thumbnails,
-  .footer {
-    display: none;
-  }
-
-  .docs-shell {
-    display: block;
-    width: min(100% - 6rem, 58rem);
-  }
-
-  .docs {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: calc(100vh - 2.75rem);
-  }
-
-  .api-sections {
-    width: 100%;
-    padding: 0;
-  }
-
-  .api-section {
-    padding: 0;
-  }
-
-  .component-preview--screenshot-target {
-    width: 100%;
-    padding: 0;
+    position: relative;
+    min-height: 100vh;
+    padding-top: 2.75rem;
+    color: var(--terminal-ink);
     background: var(--terminal);
-    border: 0;
-  }
-
-  .function-row {
-    display: none;
-
-    &.component-preview--screenshot-target {
-      display: block;
-    }
-  }
-
-  .api-entry__header,
-  .function-row__name {
-    margin-bottom: 2.25rem;
-  }
-
-  .api-entry__name,
-  .function-row__function {
-    color: var(--terminal-accent);
-    font-size: calc(1.4rem + 2px);
-    letter-spacing: 0;
+    border: 1px solid var(--terminal-border);
+    border-radius: 0.35rem;
+    overflow: hidden;
 
     &::before {
-      color: var(--terminal-primary);
-      content: '$ ';
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 2.75rem;
+        color: var(--terminal-chrome-ink);
+        font: calc(0.72rem + 2px)/1 var(--font-sans);
+        background: var(--terminal-chrome);
+        content: "Moma";
     }
-  }
 
-  .wireframe {
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-
-  .terminal-window {
-    border: 0;
-    border-radius: 0;
-    background: none;
-
-    &__body {
-      width: 100%;
-      padding: 0;
-      background: var(--terminal);
-      font-size: calc(1.05rem + 2px);
-      line-height: 1.7;
-
-      &--pagga {
-        line-height: 1;
-      }
+    &::after {
+        position: absolute;
+        top: 1.05rem;
+        right: 1.25rem;
+        z-index: 2;
+        width: 0.65rem;
+        height: 0.65rem;
+        background: var(--terminal-control-error);
+        border-radius: 50%;
+        box-shadow:
+            -1.15rem 0 var(--terminal-control-warning),
+            -2.3rem 0 var(--terminal-control-success);
+        content: "";
     }
-  }
+
+    .topbar,
+    .nav-toggle,
+    .docs-nav,
+    .docs-nav-backdrop,
+    .docs-hero,
+    .api-section__header,
+    .empty-state,
+    .api-entry__kind,
+    .api-entry__description,
+    .signature,
+    .signature-toggle,
+    .signature-options,
+    .api-examples,
+    .function-row__description,
+    .function-row__signature,
+    .wireframe__label,
+    .terminal-window__chrome,
+    .output-carousel__thumbnails,
+    .footer {
+        display: none;
+    }
+
+    .docs-shell {
+        display: block;
+        width: min(100% - 6rem, 58rem);
+    }
+
+    .docs {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-height: calc(100vh - 2.75rem);
+    }
+
+    .api-sections {
+        width: 100%;
+        padding: 0;
+    }
+
+    .api-section {
+        padding: 0;
+    }
+
+    .component-preview--screenshot-target {
+        width: 100%;
+        padding: 0;
+        background: var(--terminal);
+        border: 0;
+    }
+
+    .function-row {
+        display: none;
+
+        &.component-preview--screenshot-target {
+            display: block;
+        }
+    }
+
+    .api-entry__header,
+    .function-row__name {
+        margin-bottom: 2.25rem;
+    }
+
+    .api-entry__name,
+    .function-row__function {
+        color: var(--terminal-accent);
+        font-size: calc(1.4rem + 2px);
+        letter-spacing: 0;
+
+        &::before {
+            color: var(--terminal-primary);
+            content: "$ ";
+        }
+    }
+
+    .wireframe {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .terminal-window {
+        border: 0;
+        border-radius: 0;
+        background: none;
+
+        &__body {
+            width: 100%;
+            padding: 0;
+            background: var(--terminal);
+            font-size: calc(1.05rem + 2px);
+            line-height: 1.7;
+
+            &--pagga {
+                line-height: 1;
+            }
+        }
+    }
 }

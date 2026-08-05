@@ -1,19 +1,23 @@
 ---
-import './CopyButton.scss';
-import type { Props } from './CopyButton.types';
+import "./CopyButton.scss";
+import type { Props } from "./CopyButton.types";
 
-const { text, label = 'Copy command to clipboard', variant = 'floating' } = Astro.props as Props;
+const {
+    text,
+    label = "Copy command to clipboard",
+    variant = "floating",
+} = Astro.props as Props;
 ---
 
 <button
-  type="button"
-  class:list={['copy-btn', { 'copy-btn--inline': variant === 'inline' }]}
-  data-copy-text={text}
-  aria-label={label}
+    type="button"
+    class:list={["copy-btn", { "copy-btn--inline": variant === "inline" }]}
+    data-copy-text={text}
+    aria-label={label}
 >
-  Copy
+    Copy
 </button>
 
 <script>
-  import './CopyButton.client';
+    import "./CopyButton.client";
 </script>

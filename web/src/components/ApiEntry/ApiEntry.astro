@@ -1,13 +1,23 @@
 ---
-import { Image } from 'astro:assets';
-import './ApiEntry.scss';
-import CopyButton from '../CopyButton/CopyButton.astro';
-import TerminalWindow from '../TerminalWindow/TerminalWindow.astro';
-import OutputCarousel from '../OutputCarousel/OutputCarousel.astro';
-import { getScreenshot, getCarouselFrames } from '../../data/screenshots';
-import type { Props } from './ApiEntry.types';
+import { Image } from "astro:assets";
+import "./ApiEntry.scss";
+import CopyButton from "../CopyButton/CopyButton.astro";
+import TerminalWindow from "../TerminalWindow/TerminalWindow.astro";
+import OutputCarousel from "../OutputCarousel/OutputCarousel.astro";
+import { getScreenshot, getCarouselFrames } from "../../data/screenshots";
+import type { Props } from "./ApiEntry.types";
 
-const { id, kind, name, descriptionHtml, signature, searchText, examples, options, wireframe } = Astro.props as Props;
+const {
+    id,
+    kind,
+    name,
+    descriptionHtml,
+    signature,
+    searchText,
+    examples,
+    options,
+    wireframe,
+} = Astro.props as Props;
 
 const hasOptions = Boolean(options && options.length > 0);
 const optionsId = `${id}-options`;
@@ -30,86 +40,114 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
 ---
 
 <article class="api-entry" id={id} data-api={searchText}>
-  <header class="api-entry__header">
-    <div>
-      <p class="api-entry__kind">{kind}</p>
-      <h3 class="api-entry__name">{name}</h3>
+    <header class="api-entry__header">
+        <div>
+            <p class="api-entry__kind">{kind}</p>
+            <h3 class="api-entry__name">{name}</h3>
+        </div>
+    </header>
+    <p class="api-entry__description" set:html={descriptionHtml} />
+    <div class="code-block">
+        <code class="signature">{signature}</code>
+        {
+            hasOptions && (
+                <button
+                    type="button"
+                    class="signature-toggle"
+                    aria-expanded="false"
+                    aria-controls={optionsId}
+                >
+                    Options
+                    <span class="signature-toggle__icon" aria-hidden="true">
+                        ⯆
+                    </span>
+                </button>
+            )
+        }
     </div>
-  </header>
-  <p class="api-entry__description" set:html={descriptionHtml} />
-  <div class="code-block">
-    <code class="signature">{signature}</code>
-    {hasOptions && (
-      <button
-        type="button"
-        class="signature-toggle"
-        aria-expanded="false"
-        aria-controls={optionsId}
-      >
-        Options
-        <span class="signature-toggle__icon" aria-hidden="true">
-          ⯆
-        </span>
-      </button>
-    )}
-  </div>
 
-  {hasOptions && (
-    <div class="signature-options" id={optionsId} data-open="false" hidden>
-      <div class="signature-options__inner">
-        <table>
-          <tbody>
-            {options!.map((option) => (
-              <tr>
-                <td><code>{option.flag}</code></td>
-                <td>{option.description}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )}
+    {
+        hasOptions && (
+            <div
+                class="signature-options"
+                id={optionsId}
+                data-open="false"
+                hidden
+            >
+                <div class="signature-options__inner">
+                    <table>
+                        <tbody>
+                            {options!.map((option) => (
+                                <tr>
+                                    <td>
+                                        <code>{option.flag}</code>
+                                    </td>
+                                    <td>{option.description}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        )
+    }
 
-  {showExamples && (
-    <section class="api-examples">
-      <p class="api-examples__title">Bash examples</p>
-      <div class="api-examples__list">
-        {examples!.map((example) => (
-          <pre class="api-examples__example"><code class="api-examples__code">{example}</code><CopyButton text={example} /></pre>
-        ))}
-      </div>
-    </section>
-  )}
+    {
+        showExamples && (
+            <section class="api-examples">
+                <p class="api-examples__title">Bash examples</p>
+                <div class="api-examples__list">
+                    {examples!.map((example) => (
+                        <pre class="api-examples__example">
+                            <code class="api-examples__code">{example}</code>
+                            <CopyButton text={example} />
+                        </pre>
+                    ))}
+                </div>
+            </section>
+        )
+    }
 
-  {hasCarousel ? (
-    <div class="wireframe">
-      <p class="wireframe__label">Output</p>
-      <OutputCarousel name={name} frames={carouselFrames!} />
-    </div>
-  ) : screenshot ? (
-    <div class="wireframe">
-      <p class="wireframe__label">Output</p>
-      <button
-        type="button"
-        class="wireframe__trigger"
-        data-lightbox-trigger
-        data-lightbox-caption={name}
-        aria-label={`View ${name} output full-size`}
-      >
-        <Image class="wireframe__screenshot" src={screenshot} alt={`${name} output`} loading="lazy" />
-      </button>
-    </div>
-  ) : wireframe && (
-    <div class="wireframe">
-      <p class="wireframe__label">Output</p>
-      <TerminalWindow title={`moma ${name}`} ariaLabel={`${name} output`}>
-        <Fragment set:html={wireframe.bodyHtml} />
-      </TerminalWindow>
-    </div>
-  )}
+    {
+        hasCarousel ? (
+            <div class="wireframe">
+                <p class="wireframe__label">Output</p>
+                <OutputCarousel name={name} frames={carouselFrames!} />
+            </div>
+        ) : screenshot ? (
+            <div class="wireframe">
+                <p class="wireframe__label">Output</p>
+                <button
+                    type="button"
+                    class="wireframe__trigger"
+                    data-lightbox-trigger
+                    data-lightbox-caption={name}
+                    aria-label={`View ${name} output full-size`}
+                >
+                    <Image
+                        class="wireframe__screenshot"
+                        src={screenshot}
+                        alt={`${name} output`}
+                        loading="lazy"
+                    />
+                </button>
+            </div>
+        ) : (
+            wireframe && (
+                <div class="wireframe">
+                    <p class="wireframe__label">Output</p>
+                    <TerminalWindow
+                        title={`moma ${name}`}
+                        ariaLabel={`${name} output`}
+                    >
+                        <Fragment set:html={wireframe.bodyHtml} />
+                    </TerminalWindow>
+                </div>
+            )
+        )
+    }
 </article>
 
 <script>
-  import './ApiEntry.client';
+    import "./ApiEntry.client";
 </script>
