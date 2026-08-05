@@ -268,6 +268,8 @@ _moma_render_title_sub() {
   local no_color="${6:-false}"
   local width="${7:-}"
   local max_width="${8:-}"
+  local icon="${9-▪}"
+  local border="${10:-open}"
 
   text="$(_moma_trim "$text")"
   detail="$(_moma_trim "$detail")"
@@ -291,13 +293,33 @@ _moma_render_title_sub() {
       "$min_width" "$width" "$max_width" 8
   )"
 
+  # There's no left box edge to fall back to here (unlike moma-title), so
+  # a missing icon is just blank filler, not a │.
+  local left_glyph="${icon:- }"
+
   printf '%b\n' "$resolved_color"
   if [[ -n "$detail" ]]; then
-    printf '  ▪  %b%s %b%s\n' "$reset" "$text" "$resolved_color" "$detail"
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s %s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" "$left_glyph"
+    else
+      printf '  %s  %b%s %b%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
+    fi
   else
-    printf '  ▪  %b%s %b\n' "$reset" "$text" "$resolved_color"
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$left_glyph"
+    else
+      printf '  %s  %b%s %b\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color"
+    fi
   fi
-  printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
+  if [[ "$border" == open ]]; then
+    printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
+  else
+    printf '  └%s┘\n' "$(_moma_repeat_char "─" "$((box_width - 1))")"
+  fi
   if [[ -n "$message" ]]; then
     printf '\n'
     printf '     %b%s\n' "$reset" "$message"
@@ -315,10 +337,19 @@ moma-title-sub() {
   local width=""
   local max_width=""
   local no_color=false
+  local icon="▪"
+  local border="open"
   local -a positional=()
+  local style
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --success | --error | --warning | --info)
+        style="$(_moma_apply_semantic_style "${1#--}")"
+        color="${style%%$'\t'*}"
+        icon="${style#*$'\t'}"
+        shift
+        ;;
       --color | -c)
         if [[ $# -lt 2 ]]; then
           _moma_option_requires_value moma-title-sub "$1"
@@ -329,6 +360,34 @@ moma-title-sub() {
         ;;
       --color=*)
         color="${1#*=}"
+        shift
+        ;;
+      --icon | -i)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-title-sub "$1"
+          return 1
+        fi
+        icon="$2"
+        shift 2
+        ;;
+      --icon=*)
+        icon="${1#*=}"
+        shift
+        ;;
+      --no-icon)
+        icon=""
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-title-sub "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
         shift
         ;;
       --message)
@@ -385,7 +444,12 @@ moma-title-sub() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-title-sub "<text>" ["detail"] [--color <color>] [--message <text>] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+Usage: moma-title-sub "<text>" ["detail"] [--success|--error|--warning|--info] [--color <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--message <text>] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+
+--icon sets the left marker (default ▪); --no-icon replaces it with blank
+filler. --border controls the closing line: open (default) is a bare
+underline, line closes it with ┘, and mirror also closes it with ┘ and
+repeats the left marker at the end of the text line.
 EOF
         return 0
         ;;
@@ -407,6 +471,13 @@ EOF
 
   text="${positional[0]:-}"
   detail="${positional[1]:-}"
+  case "$border" in
+    mirror | line | open) ;;
+    *)
+      _moma_usage_error moma-title-sub "invalid border: $border (expected mirror, line, or open)"
+      return 2
+      ;;
+  esac
   if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
     _moma_usage_error moma-title-sub "invalid width: $width"
     return 2
@@ -417,5 +488,5 @@ EOF
   fi
   _moma_render_title_sub \
     "$text" "$detail" "$color" "$message" \
-    "$min_width" "$no_color" "$width" "$max_width"
+    "$min_width" "$no_color" "$width" "$max_width" "$icon" "$border"
 }

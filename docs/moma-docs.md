@@ -46,9 +46,10 @@ export MOMA_MAX_WIDTH=50
 
 Fixed width takes priority when both variables are set. The decorated
 components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
-`moma-label`, and `moma-input` also accept local `--width` and `--max-width`
-options. A local fixed width overrides the global setting. The minimum
-effective decoration width is 8 columns; box padding can require more.
+`moma-label`, `moma-input`, and `moma-resume` also accept local `--width`
+and `--max-width` options. A local fixed width overrides the global
+setting. The minimum effective decoration width is 8 columns; box padding
+can require more.
 
 ## Color themes
 
@@ -143,10 +144,14 @@ moma title "Moma" "Terminal UI library" --no-icon --border open
 
 ### `moma-title-sub`
 
-Secondary heading for stages nested inside the main workflow.
+Secondary heading for stages nested inside the main workflow. The left
+marker defaults to `▪` and can be swapped for a semantic icon or dropped
+in favor of blank filler (there's no left box edge to fall back to here,
+unlike `moma-title`); `--border` controls the closing line the same way
+it does on `moma-title` and `moma-resume`.
 
 ```text
-moma title-sub "Deployment" "Production environment" [--width number] [--max-width number]
+moma title-sub "Deployment" "Production environment" [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--width number] [--max-width number]
 ```
 
 ```bash
@@ -158,6 +163,9 @@ moma title-sub "Deploy" "Production" --color cyan
 
 # Example 3
 moma title-sub "Tests" --message "Running suite" --min-width 42
+
+# Example 4: closed underline, marker mirrored at the end of the line
+moma title-sub "Dependencies" "Installing packages" --border mirror
 ```
 
 ![moma-title-sub preview](../.img/moma-title-sub.png)

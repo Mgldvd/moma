@@ -308,6 +308,34 @@ fixed_title_sub="$(
 )"
 [[ "$fixed_title_sub" == *"  └${shared_rule}"* ]]
 
+title_sub_no_icon="$(
+  NO_COLOR=1 "$MOMA_DIST" title-sub "Dependencies" "Installing packages" \
+    --no-icon
+)"
+[[ "$title_sub_no_icon" == *$'\n     Dependencies Installing packages\n  └'* ]]
+[[ "$title_sub_no_icon" != *'┘'* ]]
+
+title_sub_line="$(
+  NO_COLOR=1 "$MOMA_DIST" title-sub "Dependencies" "Installing packages" \
+    --border line
+)"
+[[ "$title_sub_line" == *$'\n  ▪  Dependencies Installing packages\n  └'*'┘'* ]]
+
+title_sub_mirror="$(
+  NO_COLOR=1 "$MOMA_DIST" title-sub "Dependencies" "Installing packages" \
+    --border mirror
+)"
+[[ "$title_sub_mirror" == *$'Installing packages ▪\n  └'*'┘'* ]]
+
+set +e
+title_sub_bad_border="$(
+  NO_COLOR=1 "$MOMA_DIST" title-sub "x" --border sideways 2>&1
+)"
+title_sub_bad_border_status=$?
+set -e
+[[ "$title_sub_bad_border_status" -eq 2 ]]
+[[ "$title_sub_bad_border" == *"invalid border"* ]]
+
 fixed_label="$(
   NO_COLOR=1 MOMA_WIDTH="$shared_width" \
     "$MOMA_DIST" label "Short"
