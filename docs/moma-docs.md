@@ -113,10 +113,13 @@ moma header "Deploy 2026" --color cyan --margin-top 0 --margin-bottom 1 --margin
 
 ### `moma-title`
 
-Primary identity block for the beginning of a script or major workflow.
+Primary identity block for the beginning of a script or major workflow. The
+left marker defaults to `▪` and can be swapped for a semantic icon or
+dropped in favor of a plain box edge; the right marker independently
+mirrors it, closes with a plain edge, or is dropped entirely.
 
 ```text
-moma title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]
+moma title "Moma" "Terminal UI library" [--success|--error|--warning|--info] [--primary color] [--accent color] [--icon char] [--no-icon] [--border mirror|line|open] [--width number] [--max-width number]
 ```
 
 ```bash
@@ -128,6 +131,12 @@ moma title "Deploy" "Production" --primary cyan
 
 # Example 3
 moma title "Backup" "Nightly job" --accent yellow --min-width 48
+
+# Example 4: semantic icon, plain right edge
+moma title "Moma" "Terminal UI library" --success --border line
+
+# Example 5: no marker at all, open right edge
+moma title "Moma" "Terminal UI library" --no-icon --border open
 ```
 
 ![moma-title preview](../.img/moma-title.png)

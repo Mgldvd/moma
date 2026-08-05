@@ -242,6 +242,43 @@ fixed_title="$(
 [[ "$fixed_title" == *"  ┌${shared_rule}┐"* ]]
 [[ "$fixed_title" == *"  └${shared_rule}┘"* ]]
 
+title_markers="$(
+  NO_COLOR=1 "$MOMA_DIST" title "Moma" "Terminal UI library"
+)"
+[[ "$title_markers" == *$'\n  ▪  Moma Terminal UI library         ▪\n'* ]]
+
+title_no_icon="$(
+  NO_COLOR=1 "$MOMA_DIST" title "Moma" "Terminal UI library" --no-icon
+)"
+[[ "$title_no_icon" == *$'\n  │  Moma Terminal UI library         │\n'* ]]
+
+title_open="$(
+  NO_COLOR=1 "$MOMA_DIST" title "Moma" "Terminal UI library" \
+    --no-icon --border open
+)"
+[[ "$title_open" == *$'\n  │  Moma Terminal UI library\n'* ]]
+
+title_line="$(
+  NO_COLOR=1 "$MOMA_DIST" title "Moma" "Terminal UI library" --border line
+)"
+[[ "$title_line" == *$'\n  ▪  Moma Terminal UI library         │\n'* ]]
+
+title_semantic="$(
+  env -u NO_COLOR "$MOMA_DIST" title "Moma" "Terminal UI library" --success
+)"
+[[ "$title_semantic" == *$'✔  \033[32mMoma'* ]]
+[[ "$title_semantic" == *'         ✔'* ]]
+[[ "$title_semantic" == *$'\033[32m'* ]]
+
+set +e
+title_bad_border="$(
+  NO_COLOR=1 "$MOMA_DIST" title "Moma" --border sideways 2>&1
+)"
+title_bad_border_status=$?
+set -e
+[[ "$title_bad_border_status" -eq 2 ]]
+[[ "$title_bad_border" == *"invalid border"* ]]
+
 fixed_title_sub="$(
   NO_COLOR=1 MOMA_WIDTH="$shared_width" \
     "$MOMA_DIST" title-sub "Short"
