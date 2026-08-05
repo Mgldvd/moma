@@ -280,8 +280,16 @@ résumé section or a categorized reference list. Rows come from repeated
 line follows the block, so calling `moma-resume` repeatedly stacks blocks
 with consistent spacing.
 
+The title is a single open line by default (`┌─ Title`). Setting `--icon`,
+`--no-icon`, or a semantic flag switches to a boxed header instead: a
+full-width top border, a marker + title line, and a blank separator row
+before the content rows - mirroring `moma-title`'s own marker conventions.
+`--border` controls the closing edge the same way it does on `moma-title`:
+`mirror` and `line` (default: `mirror`) close with `└`, `open` leaves the
+block unclosed.
+
 ```text
-moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
+moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--width number] [--max-width number] [--no-color]
 ```
 
 ```bash
@@ -298,10 +306,16 @@ moma resume --title "Summary" --color cyan \
   --text "All checks passed." \
   --text "No manual follow-up required."
 
-# Example 3: semantic color and mixed row kinds
+# Example 3: semantic color and mixed row kinds - the semantic flag also
+# switches on the boxed header
 moma resume --title "Review" --warning \
   --item "Environment" "production" \
   --text "Confirm the target before deploying."
+
+# Example 4: boxed header, no marker, left unclosed
+moma resume --title "Moma Terminal UI library" --no-icon --border open \
+  --text "element 1" \
+  --text "element 2"
 ```
 
 ### `moma-prompt`
