@@ -272,7 +272,7 @@ export const API_ENTRIES: ApiEntryData[] = [
     id: 'moma-divider',
     kind: 'Rule component',
     name: 'divider',
-    descriptionHtml: 'Marker-led horizontal rule, for separating sections without a full heading. Uses <code>⎼</code> instead of the <code>─</code> box-drawing character elsewhere in Moma, and has no left box edge, only an optional bare <code>┌</code>/<code>└</code> pair framing the rule above and below.',
+    descriptionHtml: 'Marker-led horizontal rule, for separating sections without a full heading. Uses <code>—</code> (em dash) instead of the <code>─</code> box-drawing character elsewhere in Moma, and has no left box edge, only an optional bare <code>┌</code>/<code>└</code> pair framing the rule above and below.',
     signature: 'moma divider [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--min-width number] [--width number] [--max-width number] [--no-color]',
     searchText: 'moma-divider rule horizontal separator line icon marker border mirror line open success error warning info',
     group: 'visual',

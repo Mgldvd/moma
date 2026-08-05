@@ -356,11 +356,12 @@ moma resume --title "Moma Terminal UI library" --no-icon --border open \
 ### `moma-divider`
 
 Marker-led horizontal rule, for separating sections without a full
-heading. Uses `⎼` instead of the `─` box-drawing character elsewhere in
-Moma, and has no left box edge, only an optional bare `┌`/`└` pair framing
-the rule above and below. `--icon`, `--no-icon`, and the semantic flags
-work the same way as on `moma-title-sub`; `--border` open (default) prints
-just the rule, while `line` and `mirror` both frame it.
+heading. Uses `—` (em dash) instead of the `─` box-drawing character
+elsewhere in Moma, and has no left box edge, only an optional bare
+`┌`/`└` pair framing the rule above and below. `--icon`, `--no-icon`, and
+the semantic flags work the same way as on `moma-title-sub`; `--border`
+open (default) prints just the rule, while `line` and `mirror` both
+frame it.
 
 ```text
 moma divider [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--min-width number] [--width number] [--max-width number] [--no-color]

@@ -238,18 +238,18 @@ set -e
 [[ "$resume_missing_title" == *"--title is required"* ]]
 
 divider_default="$(NO_COLOR=1 "$MOMA_DIST" divider)"
-[[ "$divider_default" == $'\n  ▪ '*'⎼'* ]]
+[[ "$divider_default" == $'\n  ▪ '*'—'* ]]
 [[ "$divider_default" != *'┌'* ]]
 [[ "$divider_default" != *'└'* ]]
 
 divider_framed="$(NO_COLOR=1 "$MOMA_DIST" divider --border line)"
-[[ "$divider_framed" == $'\n  ┌\n  ▪ '*'⎼'*$'\n  └'* ]]
+[[ "$divider_framed" == $'\n  ┌\n  ▪ '*'—'*$'\n  └'* ]]
 
 divider_semantic="$(env -u NO_COLOR "$MOMA_DIST" divider --success --border line)"
 [[ "$divider_semantic" == *$'\033[32m'*'✔'* ]]
 
 divider_no_icon="$(NO_COLOR=1 "$MOMA_DIST" divider --no-icon)"
-[[ "$divider_no_icon" == $'\n    ⎼'* ]]
+[[ "$divider_no_icon" == $'\n    —'* ]]
 
 set +e
 divider_bad_border="$(NO_COLOR=1 "$MOMA_DIST" divider --border sideways 2>&1)"
