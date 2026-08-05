@@ -89,10 +89,12 @@ _BLOCK_SHADES = {
     "▒": 0.50,  # ▒ medium shade
     "▓": 0.75,  # ▓ dark shade
 }
-# U+23BA HORIZONTAL SCAN LINE-1 (moma-rabbit's ground line) is outside
-# DejaVu Sans Mono's coverage and would otherwise render as a tofu box; draw
-# it as the thin line near the top of the cell its name describes.
+# U+23BA HORIZONTAL SCAN LINE-1 (moma-rabbit's ground line) and U+23BC
+# HORIZONTAL SCAN LINE-9 (moma-divider's rule) are both outside DejaVu Sans
+# Mono's coverage and would otherwise render as tofu boxes; draw each as
+# the thin line near the top/bottom of the cell its name describes.
 _SCAN_LINE_1 = "⎺"
+_SCAN_LINE_9 = "⎼"
 
 
 def _draw_block_glyph(draw, cx, cy, cell_w, cell_h, data, fg, bg) -> bool:
@@ -126,6 +128,15 @@ def _draw_block_glyph(draw, cx, cy, cell_w, cell_h, data, fg, bg) -> bool:
 
     if data == _SCAN_LINE_1:
         line_y = cy + cell_h * 0.12
+        draw.line(
+            [(cx, line_y), (cx + cell_w, line_y)],
+            fill=(*fg, 255),
+            width=max(1, round(cell_h * 0.08)),
+        )
+        return True
+
+    if data == _SCAN_LINE_9:
+        line_y = cy + cell_h * 0.85
         draw.line(
             [(cx, line_y), (cx + cell_w, line_y)],
             fill=(*fg, 255),
