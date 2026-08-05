@@ -15,6 +15,32 @@ document.querySelectorAll<HTMLElement>('.api-entry').forEach((entry) => {
     code.innerHTML = highlightBashSyntax(code.textContent || '');
   });
 
+  const signatureToggle = entry.querySelector<HTMLButtonElement>('.signature-toggle');
+  const signatureOptions = entry.querySelector<HTMLElement>('.signature-options');
+  if (signatureToggle && signatureOptions) {
+    let collapseTimeout: number | undefined;
+    // Same two-step reveal Lightbox.client.ts/DocsNav.client.ts use for
+    // their own transitions: unhide *before* the animated attribute so the
+    // panel has real content to grow into, then re-hide only once the
+    // collapse transition has actually finished playing.
+    signatureToggle.addEventListener('click', () => {
+      const expanded = signatureToggle.getAttribute('aria-expanded') === 'true';
+      signatureToggle.setAttribute('aria-expanded', String(!expanded));
+      window.clearTimeout(collapseTimeout);
+      if (expanded) {
+        signatureOptions.dataset.open = 'false';
+        collapseTimeout = window.setTimeout(() => {
+          signatureOptions.hidden = true;
+        }, 200);
+      } else {
+        signatureOptions.hidden = false;
+        requestAnimationFrame(() => {
+          signatureOptions.dataset.open = 'true';
+        });
+      }
+    });
+  }
+
   function setVisible(visible: boolean): void {
     entry.hidden = !visible;
     entry.dispatchEvent(

@@ -1,0 +1,65 @@
+@use '../../styles/breakpoints' as bp;
+
+.output-carousel {
+  position: relative;
+
+  // Inert until OutputCarousel.client wires up the thumbnails; hide them
+  // rather than leaving dead controls clickable with no-JS.
+  &__thumbnails {
+    .no-js & {
+      display: none;
+    }
+  }
+
+  &__thumbnails {
+    display: flex;
+    // .wireframe__screenshot caps the image itself at 48rem, but this row
+    // is a sibling of the trigger button, not a child of the (also
+    // capped) <img> - without the same cap here, centering happens across
+    // the whole (uncapped, often wider) column instead of under the image
+    // actually visible above it.
+    max-width: 48rem;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+  }
+
+  &__thumbnail {
+    flex: none;
+    width: 3.5rem;
+    padding: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 0.3rem;
+    background: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pink);
+      outline-offset: 2px;
+    }
+
+    &[aria-current='true'] {
+      opacity: 1;
+      border-color: var(--pink);
+    }
+  }
+
+  @include bp.reduced-motion {
+    &__thumbnail {
+      transition: none;
+    }
+  }
+}

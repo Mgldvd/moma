@@ -1,5 +1,6 @@
 import {
   ENTRY_VISIBILITY_EVENT,
+  FILTER_EVENT,
   NAV_TOGGLE_REQUEST,
   NAV_TOGGLE_STATE,
   type EntryVisibilityDetail,
@@ -12,8 +13,9 @@ const navLinks = [...document.querySelectorAll<HTMLAnchorElement>('.docs-nav__li
 const navGroupEls = [...document.querySelectorAll<HTMLElement>('.docs-nav__group')];
 
 // The screenshot tool renders one isolated component at a time and never
-// interacts with the page, so the mobile drawer and scroll-spy - both of
-// which assume a normal viewport and user input - stay off in that mode.
+// interacts with the page, so the mobile drawer, scroll-spy, and search -
+// all of which assume a normal viewport and user input - stay off in that
+// mode.
 const screenshotName = new URLSearchParams(window.location.search).get('component');
 
 function setupMobileNav(): void {
@@ -251,7 +253,7 @@ function setupScrollSpy(): void {
   }
 
   // Called for any in-page hash navigation, whether or not it targets a
-  // tracked section (e.g. the API index's "#components" jumps to a whole
+  // tracked section (e.g. a footer link's "#components" jumps to a whole
   // ApiSection, not one sidebar entry). targetId is applied immediately
   // when it does match, for an instant, flicker-free highlight; either way,
   // scroll-driven updates stay locked until endSettling confirms where the
@@ -315,9 +317,9 @@ function setupScrollSpy(): void {
     pendingTargetId = null;
   }
 
-  // Covers the sidebar's own links, the API index, the footer's "back to
-  // top", and the header brand link - every in-page hash link on the page -
-  // from one place, rather than re-deriving this per component.
+  // Covers the sidebar's own links, the footer's "back to top", and the
+  // header brand link - every in-page hash link on the page - from one
+  // place, rather than re-deriving this per component.
   document.addEventListener('click', (event) => {
     const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
     if (!anchor) {
@@ -401,6 +403,28 @@ function setupScrollSpy(): void {
   }
 }
 
+// Owns the sidebar's search field: dispatches FILTER_EVENT for
+// ApiEntry/FunctionRow instances to react to (see their own listeners),
+// plus the "/" shortcut to focus it from anywhere on the page.
+function setupSearch(): void {
+  const searchInput = docsNav?.querySelector<HTMLInputElement>('.docs-nav__search-input');
+  if (!searchInput) {
+    return;
+  }
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    document.dispatchEvent(new CustomEvent(FILTER_EVENT, { detail: { query } }));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === '/' && document.activeElement !== searchInput) {
+      event.preventDefault();
+      searchInput.focus();
+    }
+  });
+}
+
 // React to search-filter results reported by ApiEntry/FunctionRow
 // instances elsewhere on the page, without ever querying their DOM
 // directly.
@@ -423,4 +447,5 @@ setupFilterSync();
 if (!screenshotName) {
   setupMobileNav();
   setupScrollSpy();
+  setupSearch();
 }

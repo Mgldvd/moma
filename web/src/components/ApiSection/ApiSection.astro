@@ -2,7 +2,7 @@
 import './ApiSection.scss';
 import type { Props } from './ApiSection.types';
 
-const { id, number, title, intro, filterable = false } = Astro.props as Props;
+const { id, title, intro, filterable = false } = Astro.props as Props;
 ---
 
 {/* data-filterable must be omitted, not set to "false", when not
@@ -14,7 +14,6 @@ const { id, number, title, intro, filterable = false } = Astro.props as Props;
     children to ever satisfy the "not empty" check). */}
 <section class="api-section" id={id} data-filterable={filterable ? 'true' : undefined}>
   <header class="api-section__header">
-    <p class="api-section__number">{number}</p>
     <h2 class="api-section__title">{title}</h2>
     <p class="api-section__intro">{intro}</p>
   </header>

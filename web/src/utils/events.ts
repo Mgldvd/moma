@@ -16,7 +16,7 @@ export interface NavToggleStateDetail {
   open: boolean;
 }
 
-/** Dispatched on `document` by DocsIndex's search field whenever the query
+/** Dispatched on `document` by DocsNav's search field whenever the query
  * changes. ApiEntry and FunctionRow instances each decide their own
  * visibility from their own known search text. */
 export const FILTER_EVENT = 'moma:filter';

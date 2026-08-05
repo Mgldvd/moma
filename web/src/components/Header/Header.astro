@@ -18,6 +18,14 @@ const { version, repoUrl } = Astro.props as Props;
     </span>
   </a>
   <div class="topbar__actions">
+    <button
+      class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"
+      aria-label="Toggle components menu"
+    >
+      <span class="nav-toggle__icon" aria-hidden="true">☰</span>
+      <span class="nav-toggle__text">Menu</span>
+    </button>
+
     <span class="brand__label">
       documentation
     </span>

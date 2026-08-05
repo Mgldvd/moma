@@ -1,0 +1,89 @@
+@use '../../styles/breakpoints' as bp;
+
+.colors-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  margin-top: 2rem;
+
+  &__group-title {
+    margin: 0 0 0.5rem;
+    color: var(--faint);
+    font: 800 calc(0.66rem + 2px) var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__group-note {
+    max-width: 42rem;
+    margin: 0 0 1.25rem;
+    color: var(--muted);
+    font-size: calc(0.88rem + 2px);
+
+    code {
+      padding: 0.05rem 0.3rem;
+      background: var(--pink-soft);
+      color: var(--pink);
+      font: calc(0.82rem + 2px) var(--font-mono);
+    }
+  }
+
+  &__swatches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+
+    @include bp.mq-up(bp.$bp-cursor) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    &--named {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      @include bp.mq-up(bp.$bp-cursor) {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
+  }
+
+  &__swatch {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 0.35rem;
+  }
+
+  &__dot {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 1px solid rgb(0 0 0 / 15%);
+    border-radius: 50%;
+  }
+
+  &__flag {
+    display: block;
+    color: var(--ink);
+    font: 700 calc(0.78rem + 2px) var(--font-mono);
+  }
+
+  &__caption {
+    margin: 0.1rem 0 0;
+    color: var(--muted);
+    font-size: calc(0.76rem + 2px);
+  }
+
+  &__default-badge {
+    display: inline-block;
+    margin-top: 0.2rem;
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.2rem;
+    background: var(--pink-soft);
+    color: var(--pink);
+    font: 800 calc(0.6rem + 2px) var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}

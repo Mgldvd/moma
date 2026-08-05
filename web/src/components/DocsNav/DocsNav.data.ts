@@ -1,4 +1,4 @@
-import { API_ENTRIES, type ApiEntryNavGroup } from '../../data/apiEntries';
+import { API_ENTRIES, type ApiEntryGroup } from '../../data/apiEntries';
 import { FUNCTION_ROWS } from '../../data/functionRows';
 import type { NavGroup } from './DocsNav.types';
 
@@ -6,21 +6,25 @@ import type { NavGroup } from './DocsNav.types';
 // and FUNCTION_ROWS - the same arrays index.astro renders the page from -
 // instead of separate, hand-maintained id lists. Reordering or adding an
 // entry there is therefore automatically reflected here, in the matching
-// position, with no second place to keep in sync.
-const GROUP_HEADINGS: Record<ApiEntryNavGroup, string> = {
+// position, with no second place to keep in sync. index.astro renders one
+// ApiSection per group below, in this same order, so this heading list is
+// also the page's own section order, not just the sidebar's.
+const GROUP_HEADINGS: Record<ApiEntryGroup, string> = {
   visual: 'Visual',
   interactive: 'Interactive',
   selection: 'Selection',
-  workflow: 'Workflow',
+  decorative: 'Decorative',
+  utils: 'Utils',
+  self: 'Self',
 };
 
-const GROUP_ORDER: ApiEntryNavGroup[] = ['visual', 'interactive', 'selection', 'workflow'];
+const GROUP_ORDER: ApiEntryGroup[] = ['visual', 'interactive', 'selection', 'decorative', 'utils', 'self'];
 
 export const NAV_GROUPS: NavGroup[] = [
   ...GROUP_ORDER.map((key) => ({
     key,
     heading: GROUP_HEADINGS[key],
-    links: API_ENTRIES.filter((entry) => entry.navGroup === key).map((entry) => ({
+    links: API_ENTRIES.filter((entry) => entry.group === key).map((entry) => ({
       label: entry.name,
       targetId: entry.id,
       filterable: true,

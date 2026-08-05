@@ -18,23 +18,43 @@ class Command:
     id: str
     title: str
     script: str
+    # Optional one-example-per-frame variant of `script`, each run and
+    # captured as its own separate screenshot (rather than one combined
+    # capture) for the docs site's output carousel. `script` above still
+    # renders unconditionally and is what feeds the single, combined image
+    # README.md and docs/moma-docs.md embed - frames are purely additive.
+    frames: tuple[str, ...] = ()
 
 
 COMMANDS: list[Command] = [
     Command(
         id="moma-header",
         title="moma header",
-        script='moma header "Moma" --color cyan --margin-top 0 --margin-bottom 0',
+        # Mirrors apiEntries.ts's `examples` for moma-header exactly - see
+        # the module docstring above.
+        script="""
+moma header "Moma"
+moma header "Deploy 2026" --color cyan --margin-bottom 1
+moma header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 2 --no-color
+""".strip(),
     ),
     Command(
         id="moma-title",
         title="moma title",
-        script='moma title "Moma" "Terminal UI library"',
+        script="""
+moma title "Moma" "Terminal UI library"
+moma title "Deploy" "Production" --primary cyan
+moma title "Backup" "Nightly job" --accent yellow --min-width 48
+""".strip(),
     ),
     Command(
         id="moma-title-sub",
         title="moma title-sub",
-        script='moma title-sub "Deployment" "Production environment"',
+        script="""
+moma title-sub "Dependencies" "Installing packages"
+moma title-sub "Deploy" "Production" --color cyan
+moma title-sub "Tests" --message "Running suite" --min-width 42
+""".strip(),
     ),
     Command(
         id="moma-section",
@@ -42,8 +62,7 @@ COMMANDS: list[Command] = [
         script="""
 moma section "Dependencies ready" --success
 moma section "Configuration failed" --error
-moma section "Review required" --warning
-moma section "Next step" --info
+moma section "Next step" --info --icon "→"
 """.strip(),
     ),
     Command(
@@ -52,9 +71,7 @@ moma section "Next step" --info
         script="""
 moma msg "Package installed" --success
 moma msg "Connection refused" --error
-moma msg "Using cached version" --warning
-moma msg "Downloading metadata" --info
-moma msg "Custom presentation" --icon "◆" --color pink
+moma msg "Downloading metadata" --color cyan --icon "→"
 """.strip(),
     ),
     Command(
@@ -64,44 +81,64 @@ moma msg "Custom presentation" --icon "◆" --color pink
 moma msg-simple "Package installed"
 moma msg-simple "Package installation failed" --error
 """.strip(),
+        # Mirrors apiEntries.ts's `examples` for moma-msg-simple exactly -
+        # one frame per documented example, in the same order.
+        frames=(
+            'moma msg-simple "Package installed"',
+            'moma msg-simple "Package installation failed" --error',
+            'moma msg-simple "Queued" --color yellow --marker "•"',
+        ),
     ),
     Command(
         id="moma-list",
         title="moma list",
-        script=(
-            'moma list "Clone repository" "Install dependencies" '
-            '"Start application"'
-        ),
+        script="""
+moma list "Clone repository" "Install dependencies" "Start application"
+moma list "Database ready" "Cache ready" --success
+moma list "Review logs" "Retry deployment" --marker "→" --color yellow
+""".strip(),
     ),
     Command(
         id="moma-box",
         title="moma box",
         script="""
-moma box "Your configuration is ready." --success
-moma box "Back up your files before continuing." --warning
+moma box "Configuration is ready." --success
+moma box "Review the deployment settings." --warning --width 48
+moma box "A long notice wraps inside its border." --info --max-width 32
 """.strip(),
     ),
     Command(
         id="moma-block",
         title="moma block",
         script="""
-moma block --title "Shells and Terminal Experience" --color blue \\
-  --item "Bash" "GNU command shell and scripting environment." \\
-  --item "Zsh" "Interactive shell with advanced completion."
-moma block --title "Files, Search, and Data Processing" --color pink \\
-  --item "ripgrep" "Fast recursive text-search utility." \\
-  --item "jq" "Command-line JSON query and transformation processor."
+moma block --title "Shells" --color blue \\
+  --item "Bash" "GNU command shell." \\
+  --item "Zsh" "Interactive shell with completion."
+moma block --title "Summary" \\
+  --text "All checks passed." \\
+  --text "No manual follow-up required."
+moma block --title "Review" --warning \\
+  --item "Environment" "production" \\
+  --text "Confirm the target before deploying."
 """.strip(),
     ),
     Command(
         id="moma-prompt",
         title="moma prompt",
-        script='moma prompt "Continue with the installation?" --color pink',
+        script="""
+moma prompt "Continue with the installation?"
+moma prompt "Select an environment" --color cyan
+moma prompt "Deploy now?" --default "yes" --icon "?"
+""".strip(),
     ),
     Command(
         id="moma-label",
         title="moma label",
-        script='moma label "TEXT HERE"',
+        script="""
+moma label "PROJECT NAME"
+moma label "DEPLOYMENT" --success
+moma label "NOTES" --width 52 --color cyan --icon "→"
+""".strip(),
     ),
     Command(
         id="moma-input",
@@ -165,8 +202,8 @@ moma multi-select-groups \\
         title="moma rabbit",
         script="""
 moma rabbit "Preparing workspace" --info
-printf '\\n'
-moma rabbit "Task completed" --success
+moma rabbit "Deployment complete" --success
+moma rabbit "Build needs attention" --warning --icon "!"
 """.strip(),
     ),
     Command(
@@ -186,7 +223,15 @@ moma spinner "$pid" "Preparing workspace" --delay 0.03
     Command(
         id="moma-command-check",
         title="moma command-check",
-        script="moma command-check bash curl",
+        # Mirrors apiEntries.ts's first two examples for moma-command-check
+        # verbatim; the third (`if ! moma command-check git; then exit 1;
+        # fi`) illustrates script-exit-code usage rather than a visually
+        # distinct frame, and a real `exit 1` here would truncate this
+        # capture if git were ever missing from the capturing environment.
+        script="""
+moma command-check bash curl git
+moma command-check docker --quiet
+""".strip(),
     ),
     Command(
         id="moma-version",

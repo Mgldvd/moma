@@ -1,7 +1,5 @@
 export interface Props {
   id: string;
-  /** e.g. "01 / 03". */
-  number: string;
   title: string;
   intro: string;
   /**

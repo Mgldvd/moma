@@ -53,16 +53,18 @@ def build_env(cols: int, rows: int) -> dict[str, str]:
     return env
 
 
-def run_command(
-    command,
+def render_script(
+    script: str,
+    title: str,
     *,
+    label: str,
     moma_dist: Path,
     cfg: render.RenderConfig,
     timeout: float,
 ) -> render.Image.Image:
-    script = f'source "{moma_dist}"\n{command.script}\n'
+    full_script = f'source "{moma_dist}"\n{script}\n'
     result = run_in_pty(
-        script,
+        full_script,
         cols=cfg.cols,
         rows=cfg.rows,
         cwd=str(REPO_ROOT),
@@ -70,8 +72,15 @@ def run_command(
         timeout=timeout,
     )
     if result.timed_out:
-        print(f"  warning: {command.id} timed out; screenshot may be incomplete", file=sys.stderr)
-    return render.render_screen(result.screen, command.title, cfg)
+        print(f"  warning: {label} timed out; screenshot may be incomplete", file=sys.stderr)
+    return render.render_screen(result.screen, title, cfg)
+
+
+def _relative_to_repo(path: Path) -> Path:
+    try:
+        return path.resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        return path
 
 
 def main() -> int:
@@ -140,22 +149,40 @@ def main() -> int:
     width, height = render.canvas_size(cfg)
     print(f"Rendering {len(selected)} command(s) at a fixed {width}x{height}px...")
 
+    frame_total = 0
     for command in selected:
-        image = run_command(
-            command, moma_dist=args.moma, cfg=cfg, timeout=args.timeout
+        image = render_script(
+            command.script, command.title, label=command.id,
+            moma_dist=args.moma, cfg=cfg, timeout=args.timeout,
         )
         assert image.size == (width, height), (
             f"{command.id} produced {image.size}, expected {(width, height)}"
         )
         out_path = args.output / f"{command.id}.png"
         image.save(out_path)
-        try:
-            shown = out_path.resolve().relative_to(REPO_ROOT)
-        except ValueError:
-            shown = out_path
-        print(f"  {shown}")
+        print(f"  {_relative_to_repo(out_path)}")
 
-    print(f"Done. {len(selected)} screenshot(s) written to {args.output}")
+        if command.frames:
+            frame_dir = args.output / "carousel" / command.id
+            frame_dir.mkdir(parents=True, exist_ok=True)
+            for index, frame_script in enumerate(command.frames):
+                frame_image = render_script(
+                    frame_script, command.title, label=f"{command.id} frame {index}",
+                    moma_dist=args.moma, cfg=cfg, timeout=args.timeout,
+                )
+                assert frame_image.size == (width, height), (
+                    f"{command.id} frame {index} produced {frame_image.size}, expected {(width, height)}"
+                )
+                frame_path = frame_dir / f"{index}.png"
+                frame_image.save(frame_path)
+                print(f"  {_relative_to_repo(frame_path)}")
+                frame_total += 1
+
+    print(
+        f"Done. {len(selected)} screenshot(s)"
+        + (f" + {frame_total} carousel frame(s)" if frame_total else "")
+        + f" written to {args.output}"
+    )
     return 0
 
 

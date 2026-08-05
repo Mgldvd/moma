@@ -1,0 +1,44 @@
+---
+import './ColorsReference.scss';
+import { SEMANTIC_COLORS, NAMED_COLORS, DEFAULT_COLOR_NAME } from './ColorsReference.data';
+---
+
+<div class="colors-reference">
+  <div class="colors-reference__group">
+    <p class="colors-reference__group-title">Semantic states</p>
+    <p class="colors-reference__group-note">
+      <code>--success</code>, <code>--error</code>, <code>--warning</code>, and <code>--info</code> aren't colors
+      of their own - each just resolves to one of the named colors below.
+    </p>
+    <div class="colors-reference__swatches">
+      {SEMANTIC_COLORS.map((state) => (
+        <div class="colors-reference__swatch">
+          <span class="colors-reference__dot" style={`background:${state.hex}`} aria-hidden="true"></span>
+          <div>
+            <code class="colors-reference__flag">{state.flag}</code>
+            <p class="colors-reference__caption">{state.icon} {state.colorName}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="colors-reference__group">
+    <p class="colors-reference__group-title">Named colors</p>
+    <p class="colors-reference__group-note">
+      Pass any of these to <code>--color &lt;name&gt;</code> on every component. <code>{DEFAULT_COLOR_NAME}</code> is
+      the default when <code>--color</code> is left out entirely.
+    </p>
+    <div class="colors-reference__swatches colors-reference__swatches--named">
+      {NAMED_COLORS.map((color) => (
+        <div class="colors-reference__swatch">
+          <span class="colors-reference__dot" style={`background:${color.hex}`} aria-hidden="true"></span>
+          <div>
+            <code class="colors-reference__flag">{color.name}</code>
+            {color.name === DEFAULT_COLOR_NAME && <span class="colors-reference__default-badge">default</span>}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
