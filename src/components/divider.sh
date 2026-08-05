@@ -1,8 +1,8 @@
 # Divider component.
 # Render a marker-led horizontal rule from normalized arguments. Unlike
-# moma-title-sub/moma-sub-title, the rule uses ⎼ instead of ─ and there is
-# no box edge on the marker's left, only an optional bare ┌/└ pair framing
-# the line above and below when --border draws one.
+# moma-title-sub/moma-sub-title, the rule uses — (em dash) instead of ─
+# and there is no box edge on the marker's left, only an optional bare
+# ┌/└ pair framing the line above and below when --border draws one.
 _moma_render_divider() {
   local color="${1:-$MOMA_COLOR_PRIMARY}"
   local no_color="${2:-false}"
@@ -33,7 +33,7 @@ _moma_render_divider() {
   if [[ "$border" != open ]]; then
     printf '  ┌\n'
   fi
-  printf '  %s %s\n' "$left_glyph" "$(_moma_repeat_char "⎼" "$rule_width")"
+  printf '  %s %s\n' "$left_glyph" "$(_moma_repeat_char "—" "$rule_width")"
   if [[ "$border" != open ]]; then
     printf '  └\n'
   fi
@@ -144,7 +144,7 @@ moma-divider() {
         cat <<'EOF'
 Usage: moma-divider [--success|--error|--warning|--info] [--color <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
 
-Prints a single marker-led rule (⎼, not ─). --icon sets the left marker
+Prints a single marker-led rule (—, not ─). --icon sets the left marker
 (default ▪); --no-icon replaces it with blank filler. --border open
 (default) prints just the rule; line and mirror both frame it with a
 bare ┌ above and └ below.
