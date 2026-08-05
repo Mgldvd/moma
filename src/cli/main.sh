@@ -88,6 +88,7 @@ _moma_main() {
     header) moma-header "$@" ;;
     title) moma-title "$@" ;;
     title-sub) moma-title-sub "$@" ;;
+    sub-title) moma-sub-title "$@" ;;
     section) moma-section "$@" ;;
     msg) moma-msg "$@" ;;
     msg-simple) moma-msg-simple "$@" ;;

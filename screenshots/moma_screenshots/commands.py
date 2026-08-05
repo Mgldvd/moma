@@ -57,6 +57,15 @@ moma title-sub "Tests" --message "Running suite" --min-width 42
 """.strip(),
     ),
     Command(
+        id="moma-sub-title",
+        title="moma sub-title",
+        script="""
+moma sub-title "Moma" "Terminal UI library"
+moma sub-title "Moma" "Terminal UI library" --no-icon --border open
+moma sub-title "Moma" "Terminal UI library" --border line
+""".strip(),
+    ),
+    Command(
         id="moma-section",
         title="moma section",
         script="""

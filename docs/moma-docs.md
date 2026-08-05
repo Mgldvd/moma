@@ -170,6 +170,31 @@ moma title-sub "Dependencies" "Installing packages" --border mirror
 
 ![moma-title-sub preview](../.img/moma-title-sub.png)
 
+### `moma-sub-title`
+
+Rule-first secondary heading: the same marker/padding line as
+`moma-title-sub`, but with the rule printed above the text instead of
+below it, and no closing row. `--icon`/`--no-icon`/semantic flags and
+`--border mirror|line|open` work the same way as on `moma-title-sub`,
+except `--border` controls whether the *top* rule closes with a `┐`.
+
+```text
+moma sub-title "Moma" "Terminal UI library" [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--min-width number] [--width number] [--max-width number]
+```
+
+```bash
+# Example 1: default - closed rule, marker mirrored at both ends
+moma sub-title "Moma" "Terminal UI library"
+
+# Example 2: open rule, no marker at all
+moma sub-title "Moma" "Terminal UI library" --no-icon --border open
+
+# Example 3: closed rule, single left marker only
+moma sub-title "Moma" "Terminal UI library" --border line
+```
+
+![moma-sub-title preview](../.img/moma-sub-title.png)
+
 ### `moma-section`
 
 Strong separator that gives semantic context to the content that follows.

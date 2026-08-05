@@ -5,6 +5,7 @@ _moma_command_registry() {
 header	moma-header	Print a Pagga ASCII heading.
 title	moma-title	Print a title and subtitle.
 title-sub	moma-title-sub	Print a secondary title.
+sub-title	moma-sub-title	Print a rule-first secondary title.
 section	moma-section	Print a section heading.
 msg	moma-msg	Print a styled message.
 msg-simple	moma-msg-simple	Print a compact message.
