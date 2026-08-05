@@ -325,7 +325,7 @@ title_sub_mirror="$(
   NO_COLOR=1 "$MOMA_DIST" title-sub "Dependencies" "Installing packages" \
     --border mirror
 )"
-[[ "$title_sub_mirror" == *$'Installing packages ▪\n  └'*'┘'* ]]
+[[ "$title_sub_mirror" == *$'Installing packages   ▪\n  └'*'┘'* ]]
 
 set +e
 title_sub_bad_border="$(
