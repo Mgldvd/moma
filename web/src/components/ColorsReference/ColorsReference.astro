@@ -34,8 +34,14 @@ import { SEMANTIC_COLORS, NAMED_COLORS, DEFAULT_COLOR_NAME } from './ColorsRefer
         <div class="colors-reference__swatch">
           <span class="colors-reference__dot" style={`background:${color.hex}`} aria-hidden="true"></span>
           <div>
-            <code class="colors-reference__flag">{color.name}</code>
-            {color.name === DEFAULT_COLOR_NAME && <span class="colors-reference__default-badge">default</span>}
+            <code class="colors-reference__flag">
+              {color.name}
+            </code>
+
+              {color.name === DEFAULT_COLOR_NAME &&
+              <span class="colors-reference__default-badge">
+                default
+              </span>}
           </div>
         </div>
       ))}
