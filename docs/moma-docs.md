@@ -262,35 +262,35 @@ moma box "Back up your files before continuing." --warning --width 50
 
 ![moma-box preview](../.img/moma-box.png)
 
-### `moma-block`
+### `moma-resume`
 
 Titled, colored content block for grouping related information, such as a
 résumé section or a categorized reference list. Rows come from repeated
 `--item` (a bold term next to a muted description, aligned as a column) and
 `--text` (a plain line) flags, interleaved in the order given. One blank
-line follows the block, so calling `moma-block` repeatedly stacks blocks
+line follows the block, so calling `moma-resume` repeatedly stacks blocks
 with consistent spacing.
 
 ```text
-moma block --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
+moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
 ```
 
 ```bash
 # Example 1: a definition list, each block its own color
-moma block --title "Shells and Terminal Experience" --color blue \
+moma resume --title "Shells and Terminal Experience" --color blue \
   --item "Bash" "GNU command shell and scripting environment." \
   --item "Zsh" "Interactive shell with advanced completion and customization."
-moma block --title "Files, Search, and Data Processing" --color pink \
+moma resume --title "Files, Search, and Data Processing" --color pink \
   --item "ripgrep" "Fast recursive text-search utility." \
   --item "jq" "Command-line JSON query and transformation processor."
 
 # Example 2: plain text rows instead of a definition list
-moma block --title "Summary" --color cyan \
+moma resume --title "Summary" --color cyan \
   --text "All checks passed." \
   --text "No manual follow-up required."
 
 # Example 3: semantic color and mixed row kinds
-moma block --title "Review" --warning \
+moma resume --title "Review" --warning \
   --item "Environment" "production" \
   --text "Confirm the target before deploying."
 ```

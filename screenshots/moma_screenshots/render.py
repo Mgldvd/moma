@@ -30,7 +30,7 @@ SHADOW_MARGIN = 24
 @dataclass(frozen=True)
 class RenderConfig:
     # Wide/tall enough for the tallest (moma-multi-select-groups, ~20 lines)
-    # and widest (moma-block, ~66 columns) entries in the command catalog,
+    # and widest (moma-resume, ~66 columns) entries in the command catalog,
     # with a little headroom - see screenshots/README.md for how this was
     # measured.
     cols: int = 84

@@ -1,8 +1,8 @@
-# Block component.
+# Resume component.
 # Render a colored, titled block from normalized row arguments. Rows are
 # either a term/description pair (aligned to the widest term in the block)
 # or a plain text line; row order is preserved exactly as supplied.
-_moma_render_block() {
+_moma_render_resume() {
   local title="$1"
   local color="${2:-$MOMA_COLOR_PRIMARY}"
   local no_color="${3:-false}"
@@ -53,10 +53,10 @@ _moma_render_block() {
   printf '  %b└%b\n\n' "$resolved_color" "$reset"
 }
 
-# Parse block options and print a titled, colored block. Content rows come
+# Parse resume options and print a titled, colored block. Content rows come
 # from repeated --item (a bold term next to a muted description, aligned as
 # a column) and --text (a plain line) flags, interleaved in the order given.
-moma-block() {
+moma-resume() {
   local title=""
   local color="$MOMA_COLOR_PRIMARY"
   local no_color=false
@@ -69,7 +69,7 @@ moma-block() {
     case "$1" in
       --title)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         title="$2"
@@ -81,7 +81,7 @@ moma-block() {
         ;;
       --color | -c)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         color="$2"
@@ -98,7 +98,7 @@ moma-block() {
         ;;
       --item)
         if [[ $# -lt 3 ]]; then
-          printf 'moma-block: option %s requires a term and a description\n' \
+          printf 'moma-resume: option %s requires a term and a description\n' \
             "$1" >&2
           return 1
         fi
@@ -109,7 +109,7 @@ moma-block() {
         ;;
       --text)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         row_kinds+=(text)
@@ -129,7 +129,7 @@ moma-block() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-block --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--no-color]
+Usage: moma-resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--no-color]
 
 Rows print in the order their --item and --text flags are given. Every
 --item term is aligned to the widest term in the block; --text lines print
@@ -138,22 +138,22 @@ EOF
         return 0
         ;;
       -*)
-        _moma_unknown_option moma-block "$1"
+        _moma_unknown_option moma-resume "$1"
         return 1
         ;;
       *)
-        printf 'moma-block: unexpected argument: %s\n' "$1" >&2
+        printf 'moma-resume: unexpected argument: %s\n' "$1" >&2
         return 1
         ;;
     esac
   done
 
   if [[ -z "$title" ]]; then
-    _moma_usage_error moma-block "--title is required"
+    _moma_usage_error moma-resume "--title is required"
     return 2
   fi
 
-  _moma_render_block \
+  _moma_render_resume \
     "$title" "$color" "$no_color" "${#row_kinds[@]}" \
     "${row_kinds[@]}" "${row_terms[@]}" "${row_values[@]}"
 }

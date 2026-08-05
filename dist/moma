@@ -43,7 +43,7 @@ supported for backward compatibility but are not the recommended interface.
 | `msg-simple` | Print a simple message with a dot marker. |
 | `list` | Print an unordered list. |
 | `box` | Print a boxed message. |
-| `block` | Print a titled, colored content block. |
+| `resume` | Print a titled, colored content block. |
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
@@ -522,35 +522,35 @@ moma box "Back up your files before continuing." --warning --width 50
 
 ![moma-box preview](../.img/moma-box.png)
 
-### `moma-block`
+### `moma-resume`
 
 Titled, colored content block for grouping related information, such as a
 résumé section or a categorized reference list. Rows come from repeated
 `--item` (a bold term next to a muted description, aligned as a column) and
 `--text` (a plain line) flags, interleaved in the order given. One blank
-line follows the block, so calling `moma-block` repeatedly stacks blocks
+line follows the block, so calling `moma-resume` repeatedly stacks blocks
 with consistent spacing.
 
 ```text
-moma block --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
+moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
 ```
 
 ```bash
 # Example 1: a definition list, each block its own color
-moma block --title "Shells and Terminal Experience" --color blue \
+moma resume --title "Shells and Terminal Experience" --color blue \
   --item "Bash" "GNU command shell and scripting environment." \
   --item "Zsh" "Interactive shell with advanced completion and customization."
-moma block --title "Files, Search, and Data Processing" --color pink \
+moma resume --title "Files, Search, and Data Processing" --color pink \
   --item "ripgrep" "Fast recursive text-search utility." \
   --item "jq" "Command-line JSON query and transformation processor."
 
 # Example 2: plain text rows instead of a definition list
-moma block --title "Summary" --color cyan \
+moma resume --title "Summary" --color cyan \
   --text "All checks passed." \
   --text "No manual follow-up required."
 
 # Example 3: semantic color and mixed row kinds
-moma block --title "Review" --warning \
+moma resume --title "Review" --warning \
   --item "Environment" "production" \
   --text "Confirm the target before deploying."
 ```
@@ -1765,7 +1765,7 @@ msg	moma-msg	Print a styled message.
 msg-simple	moma-msg-simple	Print a compact message.
 list	moma-list	Print an unordered list.
 box	moma-box	Print a boxed message.
-block	moma-block	Print a titled, colored content block.
+resume	moma-resume	Print a titled, colored content block.
 prompt	moma-prompt	Print a prompt.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
@@ -3023,12 +3023,12 @@ EOF
   printf '%b' "$(_moma_reset_color "$no_color")"
 }
 
-# module: src/components/block.sh
-# Block component.
+# module: src/components/resume.sh
+# Resume component.
 # Render a colored, titled block from normalized row arguments. Rows are
 # either a term/description pair (aligned to the widest term in the block)
 # or a plain text line; row order is preserved exactly as supplied.
-_moma_render_block() {
+_moma_render_resume() {
   local title="$1"
   local color="${2:-$MOMA_COLOR_PRIMARY}"
   local no_color="${3:-false}"
@@ -3079,10 +3079,10 @@ _moma_render_block() {
   printf '  %b└%b\n\n' "$resolved_color" "$reset"
 }
 
-# Parse block options and print a titled, colored block. Content rows come
+# Parse resume options and print a titled, colored block. Content rows come
 # from repeated --item (a bold term next to a muted description, aligned as
 # a column) and --text (a plain line) flags, interleaved in the order given.
-moma-block() {
+moma-resume() {
   local title=""
   local color="$MOMA_COLOR_PRIMARY"
   local no_color=false
@@ -3095,7 +3095,7 @@ moma-block() {
     case "$1" in
       --title)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         title="$2"
@@ -3107,7 +3107,7 @@ moma-block() {
         ;;
       --color | -c)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         color="$2"
@@ -3124,7 +3124,7 @@ moma-block() {
         ;;
       --item)
         if [[ $# -lt 3 ]]; then
-          printf 'moma-block: option %s requires a term and a description\n' \
+          printf 'moma-resume: option %s requires a term and a description\n' \
             "$1" >&2
           return 1
         fi
@@ -3135,7 +3135,7 @@ moma-block() {
         ;;
       --text)
         if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-block "$1"
+          _moma_option_requires_value moma-resume "$1"
           return 1
         fi
         row_kinds+=(text)
@@ -3155,7 +3155,7 @@ moma-block() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-block --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--no-color]
+Usage: moma-resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--no-color]
 
 Rows print in the order their --item and --text flags are given. Every
 --item term is aligned to the widest term in the block; --text lines print
@@ -3164,22 +3164,22 @@ EOF
         return 0
         ;;
       -*)
-        _moma_unknown_option moma-block "$1"
+        _moma_unknown_option moma-resume "$1"
         return 1
         ;;
       *)
-        printf 'moma-block: unexpected argument: %s\n' "$1" >&2
+        printf 'moma-resume: unexpected argument: %s\n' "$1" >&2
         return 1
         ;;
     esac
   done
 
   if [[ -z "$title" ]]; then
-    _moma_usage_error moma-block "--title is required"
+    _moma_usage_error moma-resume "--title is required"
     return 2
   fi
 
-  _moma_render_block \
+  _moma_render_resume \
     "$title" "$color" "$no_color" "${#row_kinds[@]}" \
     "${row_kinds[@]}" "${row_terms[@]}" "${row_values[@]}"
 }
@@ -6234,12 +6234,12 @@ _moma_preview_render_boxes() {
   moma-box "Back up your files before continuing." --warning
 }
 
-# Render the content-block examples.
-_moma_preview_render_blocks() {
-  moma-block --title "Shells" --color blue \
+# Render the resume examples.
+_moma_preview_render_resumes() {
+  moma-resume --title "Shells" --color blue \
     --item "Bash" "GNU command shell and scripting environment." \
     --item "Zsh" "Interactive shell with advanced completion."
-  moma-block --title "Review" --warning \
+  moma-resume --title "Review" --warning \
     --item "Environment" "production" \
     --text "Confirm the target before deploying."
 }
@@ -6429,10 +6429,10 @@ _moma_preview() {
     'moma box "Your configuration is ready." --success' \
     _moma_preview_render_boxes
   _moma_preview_component \
-    "moma-block" \
+    "moma-resume" \
     "A titled, colored block of aligned term/description rows or plain text." \
-    'moma block --title "Shells" --item "Bash" "GNU command shell." ...' \
-    _moma_preview_render_blocks
+    'moma resume --title "Shells" --item "Bash" "GNU command shell." ...' \
+    _moma_preview_render_resumes
 
   _moma_preview_section \
     "03" "Interaction" \
@@ -6650,7 +6650,7 @@ _moma_main() {
     msg-simple) moma-msg-simple "$@" ;;
     list) moma-list "$@" ;;
     box) moma-box "$@" ;;
-    block) moma-block "$@" ;;
+    resume) moma-resume "$@" ;;
     prompt) moma-prompt "$@" ;;
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;

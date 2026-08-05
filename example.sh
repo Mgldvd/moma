@@ -138,7 +138,7 @@ printf -v secret_mask '%*s' "${#secret}" ''
 secret_mask="${secret_mask// /•}"
 
 moma section "Review" --warning
-moma block \
+moma resume \
   --title "Project configuration" \
   --color yellow \
   --item "Project" "$project_name" \

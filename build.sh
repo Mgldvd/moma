@@ -26,7 +26,7 @@ modules=(
   components/section-message.sh
   components/simple-list.sh
   components/box-prompt.sh
-  components/block.sh
+  components/resume.sh
   components/label.sh
   components/input.sh
   components/select-common.sh
