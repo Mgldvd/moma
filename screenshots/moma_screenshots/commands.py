@@ -132,6 +132,15 @@ moma resume --title "Review" --warning \\
 """.strip(),
     ),
     Command(
+        id="moma-divider",
+        title="moma divider",
+        script="""
+moma divider
+moma divider --success --border line
+moma divider --icon "★" --border line
+""".strip(),
+    ),
+    Command(
         id="moma-prompt",
         title="moma prompt",
         script="""

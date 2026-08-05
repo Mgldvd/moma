@@ -95,6 +95,7 @@ _moma_main() {
     list) moma-list "$@" ;;
     box) moma-box "$@" ;;
     resume) moma-resume "$@" ;;
+    divider) moma-divider "$@" ;;
     prompt) moma-prompt "$@" ;;
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;

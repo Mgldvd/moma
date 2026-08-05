@@ -154,6 +154,12 @@ _moma_preview_render_resumes() {
     --text "Confirm the target before deploying."
 }
 
+# Render the divider examples.
+_moma_preview_render_dividers() {
+  moma-divider
+  moma-divider --success --border line
+}
+
 # Render the prompt examples.
 _moma_preview_render_prompt() {
   moma-prompt "Continue with the installation?" --color pink
@@ -347,6 +353,10 @@ _moma_preview() {
     "A titled, colored block of aligned term/description rows or plain text." \
     'moma resume --title "Shells" --item "Bash" "GNU command shell." ...' \
     _moma_preview_render_resumes
+  _moma_preview_component \
+    "moma-divider" "A marker-led horizontal rule." \
+    'moma divider --success --border line' \
+    _moma_preview_render_dividers
 
   _moma_preview_section \
     "03" "Interaction" \

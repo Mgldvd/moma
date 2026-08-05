@@ -27,6 +27,7 @@ modules=(
   components/simple-list.sh
   components/box-prompt.sh
   components/resume.sh
+  components/divider.sh
   components/label.sh
   components/input.sh
   components/select-common.sh

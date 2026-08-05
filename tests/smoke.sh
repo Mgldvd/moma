@@ -237,6 +237,34 @@ set -e
 [[ "$resume_missing_title_status" -eq 2 ]]
 [[ "$resume_missing_title" == *"--title is required"* ]]
 
+divider_default="$(NO_COLOR=1 "$MOMA_DIST" divider)"
+[[ "$divider_default" == $'\n  ▪ '*'⎼'* ]]
+[[ "$divider_default" != *'┌'* ]]
+[[ "$divider_default" != *'└'* ]]
+
+divider_framed="$(NO_COLOR=1 "$MOMA_DIST" divider --border line)"
+[[ "$divider_framed" == $'\n  ┌\n  ▪ '*'⎼'*$'\n  └'* ]]
+
+divider_semantic="$(env -u NO_COLOR "$MOMA_DIST" divider --success --border line)"
+[[ "$divider_semantic" == *$'\033[32m'*'✔'* ]]
+
+divider_no_icon="$(NO_COLOR=1 "$MOMA_DIST" divider --no-icon)"
+[[ "$divider_no_icon" == $'\n    ⎼'* ]]
+
+set +e
+divider_bad_border="$(NO_COLOR=1 "$MOMA_DIST" divider --border sideways 2>&1)"
+divider_bad_border_status=$?
+set -e
+[[ "$divider_bad_border_status" -eq 2 ]]
+[[ "$divider_bad_border" == *"invalid border"* ]]
+
+set +e
+divider_stray_arg="$(NO_COLOR=1 "$MOMA_DIST" divider stray 2>&1)"
+divider_stray_arg_status=$?
+set -e
+[[ "$divider_stray_arg_status" -eq 1 ]]
+[[ "$divider_stray_arg" == *"unexpected argument"* ]]
+
 fixed_boxes="$({
   NO_COLOR=1 MOMA_WIDTH=50 \
     "$MOMA_DIST" box "Your configuration is ready." --success
@@ -1030,6 +1058,7 @@ mapfile -t expected_functions <<'EOF'
 moma-box
 moma-command-check
 moma-confirm
+moma-divider
 moma-header
 moma-input
 moma-label

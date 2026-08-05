@@ -45,6 +45,7 @@ supported for backward compatibility but are not the recommended interface.
 | `list` | Print an unordered list. |
 | `box` | Print a boxed message. |
 | `resume` | Print a titled, colored content block. |
+| `divider` | Print a marker-led horizontal rule. |
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
@@ -168,10 +169,10 @@ deterministic.
 
 A fixed width takes priority over a maximum width. `moma-title`,
 `moma-title-sub`, `moma-sub-title`, `moma-box`, `moma-prompt`, `moma-label`,
-`moma-input`, and `moma-resume` also accept component-level `--width` and
-`--max-width` options. Long boxed content wraps inside the selected width.
-The minimum effective decoration width is 8 columns and box padding may
-require a larger value.
+`moma-input`, `moma-resume`, and `moma-divider` also accept component-level
+`--width` and `--max-width` options. Long boxed content wraps inside the
+selected width. The minimum effective decoration width is 8 columns and
+box padding may require a larger value.
 
 ## Binary examples
 
@@ -307,11 +308,11 @@ export MOMA_MAX_WIDTH=50
 ```
 
 Fixed width takes priority when both variables are set. The decorated
-components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
-`moma-label`, `moma-input`, and `moma-resume` also accept local `--width`
-and `--max-width` options. A local fixed width overrides the global
-setting. The minimum effective decoration width is 8 columns; box padding
-can require more.
+components `moma-title`, `moma-title-sub`, `moma-sub-title`, `moma-box`,
+`moma-prompt`, `moma-label`, `moma-input`, `moma-resume`, and
+`moma-divider` also accept local `--width` and `--max-width` options. A
+local fixed width overrides the global setting. The minimum effective
+decoration width is 8 columns; box padding can require more.
 
 ## Color themes
 
@@ -612,6 +613,34 @@ moma resume --title "Moma Terminal UI library" --no-icon --border open \
   --text "element 1" \
   --text "element 2"
 ```
+
+![moma-resume preview](../.img/moma-resume.png)
+
+### `moma-divider`
+
+Marker-led horizontal rule, for separating sections without a full
+heading. Uses `⎼` instead of the `─` box-drawing character elsewhere in
+Moma, and has no left box edge, only an optional bare `┌`/`└` pair framing
+the rule above and below. `--icon`, `--no-icon`, and the semantic flags
+work the same way as on `moma-title-sub`; `--border` open (default) prints
+just the rule, while `line` and `mirror` both frame it.
+
+```text
+moma divider [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--min-width number] [--width number] [--max-width number] [--no-color]
+```
+
+```bash
+# Example 1: default - a bare rule, no frame
+moma divider
+
+# Example 2: framed, semantic icon
+moma divider --success --border line
+
+# Example 3: framed, custom icon
+moma divider --icon "⏻" --border line
+```
+
+![moma-divider preview](../.img/moma-divider.png)
 
 ### `moma-prompt`
 
@@ -1825,6 +1854,7 @@ msg-simple	moma-msg-simple	Print a compact message.
 list	moma-list	Print an unordered list.
 box	moma-box	Print a boxed message.
 resume	moma-resume	Print a titled, colored content block.
+divider	moma-divider	Print a marker-led horizontal rule.
 prompt	moma-prompt	Print a prompt.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
@@ -3726,6 +3756,195 @@ EOF
     "$title" "$color" "$no_color" "${#row_kinds[@]}" \
     "${row_kinds[@]}" "${row_terms[@]}" "${row_values[@]}" \
     "$icon" "$header" "$border" "$width" "$max_width"
+}
+
+# module: src/components/divider.sh
+# Divider component.
+# Render a marker-led horizontal rule from normalized arguments. Unlike
+# moma-title-sub/moma-sub-title, the rule uses ⎼ instead of ─ and there is
+# no box edge on the marker's left, only an optional bare ┌/└ pair framing
+# the line above and below when --border draws one.
+_moma_render_divider() {
+  local color="${1:-$MOMA_COLOR_PRIMARY}"
+  local no_color="${2:-false}"
+  local width="${3:-}"
+  local max_width="${4:-}"
+  local min_width="${5:-35}"
+  local icon="${6-▪}"
+  local border="${7:-open}"
+
+  if [[ ! "$min_width" =~ ^[0-9]+$ ]]; then
+    min_width=35
+  fi
+
+  local resolved_color reset rule_width
+  resolved_color="$(
+    _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
+  )"
+  reset="$(_moma_reset_color "$no_color")"
+  rule_width="$(
+    _moma_resolve_decor_width "0" "$min_width" "$width" "$max_width" 8
+  )"
+
+  # There's no left box edge to fall back to here, so a missing icon is
+  # just blank filler, not a │.
+  local left_glyph="${icon:- }"
+
+  printf '%b\n' "$resolved_color"
+  if [[ "$border" != open ]]; then
+    printf '  ┌\n'
+  fi
+  printf '  %s %s\n' "$left_glyph" "$(_moma_repeat_char "⎼" "$rule_width")"
+  if [[ "$border" != open ]]; then
+    printf '  └\n'
+  fi
+  printf '%b\n' "$reset"
+}
+
+# Parse options and print a marker-led horizontal rule.
+moma-divider() {
+  local color="$MOMA_COLOR_PRIMARY"
+  local no_color=false
+  local width=""
+  local max_width=""
+  local min_width=35
+  local icon="▪"
+  local border="open"
+  local -a positional=()
+  local style
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --success | --error | --warning | --info)
+        style="$(_moma_apply_semantic_style "${1#--}")"
+        color="${style%%$'\t'*}"
+        icon="${style#*$'\t'}"
+        shift
+        ;;
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --icon | -i)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        icon="$2"
+        shift 2
+        ;;
+      --icon=*)
+        icon="${1#*=}"
+        shift
+        ;;
+      --no-icon)
+        icon=""
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
+        shift
+        ;;
+      --min-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        min_width="$2"
+        shift 2
+        ;;
+      --min-width=*)
+        min_width="${1#*=}"
+        shift
+        ;;
+      --width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        width="$2"
+        shift 2
+        ;;
+      --width=*)
+        width="${1#*=}"
+        shift
+        ;;
+      --max-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-divider "$1"
+          return 1
+        fi
+        max_width="$2"
+        shift 2
+        ;;
+      --max-width=*)
+        max_width="${1#*=}"
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-divider [--success|--error|--warning|--info] [--color <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+
+Prints a single marker-led rule (⎼, not ─). --icon sets the left marker
+(default ▪); --no-icon replaces it with blank filler. --border open
+(default) prints just the rule; line and mirror both frame it with a
+bare ┌ above and └ below.
+EOF
+        return 0
+        ;;
+      -*)
+        _moma_unknown_option moma-divider "$1"
+        return 1
+        ;;
+      *)
+        positional+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if ((${#positional[@]} > 0)); then
+    printf 'moma-divider: unexpected argument: %s\n' "${positional[0]}" >&2
+    return 1
+  fi
+  case "$border" in
+    mirror | line | open) ;;
+    *)
+      _moma_usage_error moma-divider "invalid border: $border (expected mirror, line, or open)"
+      return 2
+      ;;
+  esac
+  if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+    _moma_usage_error moma-divider "invalid width: $width"
+    return 2
+  fi
+  if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+    _moma_usage_error moma-divider "invalid max width: $max_width"
+    return 2
+  fi
+
+  _moma_render_divider \
+    "$color" "$no_color" "$width" "$max_width" "$min_width" "$icon" "$border"
 }
 
 # module: src/components/label.sh
@@ -6793,6 +7012,12 @@ _moma_preview_render_resumes() {
     --text "Confirm the target before deploying."
 }
 
+# Render the divider examples.
+_moma_preview_render_dividers() {
+  moma-divider
+  moma-divider --success --border line
+}
+
 # Render the prompt examples.
 _moma_preview_render_prompt() {
   moma-prompt "Continue with the installation?" --color pink
@@ -6986,6 +7211,10 @@ _moma_preview() {
     "A titled, colored block of aligned term/description rows or plain text." \
     'moma resume --title "Shells" --item "Bash" "GNU command shell." ...' \
     _moma_preview_render_resumes
+  _moma_preview_component \
+    "moma-divider" "A marker-led horizontal rule." \
+    'moma divider --success --border line' \
+    _moma_preview_render_dividers
 
   _moma_preview_section \
     "03" "Interaction" \
@@ -7205,6 +7434,7 @@ _moma_main() {
     list) moma-list "$@" ;;
     box) moma-box "$@" ;;
     resume) moma-resume "$@" ;;
+    divider) moma-divider "$@" ;;
     prompt) moma-prompt "$@" ;;
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;

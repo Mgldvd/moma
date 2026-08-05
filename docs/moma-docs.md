@@ -45,11 +45,11 @@ export MOMA_MAX_WIDTH=50
 ```
 
 Fixed width takes priority when both variables are set. The decorated
-components `moma-title`, `moma-title-sub`, `moma-box`, `moma-prompt`,
-`moma-label`, `moma-input`, and `moma-resume` also accept local `--width`
-and `--max-width` options. A local fixed width overrides the global
-setting. The minimum effective decoration width is 8 columns; box padding
-can require more.
+components `moma-title`, `moma-title-sub`, `moma-sub-title`, `moma-box`,
+`moma-prompt`, `moma-label`, `moma-input`, `moma-resume`, and
+`moma-divider` also accept local `--width` and `--max-width` options. A
+local fixed width overrides the global setting. The minimum effective
+decoration width is 8 columns; box padding can require more.
 
 ## Color themes
 
@@ -350,6 +350,34 @@ moma resume --title "Moma Terminal UI library" --no-icon --border open \
   --text "element 1" \
   --text "element 2"
 ```
+
+![moma-resume preview](../.img/moma-resume.png)
+
+### `moma-divider`
+
+Marker-led horizontal rule, for separating sections without a full
+heading. Uses `⎼` instead of the `─` box-drawing character elsewhere in
+Moma, and has no left box edge, only an optional bare `┌`/`└` pair framing
+the rule above and below. `--icon`, `--no-icon`, and the semantic flags
+work the same way as on `moma-title-sub`; `--border` open (default) prints
+just the rule, while `line` and `mirror` both frame it.
+
+```text
+moma divider [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--min-width number] [--width number] [--max-width number] [--no-color]
+```
+
+```bash
+# Example 1: default - a bare rule, no frame
+moma divider
+
+# Example 2: framed, semantic icon
+moma divider --success --border line
+
+# Example 3: framed, custom icon
+moma divider --icon "⏻" --border line
+```
+
+![moma-divider preview](../.img/moma-divider.png)
 
 ### `moma-prompt`
 

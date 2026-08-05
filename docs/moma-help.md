@@ -38,6 +38,7 @@ supported for backward compatibility but are not the recommended interface.
 | `list` | Print an unordered list. |
 | `box` | Print a boxed message. |
 | `resume` | Print a titled, colored content block. |
+| `divider` | Print a marker-led horizontal rule. |
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
@@ -161,10 +162,10 @@ deterministic.
 
 A fixed width takes priority over a maximum width. `moma-title`,
 `moma-title-sub`, `moma-sub-title`, `moma-box`, `moma-prompt`, `moma-label`,
-`moma-input`, and `moma-resume` also accept component-level `--width` and
-`--max-width` options. Long boxed content wraps inside the selected width.
-The minimum effective decoration width is 8 columns and box padding may
-require a larger value.
+`moma-input`, `moma-resume`, and `moma-divider` also accept component-level
+`--width` and `--max-width` options. Long boxed content wraps inside the
+selected width. The minimum effective decoration width is 8 columns and
+box padding may require a larger value.
 
 ## Binary examples
 
