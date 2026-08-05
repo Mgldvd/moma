@@ -540,8 +540,16 @@ résumé section or a categorized reference list. Rows come from repeated
 line follows the block, so calling `moma-resume` repeatedly stacks blocks
 with consistent spacing.
 
+The title is a single open line by default (`┌─ Title`). Setting `--icon`,
+`--no-icon`, or a semantic flag switches to a boxed header instead: a
+full-width top border, a marker + title line, and a blank separator row
+before the content rows - mirroring `moma-title`'s own marker conventions.
+`--border` controls the closing edge the same way it does on `moma-title`:
+`mirror` and `line` (default: `mirror`) close with `└`, `open` leaves the
+block unclosed.
+
 ```text
-moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--no-color]
+moma resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--width number] [--max-width number] [--no-color]
 ```
 
 ```bash
@@ -558,10 +566,16 @@ moma resume --title "Summary" --color cyan \
   --text "All checks passed." \
   --text "No manual follow-up required."
 
-# Example 3: semantic color and mixed row kinds
+# Example 3: semantic color and mixed row kinds - the semantic flag also
+# switches on the boxed header
 moma resume --title "Review" --warning \
   --item "Environment" "production" \
   --text "Confirm the target before deploying."
+
+# Example 4: boxed header, no marker, left unclosed
+moma resume --title "Moma Terminal UI library" --no-icon --border open \
+  --text "element 1" \
+  --text "element 2"
 ```
 
 ### `moma-prompt`
@@ -3114,6 +3128,12 @@ EOF
 # Render a colored, titled block from normalized row arguments. Rows are
 # either a term/description pair (aligned to the widest term in the block)
 # or a plain text line; row order is preserved exactly as supplied.
+#
+# The title renders as a single open line by default. Setting an icon
+# (--icon, --no-icon, or a semantic flag) switches to a boxed header
+# instead: a full-width top border, a marker + title line, and a blank
+# separator row before the content rows - mirroring moma-title's own
+# marker conventions so the two components read consistently.
 _moma_render_resume() {
   local title="$1"
   local color="${2:-$MOMA_COLOR_PRIMARY}"
@@ -3125,6 +3145,12 @@ _moma_render_resume() {
   local -a row_terms=("${@:1:$row_count}")
   shift "$row_count"
   local -a row_values=("${@:1:$row_count}")
+  shift "$row_count"
+  local icon="$1"
+  local header="${2:-false}"
+  local border="${3:-mirror}"
+  local width="${4:-}"
+  local max_width="${5:-}"
 
   local resolved_color reset bold muted
   resolved_color="$(
@@ -3145,12 +3171,26 @@ _moma_render_resume() {
     fi
   done
 
-  printf '  %b┌%b %b%s%b\n' \
-    "$resolved_color" "$reset" "$bold" "$title" "$reset"
+  if [[ "$header" == true ]]; then
+    local left_glyph="${icon:-│}"
+    local box_width
+    box_width="$(
+      _moma_resolve_decor_width \
+        "$((${#title} + 6))" 35 "$width" "$max_width" 8
+    )"
+    printf '  %b┌%s┐%b\n' \
+      "$resolved_color" "$(_moma_repeat_char "─" "$box_width")" "$reset"
+    printf '  %b%s%b  %b%s%b\n' \
+      "$resolved_color" "$left_glyph" "$reset" "$bold" "$title" "$reset"
+    printf '  %b│%b \n' "$resolved_color" "$reset"
+  else
+    printf '  %b┌─%b %b%s%b\n' \
+      "$resolved_color" "$reset" "$bold" "$title" "$reset"
+  fi
 
   local gap
   for ((i = 0; i < row_count; i++)); do
-    printf '  %b│%b ' "$resolved_color" "$reset"
+    printf '  %b│%b  ' "$resolved_color" "$reset"
     if [[ "${row_kinds[i]}" == item ]]; then
       gap=$((term_width - ${#row_terms[i]} + 2))
       printf '%b%s%b%s%b%s%b\n' \
@@ -3162,7 +3202,11 @@ _moma_render_resume() {
     fi
   done
 
-  printf '  %b└%b\n\n' "$resolved_color" "$reset"
+  if [[ "$border" == open ]]; then
+    printf '\n'
+  else
+    printf '  %b└%b\n\n' "$resolved_color" "$reset"
+  fi
 }
 
 # Parse resume options and print a titled, colored block. Content rows come
@@ -3175,6 +3219,11 @@ moma-resume() {
   local -a row_kinds=()
   local -a row_terms=()
   local -a row_values=()
+  local icon=""
+  local header=false
+  local border="mirror"
+  local width=""
+  local max_width=""
   local style
 
   while [[ $# -gt 0 ]]; do
@@ -3206,6 +3255,63 @@ moma-resume() {
       --success | --error | --warning | --info)
         style="$(_moma_apply_semantic_style "${1#--}")"
         color="${style%%$'\t'*}"
+        icon="${style#*$'\t'}"
+        header=true
+        shift
+        ;;
+      --icon | -i)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-resume "$1"
+          return 1
+        fi
+        icon="$2"
+        header=true
+        shift 2
+        ;;
+      --icon=*)
+        icon="${1#*=}"
+        header=true
+        shift
+        ;;
+      --no-icon)
+        icon=""
+        header=true
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-resume "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
+        shift
+        ;;
+      --width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-resume "$1"
+          return 1
+        fi
+        width="$2"
+        shift 2
+        ;;
+      --width=*)
+        width="${1#*=}"
+        shift
+        ;;
+      --max-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-resume "$1"
+          return 1
+        fi
+        max_width="$2"
+        shift 2
+        ;;
+      --max-width=*)
+        max_width="${1#*=}"
         shift
         ;;
       --item)
@@ -3241,11 +3347,17 @@ moma-resume() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--no-color]
+Usage: moma-resume --title "<text>" [--item "<term>" "<description>"]... [--text "<line>"]... [--success|--error|--warning|--info] [--color <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--width <n>] [--max-width <n>] [--no-color]
 
 Rows print in the order their --item and --text flags are given. Every
 --item term is aligned to the widest term in the block; --text lines print
 as-is with no term column. One blank line follows the block.
+
+The title is a single open line by default. --icon, --no-icon, and the
+semantic flags switch to a boxed header instead: a full-width top border,
+a marker + title line, and a blank separator row before the content rows.
+--border controls the closing edge: mirror and line (default: mirror)
+close with └, open leaves the block unclosed.
 EOF
         return 0
         ;;
@@ -3264,10 +3376,26 @@ EOF
     _moma_usage_error moma-resume "--title is required"
     return 2
   fi
+  case "$border" in
+    mirror | line | open) ;;
+    *)
+      _moma_usage_error moma-resume "invalid border: $border (expected mirror, line, or open)"
+      return 2
+      ;;
+  esac
+  if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+    _moma_usage_error moma-resume "invalid width: $width"
+    return 2
+  fi
+  if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+    _moma_usage_error moma-resume "invalid max width: $max_width"
+    return 2
+  fi
 
   _moma_render_resume \
     "$title" "$color" "$no_color" "${#row_kinds[@]}" \
-    "${row_kinds[@]}" "${row_terms[@]}" "${row_values[@]}"
+    "${row_kinds[@]}" "${row_terms[@]}" "${row_values[@]}" \
+    "$icon" "$header" "$border" "$width" "$max_width"
 }
 
 # module: src/components/label.sh

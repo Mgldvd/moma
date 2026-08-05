@@ -194,18 +194,41 @@ resume_output="$(
     --item "Zsh" "Interactive shell." \
     --text "Plain note."
 )"
-[[ "$resume_output" == $'  ┌ Shells\n  │ Bash  GNU shell.\n  │ Zsh   Interactive shell.\n  │ Plain note.\n  └' ]]
+[[ "$resume_output" == $'  ┌─ Shells\n  │  Bash  GNU shell.\n  │  Zsh   Interactive shell.\n  │  Plain note.\n  └' ]]
 
 resume_spacing="$({
   NO_COLOR=1 "$MOMA_DIST" resume --title "One" --text "First."
   printf 'NEXT'
 })"
-[[ "$resume_spacing" == $'  ┌ One\n  │ First.\n  └\n\nNEXT' ]]
+[[ "$resume_spacing" == $'  ┌─ One\n  │  First.\n  └\n\nNEXT' ]]
 
 resume_semantic_output="$(
   env -u NO_COLOR "$MOMA_DIST" resume --title "Review" --warning --text "Check"
 )"
-[[ "$resume_semantic_output" == *$'\033[33m'*'└'* ]]
+[[ "$resume_semantic_output" == *$'\033[33m!\033[0m  \033[1;37mReview'* ]]
+[[ "$resume_semantic_output" == *'└'* ]]
+
+resume_boxed_open="$(
+  NO_COLOR=1 "$MOMA_DIST" resume --title "Moma Terminal UI library" \
+    --icon "▪" --border open --text "element 1"
+)"
+[[ "$resume_boxed_open" == *$'\n  ▪  Moma Terminal UI library\n  │ \n  │  element 1'* ]]
+[[ "$resume_boxed_open" != *'└'* ]]
+
+resume_no_icon="$(
+  NO_COLOR=1 "$MOMA_DIST" resume --title "Moma Terminal UI library" \
+    --no-icon --text "element 1"
+)"
+[[ "$resume_no_icon" == *$'\n  │  Moma Terminal UI library\n  │ \n  │  element 1\n  └'* ]]
+
+set +e
+resume_bad_border="$(
+  NO_COLOR=1 "$MOMA_DIST" resume --title "x" --border sideways 2>&1
+)"
+resume_bad_border_status=$?
+set -e
+[[ "$resume_bad_border_status" -eq 2 ]]
+[[ "$resume_bad_border" == *"invalid border"* ]]
 
 set +e
 resume_missing_title="$(NO_COLOR=1 "$MOMA_DIST" resume --text "x" 2>&1)"
