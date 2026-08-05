@@ -1,60 +1,34 @@
+import { API_ENTRIES, type ApiEntryNavGroup } from '../../data/apiEntries';
+import { FUNCTION_ROWS } from '../../data/functionRows';
 import type { NavGroup } from './DocsNav.types';
 
-const filterableLink = (id: string) => ({ label: id, targetId: id, filterable: true });
+// The sidebar's grouping and order are derived entirely from API_ENTRIES
+// and FUNCTION_ROWS - the same arrays index.astro renders the page from -
+// instead of separate, hand-maintained id lists. Reordering or adding an
+// entry there is therefore automatically reflected here, in the matching
+// position, with no second place to keep in sync.
+const GROUP_HEADINGS: Record<ApiEntryNavGroup, string> = {
+  visual: 'Visual',
+  interactive: 'Interactive',
+  selection: 'Selection',
+  workflow: 'Workflow',
+};
+
+const GROUP_ORDER: ApiEntryNavGroup[] = ['visual', 'interactive', 'selection', 'workflow'];
 
 export const NAV_GROUPS: NavGroup[] = [
-  {
-    key: 'visual',
-    heading: 'Visual',
-    links: [
-      'moma-header',
-      'moma-title',
-      'moma-title-sub',
-      'moma-section',
-      'moma-msg',
-      'moma-msg-simple',
-      'moma-list',
-      'moma-box',
-      'moma-block',
-      'moma-prompt',
-      'moma-label',
-      'moma-rabbit',
-    ].map(filterableLink),
-  },
-  {
-    key: 'interactive',
-    heading: 'Interactive',
-    links: ['moma-input', 'moma-confirm'].map(filterableLink),
-  },
-  {
-    key: 'selection',
-    heading: 'Selection',
-    links: [
-      'moma-single-select',
-      'moma-select',
-      'moma-single-select-groups',
-      'moma-multi-select',
-      'moma-multi-select-groups',
-    ].map(filterableLink),
-  },
-  {
-    key: 'workflow',
-    heading: 'Workflow',
-    links: [
-      'moma-spinner',
-      'moma-command-check',
-      'moma-version',
-      'moma-update',
-    ].map(filterableLink),
-  },
+  ...GROUP_ORDER.map((key) => ({
+    key,
+    heading: GROUP_HEADINGS[key],
+    links: API_ENTRIES.filter((entry) => entry.navGroup === key).map((entry) => ({
+      label: entry.name,
+      targetId: entry.id,
+      filterable: true,
+    })),
+  })),
   {
     key: 'cli',
     heading: 'CLI',
-    links: [
-      { label: 'Component commands', targetId: 'cli-component-commands' },
-      { label: 'Helper commands', targetId: 'cli-helper-commands' },
-      { label: 'Color themes', targetId: 'cli-color-themes' },
-      { label: 'Documentation commands', targetId: 'cli-documentation-commands' },
-    ],
+    links: FUNCTION_ROWS.map((row) => ({ label: row.name, targetId: row.id })),
   },
 ];

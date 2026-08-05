@@ -71,6 +71,20 @@
     text-transform: uppercase;
   }
 
+  &__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  &__icon {
+    flex: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    color: var(--muted);
+  }
+
   &__command {
     display: block;
     overflow-x: hidden;
@@ -80,5 +94,18 @@
     font: calc(0.84rem + 2px)/1.5 var(--font-mono);
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+}
+
+.quick-start__icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-right: 0.3rem;
+
+  svg {
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--muted);
   }
 }

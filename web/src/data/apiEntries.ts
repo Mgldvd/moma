@@ -7,6 +7,20 @@ export interface ApiEntryWireframe {
   bodyHtml: string;
 }
 
+/**
+ * Sidebar sub-category (see DocsNav.data.ts, which groups entries by this
+ * field, in array order, into the sidebar's Visual/Interactive/Selection/
+ * Workflow headings). Kept separate from `section` below: `moma-rabbit` is
+ * grouped under `workflow` here purely because it sits immediately before
+ * `moma-spinner` on the page (see `section`), so its sidebar link lands
+ * next to what it actually scrolls next to - it does not change which
+ * page section renders it.
+ */
+export type ApiEntryNavGroup = 'visual' | 'interactive' | 'selection' | 'workflow';
+
+/** Which ApiSection on the page renders this entry - see index.astro. */
+export type ApiEntrySection = 'components' | 'helpers';
+
 export interface ApiEntryData {
   id: string;
   kind: string;
@@ -16,6 +30,8 @@ export interface ApiEntryData {
   descriptionHtml: string;
   signature: string;
   searchText: string;
+  navGroup: ApiEntryNavGroup;
+  section: ApiEntrySection;
   examples?: string[];
   wireframe?: ApiEntryWireframe;
 }
@@ -24,10 +40,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-header',
     kind: 'ASCII heading component',
-    name: 'moma-header',
+    name: 'header',
     descriptionHtml: 'Three-line Pagga text for a prominent script or workflow identity, with one blank line above, two below, and no left indent by default.',
     signature: 'moma header "TEXT" [--color color] [--margin-top number] [--margin-bottom number] [--margin-left number] [--no-color]',
     searchText: 'moma-header pagga ascii art heading title color',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma header "Moma"',
       'moma header "Deploy 2026" --color cyan --margin-bottom 1',
@@ -37,10 +55,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-title',
     kind: 'Heading component',
-    name: 'moma-title',
+    name: 'title',
     descriptionHtml: 'Primary identity block for the beginning of a script or major workflow.',
     signature: 'moma title "Moma" "Terminal UI library" [--primary color] [--accent color] [--width number] [--max-width number]',
     searchText: 'moma-title primary script header title subtitle accent',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma title "Moma" "Terminal UI library"',
       'moma title "Deploy" "Production" --primary cyan',
@@ -50,10 +70,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-title-sub',
     kind: 'Heading component',
-    name: 'moma-title-sub',
+    name: 'title-sub',
     descriptionHtml: 'Secondary heading for stages nested inside the main workflow.',
     signature: 'moma title-sub "Deployment" "Production environment" [--width number] [--max-width number]',
     searchText: 'moma-title-sub secondary workflow header subtitle',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma title-sub "Dependencies" "Installing packages"',
       'moma title-sub "Deploy" "Production" --color cyan',
@@ -63,10 +85,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-section',
     kind: 'Section component',
-    name: 'moma-section',
+    name: 'section',
     descriptionHtml: 'Strong separator that gives semantic context to the content that follows.',
     signature: 'moma section "Dependencies ready" --success',
     searchText: 'moma-section semantic heading success error warning info',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma section "Dependencies ready" --success',
       'moma section "Configuration failed" --error',
@@ -76,10 +100,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-msg',
     kind: 'Message component',
-    name: 'moma-msg',
+    name: 'msg',
     descriptionHtml: 'Compact feedback with semantic defaults or custom color and icon overrides.',
     signature: 'moma msg "Package installed" --success [--color value] [--icon value]',
     searchText: 'moma-msg message inline feedback icon success error warning info',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma msg "Package installed" --success',
       'moma msg "Connection refused" --error',
@@ -89,10 +115,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-msg-simple',
     kind: 'Simple message',
-    name: 'moma-msg-simple',
+    name: 'msg-simple',
     descriptionHtml: 'A quiet message with only a dot marker and no semantic icon.',
     signature: 'moma msg-simple "Package installed" [--success|--error|--warning|--info] [--color value]',
     searchText: 'moma-msg-simple simple message dot marker no icon success error warning info semantic',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma msg-simple "Package installed"',
       'moma msg-simple "Package installation failed" --error',
@@ -102,10 +130,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-list',
     kind: 'List component',
-    name: 'moma-list',
+    name: 'list',
     descriptionHtml: 'An unordered terminal list with a consistent marker for every item.',
     signature: 'moma list "Clone repository" "Install dependencies" [--success|--error|--warning|--info]',
     searchText: 'moma-list unordered list items dot marker success error warning info semantic',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma list "Clone repository" "Install dependencies" "Start application"',
       'moma list "Database ready" "Cache ready" --success',
@@ -115,10 +145,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-box',
     kind: 'Notice component',
-    name: 'moma-box',
+    name: 'box',
     descriptionHtml: 'Framed notice with automatic, fixed, or maximum width. Long content wraps inside the border.',
     signature: 'moma box "Configuration is ready." --success [--width number] [--max-width number]',
     searchText: 'moma-box framed boxed notice emphasis success warning info error width max-width MOMA_WIDTH MOMA_MAX_WIDTH',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma box "Configuration is ready." --success',
       'moma box "Review the deployment settings." --warning --width 48',
@@ -128,10 +160,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-block',
     kind: 'Content block component',
-    name: 'moma-block',
+    name: 'block',
     descriptionHtml: 'Titled, colored content block for grouping related information, such as a résumé section or a categorized reference list. Rows come from repeated <code>--item</code> (a bold term next to a muted description, aligned as a column) and <code>--text</code> (a plain line), interleaved in the order given.',
     signature: 'moma block --title "<text>" [--item "term" "description"]... [--text "line"]... [--success|--error|--warning|--info] [--color color] [--no-color]',
     searchText: 'moma-block block resume by blocks definition list term description column grouped section color item text',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma block --title "Shells" --color blue --item "Bash" "GNU command shell." --item "Zsh" "Interactive shell with completion."',
       'moma block --title "Summary" --text "All checks passed." --text "No manual follow-up required."',
@@ -141,10 +175,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-prompt',
     kind: 'Prompt component',
-    name: 'moma-prompt',
+    name: 'prompt',
     descriptionHtml: 'Question lead-in used before confirmation or free-form interaction.',
     signature: 'moma prompt "Continue with the installation?" --color pink [--width number] [--max-width number]',
     searchText: 'moma-prompt question confirmation interaction',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma prompt "Continue with the installation?"',
       'moma prompt "Select an environment" --color cyan',
@@ -154,10 +190,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-label',
     kind: 'Label component',
-    name: 'moma-label',
+    name: 'label',
     descriptionHtml: 'Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.',
     signature: 'moma label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]',
     searchText: 'moma-label decorated input header separator text width color semantic',
+    navGroup: 'visual',
+    section: 'components',
     examples: [
       'moma label "PROJECT NAME"',
       'moma label "DEPLOYMENT" --success',
@@ -167,10 +205,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-input',
     kind: 'Input component',
-    name: 'moma-input',
+    name: 'input',
     descriptionHtml: 'Display or read a field with placeholders, validation, secret masking, and one blank line below each interactive value.',
     signature: 'moma input --title "Project name" --read --required [--secret] [--mask symbol] [--default value] [--width number] [--max-width number]',
     searchText: 'moma-input interactive field read value placeholder secret required default trim',
+    navGroup: 'interactive',
+    section: 'components',
     examples: [
       'moma input --title "Project name" --placeholder "my-project"',
       'project="$(moma input --title "Project name" --read --required --trim)"',
@@ -180,10 +220,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-single-select',
     kind: 'Select component',
-    name: 'moma-single-select',
+    name: 'single-select',
     descriptionHtml: 'Select one value with the arrow keys, return it through standard output, and leave one blank line below the controls.',
     signature: 'moma single-select "Development" "Staging" "Production" [--title text] [--initial number]',
     searchText: 'moma-single-select interactive selection list arrows up down radio choice',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'environment="$(moma single-select "Development" "Staging" "Production" --title "Environment")"',
       'environment="$(moma single-select "Development" "Staging" "Production" --choose 2)"',
@@ -193,10 +235,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-select',
     kind: 'Select component',
-    name: 'moma-select',
+    name: 'select',
     descriptionHtml: 'Documented compatibility alias for <code>moma-single-select</code>. Same arguments, same rendering, kept for existing scripts and the <code>select</code> CLI command.',
     signature: 'moma select "Development" "Staging" "Production" [--title text] [--initial number]',
     searchText: 'moma-select interactive selection alias compatibility single-select',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'environment="$(moma select "Development" "Staging" "Production" --title "Environment")"',
     ],
@@ -204,10 +248,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-single-select-groups',
     kind: 'Select component',
-    name: 'moma-single-select-groups',
+    name: 'single-select-groups',
     descriptionHtml: 'Select one value organized under named, non-selectable group headings. Option numbers are one-based, count only options, and follow visual order across every group.',
     signature: 'moma single-select-groups --title text (--group name --option value...)... [--initial number] [--choose number]',
     searchText: 'moma-single-select-groups interactive selection list arrows up down radio choice groups headings',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'action="$(moma single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy")"',
       'action="$(moma single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy" --choose 4)"',
@@ -216,10 +262,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-multi-select',
     kind: 'Multiple select',
-    name: 'moma-multi-select',
+    name: 'multi-select',
     descriptionHtml: 'Toggle multiple values below a decorated Moma heading and return every selection on its own line.',
     signature: 'moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]',
     searchText: 'moma-multi-select interactive multiple selection list arrows space checkbox empty filled square',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'features="$(moma multi-select "Docker" "CI" "Tests" --title "Features")"',
       'features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"',
@@ -229,10 +277,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-multi-select-groups',
     kind: 'Multiple select',
-    name: 'moma-multi-select-groups',
+    name: 'multi-select-groups',
     descriptionHtml: 'Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.',
     signature: 'moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]',
     searchText: 'moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'countries="$(moma multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
       'countries="$(moma multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru" --choose 1,3 --required)"',
@@ -241,10 +291,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-confirm',
     kind: 'Confirmation select',
-    name: 'moma-confirm',
+    name: 'confirm',
     descriptionHtml: 'Select Yes or No with the arrow keys, Enter, or the y and n shortcuts. A successful answer leaves one blank line below the controls.',
     signature: 'moma confirm "Create this project?" [--default yes|no] [--answer yes|no]',
     searchText: 'moma-confirm interactive confirmation yes no selection arrows shortcut default answer',
+    navGroup: 'selection',
+    section: 'components',
     examples: [
       'moma confirm "Create this project?" --default yes',
       'moma confirm "Delete the cache?" --answer no',
@@ -254,10 +306,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-rabbit',
     kind: 'Activity component',
-    name: 'moma-rabbit',
+    name: 'rabbit',
     descriptionHtml: "Branded activity and completion feedback using Moma's rabbit signature.",
     signature: 'moma rabbit "Preparing workspace" --info',
     searchText: 'moma-rabbit branded progress activity mascot success info',
+    navGroup: 'workflow',
+    section: 'components',
     examples: [
       'moma rabbit "Preparing workspace" --info',
       'moma rabbit "Deployment complete" --success',
@@ -267,10 +321,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-spinner',
     kind: 'Process helper',
-    name: 'moma-spinner',
+    name: 'spinner',
     descriptionHtml: 'Display progress while a process is active, then print semantic completion feedback.',
     signature: 'moma spinner pid ["message"] [--delay seconds]',
     searchText: 'moma-spinner progress pid process completion',
+    navGroup: 'workflow',
+    section: 'helpers',
     examples: [
       'sleep 2 &\nmoma spinner "$!" "Waiting"',
       'backup_database &\nmoma spinner --pid "$!" --message "Backing up"',
@@ -280,10 +336,12 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-command-check',
     kind: 'Dependency helper',
-    name: 'moma-command-check',
+    name: 'command-check',
     descriptionHtml: 'Check whether every requested executable is available and return a useful status.',
     signature: 'moma command-check bash curl git [--quiet]',
     searchText: 'moma-command-check dependency executable available missing quiet',
+    navGroup: 'workflow',
+    section: 'helpers',
     examples: [
       'moma command-check bash curl git',
       'moma command-check docker --quiet',
@@ -293,19 +351,23 @@ export const API_ENTRIES: ApiEntryData[] = [
   {
     id: 'moma-version',
     kind: 'Release helper',
-    name: 'moma-version',
+    name: 'version',
     descriptionHtml: 'Print the version embedded in the installed Moma executable.',
     signature: 'moma version',
     searchText: 'moma-version installed release version',
+    navGroup: 'workflow',
+    section: 'helpers',
     examples: ['moma version'],
   },
   {
     id: 'moma-update',
     kind: 'Release helper',
-    name: 'moma-update',
+    name: 'update',
     descriptionHtml: 'Download, validate, and atomically replace an executable Moma installation.',
     signature: 'moma update',
     searchText: 'moma-update upgrade download release curl',
+    navGroup: 'workflow',
+    section: 'helpers',
     examples: ['moma update'],
     // No screenshot: this performs a real network install, so
     // screenshots/moma_screenshots/commands.py deliberately excludes it -

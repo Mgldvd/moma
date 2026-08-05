@@ -119,6 +119,14 @@
   // makes the click do something.
   &__trigger {
     display: block;
+    // Buttons don't reliably fill their container's width the way a <div>
+    // does; without this, the width:100% screenshot below has an
+    // indeterminate percentage basis and collapses to 0x0 before it loads,
+    // which (with height:auto and no other height source) causes the page
+    // to grow underneath any hash-linked destination further down as lazy
+    // images load in and strands the browser's native smooth-scroll well
+    // short of an anchor target opened directly (e.g. #moma-prompt).
+    width: 100%;
     padding: 0;
     border: 0;
     background: none;

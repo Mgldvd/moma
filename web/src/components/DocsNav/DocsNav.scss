@@ -71,6 +71,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+
     &:hover {
       color: var(--pink);
     }
@@ -85,6 +87,10 @@
       background: var(--pink-soft);
       color: var(--ink);
       font-weight: 700;
+    }
+
+    @include bp.reduced-motion {
+      transition: none;
     }
   }
 }
@@ -103,6 +109,7 @@
     background: var(--paper);
     border-right: 1px solid var(--line);
     overflow-y: auto;
+    scroll-behavior: smooth;
     contain: layout;
     transform: translateX(-100%);
     transition: transform 0.2s ease;
@@ -145,6 +152,7 @@
     .js .docs-nav,
     .js .docs-nav-backdrop {
       transition: none;
+      scroll-behavior: auto;
     }
   }
 }
@@ -158,5 +166,10 @@
     max-height: calc(100vh - var(--topbar-height));
     padding: 2.5rem 0;
     overflow-y: auto;
+    scroll-behavior: smooth;
+
+    @include bp.reduced-motion {
+      scroll-behavior: auto;
+    }
   }
 }

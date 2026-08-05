@@ -1,6 +1,7 @@
 ---
 import './Hero.scss';
 import CopyButton from '../CopyButton/CopyButton.astro';
+import QuickStartIcon from './QuickStartIcon.astro';
 import { QUICK_START_GROUPS } from './Hero.data';
 import type { Props } from './Hero.types';
 
@@ -16,11 +17,20 @@ const { eyebrow = 'MOMA / API REFERENCE', quickStartGroups = QUICK_START_GROUPS 
     <div class="quick-start">
       <span class="quick-start__label">
         {group.label}
-        <CopyButton
-          variant="inline"
-          text={group.commands.join('\n')}
-          label={`Copy ${group.label} commands to clipboard`}
-        />
+
+
+        <span class="quick-start__actions">
+
+        <span class="quick-start__icons">
+          {group.icons?.map((icon) => <QuickStartIcon name={icon} />)}
+        </span>
+
+          <CopyButton
+            variant="inline"
+            text={group.commands.join('\n')}
+            label={`Copy ${group.label} commands to clipboard`}
+          />
+        </span>
       </span>
       {group.commands.map((command) => (
         <code class="quick-start__command" data-bash-source={command}>{command}</code>
