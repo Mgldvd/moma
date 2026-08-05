@@ -96,14 +96,9 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
         showExamples && (
             <section class="api-examples">
                 <p class="api-examples__title">Bash examples</p>
-                <div class="api-examples__list">
-                    {examples!.map((example) => (
-                        <pre class="api-examples__example">
-                            <code class="api-examples__code">{example}</code>
-                            <CopyButton text={example} />
-                        </pre>
-                    ))}
-                </div>
+
+                <!-- prettier-ignore -->
+                <div class="api-examples__list"> {examples!.map((example) => (<pre class="api-examples__example"><code class="api-examples__code">{example}</code><CopyButton text={example} /></pre>))} </div>
             </section>
         )
     }
