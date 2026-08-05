@@ -1285,6 +1285,30 @@ mapfile -t terminal_window_users < <(rg -l '<TerminalWindow' "$web_src")
 [[ "${#terminal_window_users[@]}" == "1" ]]
 [[ "${terminal_window_users[0]}" == *"/ApiEntry/ApiEntry.astro" ]]
 
+# Every screenshot is wrapped in a clickable [data-lightbox-trigger], and
+# exactly one shared Lightbox instance (used by index.astro) discovers all
+# of them for keyboard/click arrow navigation.
+lightbox_dir="$web_src/components/Lightbox"
+for lightbox_file in \
+  "$lightbox_dir/Lightbox.astro" \
+  "$lightbox_dir/Lightbox.scss" \
+  "$lightbox_dir/Lightbox.client.ts"; do
+  [[ -s "$lightbox_file" ]]
+done
+rg -Fq 'data-lightbox-trigger' "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq 'data-lightbox-caption={name}' "$web_src/components/ApiEntry/ApiEntry.astro"
+mapfile -t lightbox_page_users < <(rg -l '<Lightbox' "$web_src/pages")
+[[ "${#lightbox_page_users[@]}" == "1" ]]
+rg -Fq "querySelectorAll<HTMLButtonElement>('[data-lightbox-trigger]')" "$lightbox_dir/Lightbox.client.ts"
+rg -Fq "'ArrowLeft'" "$lightbox_dir/Lightbox.client.ts"
+rg -Fq "'ArrowRight'" "$lightbox_dir/Lightbox.client.ts"
+rg -Fq "'Escape'" "$lightbox_dir/Lightbox.client.ts"
+# Wraps around at either end instead of dead-ending, and the modal traps
+# focus (Tab) among just its own close/prev/next controls while open.
+rg -Fq '(index + triggers.length) % triggers.length' "$lightbox_dir/Lightbox.client.ts"
+rg -Fq "'Tab'" "$lightbox_dir/Lightbox.client.ts"
+rg -Fq "setAttribute('aria-modal', 'true')" "$lightbox_dir/Lightbox.client.ts"
+
 if rg -q 'class="(terminal-art|semantic-list|terminal-lines|dot-lines|select-list)' "$web_src"; then
   printf 'smoke: obsolete terminal preview classes remain under web/src\n' >&2
   exit 1

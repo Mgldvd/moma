@@ -48,7 +48,15 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
   {screenshot ? (
     <div class="wireframe">
       <p class="wireframe__label">Output</p>
-      <Image class="wireframe__screenshot" src={screenshot} alt={`${name} output`} loading="lazy" />
+      <button
+        type="button"
+        class="wireframe__trigger"
+        data-lightbox-trigger
+        data-lightbox-caption={name}
+        aria-label={`View ${name} output full-size`}
+      >
+        <Image class="wireframe__screenshot" src={screenshot} alt={`${name} output`} loading="lazy" />
+      </button>
     </div>
   ) : wireframe && (
     <div class="wireframe">

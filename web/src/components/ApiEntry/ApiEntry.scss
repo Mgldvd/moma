@@ -112,13 +112,43 @@
     text-transform: uppercase;
   }
 
+  // A plain button around the screenshot, reset back to an unstyled
+  // clickable image so it opens the Lightbox (see Lightbox.client.ts,
+  // which discovers every [data-lightbox-trigger] on the page). The zoom
+  // cursor is gated behind `.js` since Lightbox.client.ts is what actually
+  // makes the click do something.
+  &__trigger {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+
+    .js & {
+      cursor: zoom-in;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--pink);
+      outline-offset: 3px;
+    }
+  }
+
   // Real terminal screenshots (see screenshots.ts) always render at the
-  // capture tool's fixed canvas size; scale down to fit the column instead
-  // of shipping oversized markup like the old TerminalWindow mockup did.
+  // capture tool's fixed canvas size (932x665); scale down to fit the
+  // column - well under that native size, so it never looks upscaled -
+  // instead of shipping oversized markup like the old TerminalWindow
+  // mockup did. Click through to the Lightbox for the full-size view.
   &__screenshot {
     display: block;
     width: 100%;
-    max-width: 32rem;
+    max-width: 48rem;
     height: auto;
+    border-radius: 0.35rem;
+    transition: opacity 0.15s ease;
+
+    .wireframe__trigger:hover &,
+    .wireframe__trigger:focus-visible & {
+      opacity: 0.88;
+    }
   }
 }
