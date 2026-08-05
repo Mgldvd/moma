@@ -2,7 +2,7 @@
 import './TerminalWindow.scss';
 import type { Props } from './TerminalWindow.types';
 
-const { title = 'preview', ariaLabel, variant = 'default' } = Astro.props as Props;
+const { title = 'preview', ariaLabel } = Astro.props as Props;
 ---
 
 <div class="terminal-window" role="group" aria-label={ariaLabel}>
@@ -14,5 +14,5 @@ const { title = 'preview', ariaLabel, variant = 'default' } = Astro.props as Pro
       <span class="terminal-window__control terminal-window__control--error"></span>
     </span>
   </div>
-  <pre class:list={['terminal-window__body', { 'terminal-window__body--pagga': variant === 'pagga' }]}><slot /></pre>
+  <pre class="terminal-window__body"><slot /></pre>
 </div>

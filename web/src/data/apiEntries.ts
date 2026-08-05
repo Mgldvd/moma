@@ -1,9 +1,9 @@
-import { SITE } from './site';
-
 export interface ApiEntryWireframe {
-  variant?: 'default' | 'pagga';
   /** Raw, trusted, build-time-authored HTML - preserves exact terminal
-   * whitespace and `.tw-*` color spans copied from the source site. */
+   * whitespace and `.tw-*` color spans copied from the source site. Only
+   * used as a fallback for the rare entry with no real screenshot (see
+   * screenshots.ts / getScreenshot) - currently just moma-update, which
+   * performs a real network install and has no safe way to automate one. */
   bodyHtml: string;
 }
 
@@ -33,12 +33,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma header "Deploy 2026" --color cyan --margin-bottom 1',
       'moma header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 2 --no-color',
     ],
-    wireframe: {
-      variant: 'pagga',
-      bodyHtml: `<span class="tw-primary">░█▄█░█▀█░█▄█░█▀█
-░█░█░█░█░█░█░█▀█
-░▀░▀░▀▀▀░▀░▀░▀░▀</span>`,
-    },
   },
   {
     id: 'moma-title',
@@ -52,12 +46,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma title "Deploy" "Production" --primary cyan',
       'moma title "Backup" "Nightly job" --accent yellow --min-width 48',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-accent">  ┌───────────────────────────────────┐
-  ▪  </span><span class="tw-primary">Moma</span><span class="tw-accent"> Terminal UI library         ▪
-  └───────────────────────────────────┘</span>`,
-    },
   },
   {
     id: 'moma-title-sub',
@@ -71,12 +59,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma title-sub "Deploy" "Production" --color cyan',
       'moma title-sub "Tests" --message "Running suite" --min-width 42',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-accent">  ▪  </span><span class="tw-primary">Deployment</span> Production environment
-  └───────────────────────────────────────
-`,
-    },
   },
   {
     id: 'moma-section',
@@ -90,24 +72,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma section "Configuration failed" --error',
       'moma section "Next step" --info --icon "→"',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-success">  ┌
-  ▪ ✔ Dependencies ready
-  └ </span>
-
-<span class="tw-error">  ┌
-  ▪ ✖ Configuration failed
-  └ </span>
-
-<span class="tw-warning">  ┌
-  ▪ ! Review required
-  └ </span>
-
-<span class="tw-info">  ┌
-  ▪ → Next step
-  └ </span>`,
-    },
   },
   {
     id: 'moma-msg',
@@ -121,12 +85,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma msg "Connection refused" --error',
       'moma msg "Downloading metadata" --color cyan --icon "→"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-success">  ▪ ✔ Package installed  ✔ </span>
-<span class="tw-error">  ▪ ✖ Connection refused  ✖ </span>
-<span class="tw-warning">  ▪ ! Using cached version  ! </span>
-<span class="tw-info">  ▪ → Downloading metadata  → </span>`,
-    },
   },
   {
     id: 'moma-msg-simple',
@@ -140,10 +98,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma msg-simple "Package installation failed" --error',
       'moma msg-simple "Queued" --color yellow --marker "•"',
     ],
-    wireframe: {
-      bodyHtml: `  <span class="tw-primary">▪</span>   Package installed
-  <span class="tw-error">▪</span>   Package installation failed`,
-    },
   },
   {
     id: 'moma-list',
@@ -157,11 +111,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma list "Database ready" "Cache ready" --success',
       'moma list "Review logs" "Retry deployment" --marker "→" --color yellow',
     ],
-    wireframe: {
-      bodyHtml: `  <span class="tw-primary">▪</span>   Clone repository
-  <span class="tw-primary">▪</span>   Install dependencies
-  <span class="tw-primary">▪</span>   Start application`,
-    },
   },
   {
     id: 'moma-box',
@@ -175,11 +124,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma box "Review the deployment settings." --warning --width 48',
       'moma box "A long notice wraps inside its border." --info --max-width 32',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-success">  ┌───────────────────────────┐
-  │ ✔ Configuration is ready. │
-  └───────────────────────────┘</span>`,
-    },
   },
   {
     id: 'moma-block',
@@ -193,17 +137,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma block --title "Summary" --text "All checks passed." --text "No manual follow-up required."',
       'moma block --title "Review" --warning --item "Environment" "production" --text "Confirm the target before deploying."',
     ],
-    wireframe: {
-      bodyHtml: `  <span class="tw-info">┌</span> <strong>Shells and Terminal Experience</strong>
-  <span class="tw-info">│</span> <strong>Bash</strong>  <span class="tw-muted">GNU command shell and scripting environment.</span>
-  <span class="tw-info">│</span> <strong>Zsh</strong>   <span class="tw-muted">Interactive shell with advanced completion.</span>
-  <span class="tw-info">└</span>
-
-  <span class="tw-accent">┌</span> <strong>Files, Search, and Data Processing</strong>
-  <span class="tw-accent">│</span> <strong>ripgrep</strong>  <span class="tw-muted">Fast recursive text-search utility.</span>
-  <span class="tw-accent">│</span> <strong>jq</strong>       <span class="tw-muted">Command-line JSON query and transformation processor.</span>
-  <span class="tw-accent">└</span>`,
-    },
   },
   {
     id: 'moma-prompt',
@@ -217,11 +150,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma prompt "Select an environment" --color cyan',
       'moma prompt "Deploy now?" --default "yes" --icon "?"',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-accent">  ▪</span>  Continue with the installation?
-  └─────────────────────────────────────`,
-    },
   },
   {
     id: 'moma-label',
@@ -235,10 +163,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma label "DEPLOYMENT" --success',
       'moma label "NOTES" --width 52 --color cyan --icon "→"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-primary">  ┌─ TEXT HERE ────────────────────────────┐</span>
-`,
-    },
   },
   {
     id: 'moma-input',
@@ -252,15 +176,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'project="$(moma input --title "Project name" --read --required --trim)"',
       'password="$(moma input --title "Password" --read --secret --required)"',
     ],
-    wireframe: {
-      bodyHtml: `  ┌─ Owner ────────────────────────────────┐
-  │ <span class="tw-muted">asdf</span>                                   │
-  └────────────────────────────────────────┘
-
-  ┌─ Secret ───────────────────────────────┐
-  │❯ <span class="tw-muted">****</span>
-`,
-    },
   },
   {
     id: 'moma-single-select',
@@ -274,14 +189,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'environment="$(moma single-select "Development" "Staging" "Production" --choose 2)"',
       'region="$(moma single-select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan)"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-accent">  ▪  </span>Environment
-<span class="tw-primary">  └──────────────────────────────</span>
-    <span class="tw-primary">○</span> Development
-<span class="tw-focus">  › ◉ Staging</span>
-    <span class="tw-primary">○</span> Production
-<span class="tw-muted">  ↑/↓ move · Enter select · q cancel</span>`,
-    },
   },
   {
     id: 'moma-select',
@@ -293,9 +200,6 @@ export const API_ENTRIES: ApiEntryData[] = [
     examples: [
       'environment="$(moma select "Development" "Staging" "Production" --title "Environment")"',
     ],
-    // No wireframe: matches the source site, where this entry has never
-    // had a terminal preview - see ApiEntry's note on the Bash-examples
-    // block being skipped here too, for the same reason.
   },
   {
     id: 'moma-single-select-groups',
@@ -308,21 +212,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'action="$(moma single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy")"',
       'action="$(moma single-select-groups --title "Features" --group "Docker" --option "Up" --option "Down" --option "Stop" --group "npm" --option "install" --option "run dev" --option "run deploy" --choose 4)"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-accent">  ▪  </span>Features
-<span class="tw-primary">  └──────────────────────────────</span>
-
-<span class="tw-muted">    Docker</span>
-<span class="tw-focus">  › ◉ Up</span>
-    <span class="tw-primary">○</span> Down
-    <span class="tw-primary">○</span> Stop
-
-<span class="tw-muted">    npm</span>
-    <span class="tw-primary">○</span> install
-    <span class="tw-primary">○</span> run dev
-    <span class="tw-primary">○</span> run deploy
-<span class="tw-muted">  ↑/↓ move · Enter select · q cancel</span>`,
-    },
   },
   {
     id: 'moma-multi-select',
@@ -336,14 +225,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"',
       'features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-accent">  ▪  </span>Features
-<span class="tw-primary">  └──────────────────────────────</span>
-<span class="tw-focus">  › </span><span class="tw-selected">▣</span> Docker
-    <span class="tw-primary">□</span> CI
-    <span class="tw-selected">▣</span> Tests
-<span class="tw-muted">  ↑/↓ move · Space toggle · Enter confirm · q cancel</span>`,
-    },
   },
   {
     id: 'moma-multi-select-groups',
@@ -356,21 +237,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'countries="$(moma multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
       'countries="$(moma multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru" --choose 1,3 --required)"',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-accent">  ▪  </span>Features
-<span class="tw-primary">  └──────────────────────────────</span>
-
-<span class="tw-muted">    North America</span>
-<span class="tw-focus">  › </span><span class="tw-selected">▣</span> United States
-    <span class="tw-primary">□</span> Canada
-    <span class="tw-selected">▣</span> Mexico
-
-<span class="tw-muted">    South America</span>
-    <span class="tw-primary">□</span> Colombia
-    <span class="tw-primary">□</span> Argentina
-    <span class="tw-primary">□</span> Peru
-<span class="tw-muted">  ↑/↓ move · Space toggle · Enter confirm · q cancel</span>`,
-    },
   },
   {
     id: 'moma-confirm',
@@ -384,14 +250,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma confirm "Delete the cache?" --answer no',
       'if moma confirm "Deploy now?"; then\n  moma msg "Deploying" --info\nfi',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-accent">  ▪  </span>Create this project? [yes]
-<span class="tw-primary">  └────────────────────────────────</span>
-<span class="tw-focus">  ▪ Yes</span>
-    No
-<span class="tw-muted">  ↑/↓ move · Enter confirm · y yes · n no</span>`,
-    },
   },
   {
     id: 'moma-rabbit',
@@ -405,15 +263,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma rabbit "Deployment complete" --success',
       'moma rabbit "Build needs attention" --warning --icon "!"',
     ],
-    wireframe: {
-      bodyHtml: `
-<span class="tw-info">  | → Preparing workspace
-  /⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺</span>
-
-<span class="tw-accent">    (\\(\\
-    (-.-)
-  o_(")(")</span>`,
-    },
   },
   {
     id: 'moma-spinner',
@@ -427,9 +276,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'backup_database &\nmoma spinner --pid "$!" --message "Backing up"',
       'build_project &\nmoma spinner "$!" "Building" --delay 0.05',
     ],
-    wireframe: {
-      bodyHtml: `<span class="tw-success">  ▪ ✔ Processing  ✔ </span>`,
-    },
   },
   {
     id: 'moma-command-check',
@@ -443,11 +289,6 @@ export const API_ENTRIES: ApiEntryData[] = [
       'moma command-check docker --quiet',
       'if ! moma command-check git; then\n  exit 1\nfi',
     ],
-    wireframe: {
-      bodyHtml: `  <span class="tw-primary">▪</span>   bash is available
-  <span class="tw-primary">▪</span>   curl is available
-  <span class="tw-primary">▪</span>   git is available`,
-    },
   },
   {
     id: 'moma-version',
@@ -457,9 +298,6 @@ export const API_ENTRIES: ApiEntryData[] = [
     signature: 'moma version',
     searchText: 'moma-version installed release version',
     examples: ['moma version'],
-    wireframe: {
-      bodyHtml: SITE.version,
-    },
   },
   {
     id: 'moma-update',
@@ -469,6 +307,10 @@ export const API_ENTRIES: ApiEntryData[] = [
     signature: 'moma update',
     searchText: 'moma-update upgrade download release curl',
     examples: ['moma update'],
+    // No screenshot: this performs a real network install, so
+    // screenshots/moma_screenshots/commands.py deliberately excludes it -
+    // see that file's module docstring. Kept as the one hand-authored
+    // terminal preview left in this file.
     wireframe: {
       bodyHtml: `  <span class="tw-primary">▪</span>   moma: updated successfully`,
     },
