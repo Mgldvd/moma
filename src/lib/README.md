@@ -25,13 +25,15 @@ Core helpers use the private `_moma_*` namespace. Theme inputs use
 | Source | Public functions |
 | --- | --- |
 | [`header.sh`](../components/header.sh) | `moma-header` |
-| [`title.sh`](../components/title.sh) | `moma-title`, `moma-title-sub` |
+| [`title.sh`](../components/title.sh) | `moma-title`, `moma-title-sub`, `moma-sub-title` |
 | [`section-message.sh`](../components/section-message.sh) | `moma-section`, `moma-msg` |
 | [`simple-list.sh`](../components/simple-list.sh) | `moma-msg-simple`, `moma-list` |
-| [`box-prompt.sh`](../components/box-prompt.sh) | `moma-box`, `moma-prompt` |
+| [`box.sh`](../components/box.sh) | `moma-box` |
 | [`resume.sh`](../components/resume.sh) | `moma-resume` |
+| [`divider.sh`](../components/divider.sh) | `moma-divider` |
 | [`label.sh`](../components/label.sh) | `moma-label` |
 | [`input.sh`](../components/input.sh) | `moma-input` |
+| [`prompt.sh`](../components/prompt.sh) | `moma-prompt` |
 | [`select-common.sh`](../components/select-common.sh) | Private selection rendering, transition, and group-validation helpers |
 | [`single-select.sh`](../components/single-select.sh) | `moma-single-select`, `moma-select` (alias) |
 | [`single-select-groups.sh`](../components/single-select-groups.sh) | `moma-single-select-groups` |

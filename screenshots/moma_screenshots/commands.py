@@ -141,15 +141,6 @@ moma divider --icon "★" --border line
 """.strip(),
     ),
     Command(
-        id="moma-prompt",
-        title="moma prompt",
-        script="""
-moma prompt "Continue with the installation?"
-moma prompt "Select an environment" --color cyan
-moma prompt "Deploy now?" --default "yes" --icon "?"
-""".strip(),
-    ),
-    Command(
         id="moma-label",
         title="moma label",
         script="""
@@ -165,6 +156,15 @@ moma label "NOTES" --width 52 --color cyan --icon "→"
 moma input --title "Project name" --placeholder "my-project"
 moma input --title "Environment" --value "production" --info
 moma input --title "Danger zone" --warning --color yellow
+""".strip(),
+    ),
+    Command(
+        id="moma-prompt",
+        title="moma prompt",
+        script="""
+moma prompt "Continue with the installation?" <<< "Yes, continue"
+moma prompt "Deploy now?" --default "yes" <<< ""
+moma prompt "API token" --secret --required <<< "s3cr3t-token"
 """.strip(),
     ),
     Command(

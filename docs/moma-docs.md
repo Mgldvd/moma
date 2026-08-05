@@ -380,27 +380,6 @@ moma divider --icon "⏻" --border line
 
 ![moma-divider preview](../.img/moma-divider.png)
 
-### `moma-prompt`
-
-Question lead-in used before confirmation or free-form interaction.
-
-```text
-moma prompt "Continue with the installation?" --color pink [--width number] [--max-width number]
-```
-
-```bash
-# Example 1
-moma prompt "Continue with the installation?"
-
-# Example 2
-moma prompt "Select an environment" --color cyan
-
-# Example 3
-moma prompt "Deploy now?" --default "yes" --icon "?"
-```
-
-![moma-prompt preview](../.img/moma-prompt.png)
-
 ### `moma-label`
 
 Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.
@@ -465,6 +444,32 @@ password="$(moma input --title "Password" --read --secret --required)"
 ```
 
 ![moma-input preview](../.img/moma-input.png)
+
+### `moma-prompt`
+
+Free-text prompt with `moma-title-sub`'s own marker + underline look
+instead of `moma-input`'s boxed field - the two share the same read,
+validation, and secret-masking machinery, and differ only in how the
+question is drawn. Answers a ❯ cursor printed on the line below the
+underline; `--default`, `--required`, `--trim`, `--secret`, and `--mask`
+all work exactly as they do on `moma-input`.
+
+```text
+moma prompt "<question>" [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--cursor char] [--default value] [--secret] [--mask char] [--required] [--trim] [--min-width number] [--width number] [--max-width number]
+```
+
+```bash
+# Example 1
+answer="$(moma prompt "Continue with the installation?")"
+
+# Example 2: pre-filled default, shown as "[yes]"
+answer="$(moma prompt "Deploy now?" --default "yes")"
+
+# Example 3: required, masked
+token="$(moma prompt "API token" --secret --required)"
+```
+
+![moma-prompt preview](../.img/moma-prompt.png)
 
 ### `moma-single-select`
 

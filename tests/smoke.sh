@@ -404,6 +404,36 @@ fixed_input="$(
 )"
 [[ "$fixed_input" == *"  └${shared_rule}┘"* ]]
 
+prompt_answer="$(printf 'Yes, continue\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Continue?" 2>/dev/null)"
+[[ "$prompt_answer" == "Yes, continue" ]]
+
+prompt_chrome="$(printf 'Yes, continue\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Continue?" 2>&1 >/dev/null)"
+[[ "$prompt_chrome" == *$'\n  ▪  Continue?'* ]]
+[[ "$prompt_chrome" == *$'\n  └'* ]]
+[[ "$prompt_chrome" == *'❯ '* ]]
+
+prompt_default="$(printf '\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Deploy now?" --default yes 2>/dev/null)"
+[[ "$prompt_default" == "yes" ]]
+prompt_default_chrome="$(printf '\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Deploy now?" --default yes 2>&1 >/dev/null)"
+[[ "$prompt_default_chrome" == *"Deploy now? [yes]"* ]]
+
+prompt_trim="$(printf '  padded  \n' | NO_COLOR=1 "$MOMA_DIST" prompt "Name?" --trim 2>/dev/null)"
+[[ "$prompt_trim" == "padded" ]]
+
+prompt_required="$(printf '\nok\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Name?" --required 2>/dev/null)"
+[[ "$prompt_required" == "ok" ]]
+
+prompt_mirror="$(printf 'yes\n' | NO_COLOR=1 "$MOMA_DIST" prompt "Continue?" --border mirror 2>&1 >/dev/null)"
+[[ "$prompt_mirror" == *'Continue?'*'▪'* ]]
+[[ "$prompt_mirror" == *$'\n  └'*'┘'* ]]
+
+set +e
+prompt_bad_border="$(NO_COLOR=1 "$MOMA_DIST" prompt "x" --border sideways 2>&1 </dev/null)"
+prompt_bad_border_status=$?
+set -e
+[[ "$prompt_bad_border_status" -eq 2 ]]
+[[ "$prompt_bad_border" == *"invalid border"* ]]
+
 fixed_select="$(NO_COLOR=1 MOMA_WIDTH="$shared_width" "$MOMA_DIST" \
   select One Two --title "Short" --choose 1 2>&1 >/dev/null)"
 [[ "$fixed_select" == *"  └${shared_rule}"* ]]
@@ -1117,13 +1147,14 @@ for public_function in "${expected_functions[@]}"; do
 done
 
 example_output="$(
-  printf 'demo-project\nteam@example.com\nsuper-secret\nyes\n' |
+  printf 'demo-project\nTICKET-123\nteam@example.com\nsuper-secret\nyes\n' |
     NO_COLOR=1 "$ROOT_DIR/example.sh" 2>&1
 )"
 [[ "$example_output" == *"Component showcase"* ]]
 [[ "$example_output" == *"All required commands are available."* ]]
 [[ "$example_output" == *"┌─ Basic details"* ]]
-[[ "$example_output" == *"Choose the target environment"* ]]
+[[ "$example_output" == *"Deployment ticket reference"* ]]
+[[ "$example_output" == *"TICKET-123"* ]]
 [[ "$example_output" == *"Creating project"* ]]
 [[ "$example_output" == *"Project configuration accepted"* ]]
 [[ "$example_output" != *"super-secret"* ]]

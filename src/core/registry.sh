@@ -13,7 +13,7 @@ list	moma-list	Print an unordered list.
 box	moma-box	Print a boxed message.
 resume	moma-resume	Print a titled, colored content block.
 divider	moma-divider	Print a marker-led horizontal rule.
-prompt	moma-prompt	Print a prompt.
+prompt	moma-prompt	Read a free-text answer.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
 select	moma-select	Select one value (alias for single-select).

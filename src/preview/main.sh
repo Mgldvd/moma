@@ -160,11 +160,6 @@ _moma_preview_render_dividers() {
   moma-divider --success --border line
 }
 
-# Render the prompt examples.
-_moma_preview_render_prompt() {
-  moma-prompt "Continue with the installation?" --color pink
-}
-
 # Render the label examples.
 _moma_preview_render_label() {
   moma-label "TEXT HERE"
@@ -175,6 +170,11 @@ _moma_preview_render_inputs() {
   moma-input --title "Project name" --placeholder "my-project"
   moma-input --title "Environment" --value "production" --info
   moma-input --title "Danger zone" --warning --color yellow
+}
+
+# Render the prompt examples.
+_moma_preview_render_prompt() {
+  printf 'Yes, continue\n' | moma-prompt "Continue with the installation?" 2>&1
 }
 
 # Render the single-selection examples.
@@ -362,10 +362,6 @@ _moma_preview() {
     "03" "Interaction" \
     "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
-    "moma-prompt" "Question or confirmation lead-in." \
-    'moma prompt "Continue?" --color pink' \
-    _moma_preview_render_prompt
-  _moma_preview_component \
     "moma-label" "Decorated label aligned with input field headers." \
     'moma label "TEXT HERE"' \
     _moma_preview_render_label
@@ -373,6 +369,10 @@ _moma_preview() {
     "moma-input" "Display and interactive input states." \
     'moma input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
+  _moma_preview_component \
+    "moma-prompt" "Free-text prompt with moma-title-sub's own look." \
+    'answer="$(moma prompt "Continue?")"' \
+    _moma_preview_render_prompt
   _moma_preview_component \
     "moma-select" "Arrow-key selection with radio-style indicators." \
     'moma select "Development" "Staging" "Production" --title "Environment"' \
