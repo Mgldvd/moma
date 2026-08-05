@@ -9,6 +9,8 @@ _moma_render_title() {
   local no_color="${6:-false}"
   local width="${7:-}"
   local max_width="${8:-}"
+  local icon="${9-▪}"
+  local border="${10:-mirror}"
 
   title="$(_moma_trim "$title")"
   subtitle="$(_moma_trim "$subtitle")"
@@ -24,6 +26,14 @@ _moma_render_title() {
     _moma_resolve_color "$accent" "$MOMA_COLOR_ACCENT" "$no_color"
   )"
   reset="$(_moma_reset_color "$no_color")"
+
+  # The left marker defaults to a plain box edge when no icon is set, and
+  # the right marker mirrors it, repeats it as a closing edge, or is
+  # dropped entirely, per --border. Every option is a single display
+  # column, same as the default ▪, so box_width math never needs to change.
+  local left_glyph="${icon:-│}"
+  local right_glyph="$left_glyph"
+  [[ "$border" == line ]] && right_glyph="│"
 
   local text_length=${#title}
   if [[ -n "$subtitle" ]]; then
@@ -48,20 +58,38 @@ _moma_render_title() {
       _moma_wrap_text "$combined_text" "$((box_width - 4))"
     )
     for wrapped_line in "${wrapped_lines[@]}"; do
-      wrapped_padding=$((box_width - ${#wrapped_line} - 4))
-      printf '  ▪  %b%s%b%s  ▪\n' \
-        "$primary_color" "$wrapped_line" "$primary_color" \
-        "$(printf '%*s' "$wrapped_padding" '')"
+      if [[ "$border" == open ]]; then
+        printf '  %s  %b%s%b\n' \
+          "$left_glyph" "$primary_color" "$wrapped_line" "$primary_color"
+      else
+        wrapped_padding=$((box_width - ${#wrapped_line} - 4))
+        printf '  %s  %b%s%b%s  %s\n' \
+          "$left_glyph" "$primary_color" "$wrapped_line" "$primary_color" \
+          "$(printf '%*s' "$wrapped_padding" '')" "$right_glyph"
+      fi
     done
   elif [[ -n "$subtitle" ]]; then
-    printf '  ▪  %b%s%b %b%s%b%s  ▪\n' \
-      "$primary_color" "$title" "$primary_color" \
-      "$accent_color" "$subtitle" "$primary_color" \
-      "$(printf '%*s' "$padding" '')"
+    if [[ "$border" == open ]]; then
+      printf '  %s  %b%s%b %b%s%b\n' \
+        "$left_glyph" \
+        "$primary_color" "$title" "$primary_color" \
+        "$accent_color" "$subtitle" "$primary_color"
+    else
+      printf '  %s  %b%s%b %b%s%b%s  %s\n' \
+        "$left_glyph" \
+        "$primary_color" "$title" "$primary_color" \
+        "$accent_color" "$subtitle" "$primary_color" \
+        "$(printf '%*s' "$padding" '')" "$right_glyph"
+    fi
   else
-    printf '  ▪  %b%s%b%s  ▪\n' \
-      "$primary_color" "$title" "$primary_color" \
-      "$(printf '%*s' "$padding" '')"
+    if [[ "$border" == open ]]; then
+      printf '  %s  %b%s%b\n' \
+        "$left_glyph" "$primary_color" "$title" "$primary_color"
+    else
+      printf '  %s  %b%s%b%s  %s\n' \
+        "$left_glyph" "$primary_color" "$title" "$primary_color" \
+        "$(printf '%*s' "$padding" '')" "$right_glyph"
+    fi
   fi
   printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$box_width")" "$reset"
 }
@@ -76,10 +104,19 @@ moma-title() {
   local width=""
   local max_width=""
   local no_color=false
+  local icon="▪"
+  local border="mirror"
   local -a positional=()
+  local style
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --success | --error | --warning | --info)
+        style="$(_moma_apply_semantic_style "${1#--}")"
+        primary="${style%%$'\t'*}"
+        icon="${style#*$'\t'}"
+        shift
+        ;;
       --primary)
         if [[ $# -lt 2 ]]; then
           _moma_option_requires_value moma-title "$1"
@@ -90,6 +127,34 @@ moma-title() {
         ;;
       --primary=*)
         primary="${1#*=}"
+        shift
+        ;;
+      --icon | -i)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-title "$1"
+          return 1
+        fi
+        icon="$2"
+        shift 2
+        ;;
+      --icon=*)
+        icon="${1#*=}"
+        shift
+        ;;
+      --no-icon)
+        icon=""
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-title "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
         shift
         ;;
       --accent)
@@ -146,7 +211,12 @@ moma-title() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-title "<title>" ["subtitle"] [--primary <color>] [--accent <color>] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+Usage: moma-title "<title>" ["subtitle"] [--success|--error|--warning|--info] [--primary <color>] [--accent <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+
+--icon sets the left marker (default ▪); --no-icon replaces it with a
+plain box edge. --border controls the right marker: mirror (default)
+repeats the left marker, line closes with a plain edge instead, and open
+drops the right side entirely.
 EOF
         return 0
         ;;
@@ -168,6 +238,13 @@ EOF
 
   title="${positional[0]:-}"
   subtitle="${positional[1]:-}"
+  case "$border" in
+    mirror | line | open) ;;
+    *)
+      _moma_usage_error moma-title "invalid border: $border (expected mirror, line, or open)"
+      return 2
+      ;;
+  esac
   if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
     _moma_usage_error moma-title "invalid width: $width"
     return 2
@@ -178,7 +255,7 @@ EOF
   fi
   _moma_render_title \
     "$title" "$subtitle" "$primary" "$accent" \
-    "$min_width" "$no_color" "$width" "$max_width"
+    "$min_width" "$no_color" "$width" "$max_width" "$icon" "$border"
 }
 
 # Render a secondary title from normalized arguments.
