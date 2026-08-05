@@ -18,3 +18,28 @@ const screenshotsById = new Map<string, ImageMetadata>(
 export function getScreenshot(id: string): ImageMetadata | undefined {
   return screenshotsById.get(id);
 }
+
+// Per-example screenshots for the output carousel: one real capture per
+// documented example (screenshots/moma_screenshots/commands.py's `frames`),
+// rather than the single combined capture above. Lives in its own
+// `carousel/<id>/<frame-index>.png` subtree so it can't collide with the
+// flat `<id>.png` naming `getScreenshot` depends on. Only entries that have
+// opted into per-example frames have any files here.
+const carouselModules = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/screenshots/carousel/*/*.png',
+  { eager: true },
+);
+
+const carouselFramesById = new Map<string, ImageMetadata[]>();
+for (const [path, mod] of Object.entries(carouselModules)) {
+  const parts = path.split('/');
+  const id = parts[parts.length - 2];
+  const frameIndex = Number(parts[parts.length - 1].replace(/\.png$/, ''));
+  const frames = carouselFramesById.get(id) ?? [];
+  frames[frameIndex] = mod.default;
+  carouselFramesById.set(id, frames);
+}
+
+export function getCarouselFrames(id: string): ImageMetadata[] | undefined {
+  return carouselFramesById.get(id);
+}

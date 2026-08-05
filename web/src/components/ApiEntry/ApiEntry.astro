@@ -3,16 +3,24 @@ import { Image } from 'astro:assets';
 import './ApiEntry.scss';
 import CopyButton from '../CopyButton/CopyButton.astro';
 import TerminalWindow from '../TerminalWindow/TerminalWindow.astro';
-import { getScreenshot } from '../../data/screenshots';
+import OutputCarousel from '../OutputCarousel/OutputCarousel.astro';
+import { getScreenshot, getCarouselFrames } from '../../data/screenshots';
 import type { Props } from './ApiEntry.types';
 
-const { id, kind, name, descriptionHtml, signature, searchText, examples, wireframe } = Astro.props as Props;
+const { id, kind, name, descriptionHtml, signature, searchText, examples, options, wireframe } = Astro.props as Props;
+
+const hasOptions = Boolean(options && options.length > 0);
+const optionsId = `${id}-options`;
 
 // Every entry's output preview is a real screenshot (screenshots.ts, keyed
 // by id) except moma-update, which performs a real network install and
-// falls back to the one remaining hand-authored wireframe.
+// falls back to the one remaining hand-authored wireframe. Entries with
+// per-example frames (getCarouselFrames) show those in a carousel instead
+// of the single combined screenshot.
 const screenshot = getScreenshot(id);
-const hasPreview = Boolean(screenshot || wireframe);
+const carouselFrames = getCarouselFrames(id);
+const hasCarousel = Boolean(carouselFrames && carouselFrames.length > 1);
+const hasPreview = Boolean(screenshot || wireframe || hasCarousel);
 
 // Examples are only shown alongside an output preview - in practice every
 // entry has one now that real screenshots exist for the whole catalog, but
@@ -31,8 +39,37 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
   <p class="api-entry__description" set:html={descriptionHtml} />
   <div class="code-block">
     <code class="signature">{signature}</code>
-    <CopyButton text={signature} />
+    {hasOptions && (
+      <button
+        type="button"
+        class="signature-toggle"
+        aria-expanded="false"
+        aria-controls={optionsId}
+      >
+        Options
+        <span class="signature-toggle__icon" aria-hidden="true">
+          ⯆
+        </span>
+      </button>
+    )}
   </div>
+
+  {hasOptions && (
+    <div class="signature-options" id={optionsId} data-open="false" hidden>
+      <div class="signature-options__inner">
+        <table>
+          <tbody>
+            {options!.map((option) => (
+              <tr>
+                <td><code>{option.flag}</code></td>
+                <td>{option.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )}
 
   {showExamples && (
     <section class="api-examples">
@@ -45,7 +82,12 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
     </section>
   )}
 
-  {screenshot ? (
+  {hasCarousel ? (
+    <div class="wireframe">
+      <p class="wireframe__label">Output</p>
+      <OutputCarousel name={name} frames={carouselFrames!} />
+    </div>
+  ) : screenshot ? (
     <div class="wireframe">
       <p class="wireframe__label">Output</p>
       <button
@@ -61,7 +103,7 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
   ) : wireframe && (
     <div class="wireframe">
       <p class="wireframe__label">Output</p>
-      <TerminalWindow ariaLabel={`${name} output`}>
+      <TerminalWindow title={`moma ${name}`} ariaLabel={`${name} output`}>
         <Fragment set:html={wireframe.bodyHtml} />
       </TerminalWindow>
     </div>

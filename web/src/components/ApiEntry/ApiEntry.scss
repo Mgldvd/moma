@@ -43,20 +43,142 @@
 }
 
 .signature {
-  display: block;
-  overflow-x: auto;
-  padding: 1rem 3.75rem 1rem 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
   color: var(--pink);
   font: calc(0.82rem + 2px)/1.6 var(--font-mono);
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+
 }
 
-// Wrapper around .signature so its CopyButton has a stable, non-scrolling
-// position to anchor to.
+// Lets .signature wrap onto multiple lines - rather than scroll
+// horizontally - while the toggle button (when present) sits beside it on
+// wide viewports and drops to its own line, via flex-wrap, on narrow ones.
 .code-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   position: relative;
+}
+
+// Expands/collapses .signature-options below (see ApiEntry.client.ts).
+// Replaces what used to be a floating CopyButton over the signature line:
+// signature is reference notation (placeholders, [...] brackets), not a
+// literal runnable command the way each bash example already is - so a
+// details toggle is more useful here than copy-to-clipboard.
+.signature-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #f6f4ef;
+  background: #f6f4ef;
+  color: var(--muted);
+  cursor: pointer;
+  font: 700 calc(0.68rem + 2px) var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  position: absolute;
+  bottom: -15px;
+  right: 0;
+
+  &:hover {
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pink);
+    outline-offset: 2px;
+  }
+
+  &__icon {
+    display: inline-block;
+    transition: transform 0.15s ease;
+    transform-origin: center;
+  }
+
+  &[aria-expanded='true'] .signature-toggle__icon {
+    transform: rotate(180deg);
+  }
+
+  @include bp.reduced-motion {
+    .signature-toggle__icon {
+      transition: none;
+    }
+  }
+}
+
+// Animates open/closed via a grid-template-rows 0fr->1fr transition, which
+// (unlike max-height) settles at the content's own intrinsic height with
+// no guessed/hardcoded limit. &__inner is the single grid row's content;
+// its own overflow:hidden is what actually clips the table while that row
+// track is still shrinking, rather than letting it reflow or poke through.
+// JS (ApiEntry.client.ts) drives `data-open` a frame after unhiding on
+// open, and re-hides only after the transition finishes on close - the
+// same two-step reveal Lightbox.client.ts and DocsNav.client.ts already
+// use for their own transitions.
+.signature-options {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+
+  &[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  &__inner {
+    overflow: hidden;
+    min-height: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: calc(0.82rem + 2px);
+  }
+
+  tr {
+    border-bottom: 1px dotted var(--line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  td {
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+
+    &:first-child {
+      color: var(--pink);
+      font: 700 calc(0.8rem + 2px) var(--font-mono);
+    }
+
+    &:last-child {
+      padding-right: 0;
+      color: var(--muted);
+    }
+  }
+
+  @include bp.reduced-motion {
+    transition: none;
+  }
 }
 
 .api-examples {

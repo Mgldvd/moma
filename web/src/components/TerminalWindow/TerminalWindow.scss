@@ -1,8 +1,12 @@
 @use '../../styles/breakpoints' as bp;
 
-// moma-update's hand-authored preview is the only remaining consumer of
-// this component - every other entry now renders a real screenshot
-// instead (see ApiEntry.astro / screenshots.ts).
+// moma-update, moma-preview, and moma-help's hand-authored wireframes are
+// the only remaining consumers of this component - every other entry
+// renders a real screenshot instead (see ApiEntry.astro / screenshots.ts).
+// Their real output either performs a real network install (update) or
+// overflows the screenshot tool's fixed-size capture canvas (preview's
+// full component gallery, help's full command listing), so a short,
+// honest excerpt stands in for a live capture.
 .terminal-window {
   overflow: hidden;
   margin: 0;
@@ -58,7 +62,12 @@
     }
   }
 
-  // moma-update's wireframe is the only body content left; this is the
-  // only text role it uses.
+  // Text roles available to the hand-authored wireframes above, matched to
+  // the same palette real screenshots render with (screenshots/moma_screenshots/palette.py).
   .tw-primary { color: var(--terminal-primary); }
+  .tw-success { color: var(--terminal-success); }
+  .tw-error { color: var(--terminal-error); }
+  .tw-warning { color: var(--terminal-warning); }
+  .tw-info { color: var(--terminal-info); }
+  .tw-muted { color: var(--terminal-muted); }
 }

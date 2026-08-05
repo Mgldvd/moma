@@ -953,7 +953,15 @@ for public_function in "${expected_functions[@]}"; do
   bash -c \
     'source "$1"; declare -F "$2" >/dev/null' \
     _ "$MOMA_DIST" "$public_function"
-  rg -q "id: '$public_function'" "$ROOT_DIR/web/src/data/apiEntries.ts"
+  if [[ "$public_function" == "moma-single-select" ]]; then
+    # moma-select is a pure, zero-difference alias (single-select.sh: `moma-select() { moma-single-select "$@"; }`)
+    # - the docs site merges the two into one "select" card rather than
+    # documenting an identical duplicate, and mentions this alias in its
+    # own description instead of getting a separate id: 'moma-single-select'.
+    rg -q 'moma single-select' "$ROOT_DIR/web/src/data/apiEntries.ts"
+  else
+    rg -q "id: '$public_function'" "$ROOT_DIR/web/src/data/apiEntries.ts"
+  fi
   rg -q "\\b$public_function\\b" "$ROOT_DIR/src/lib/README.md"
   # example.sh uses the canonical `moma <command>` form; either that or the
   # literal moma-* function name satisfies this cross-file contract.
@@ -1226,7 +1234,7 @@ fi
 site_version="$(rg -o "version: '([^']+)'" -r '$1' "$web_src/data/site.ts")"
 [[ "$site_version" == "$("$MOMA_DIST" version)" ]]
 rg -Fq 'data-moma-version={version}' "$web_src/components/Header/Header.astro"
-rg -Fq '>v{version}<' "$web_src/components/Header/Header.astro"
+rg -Fq 'v{version}' "$web_src/components/Header/Header.astro"
 
 # Every API entry becomes one <ApiEntry> card (data-api attribute). Derive
 # the count from the data file instead of hardcoding it, and make sure the
@@ -1237,22 +1245,38 @@ mapfile -t api_entry_ids < <(rg -o "^    id: '([a-z0-9-]+)'" -r '$1' "$api_entri
 api_entry_count="${#api_entry_ids[@]}"
 unique_api_entry_count="$(printf '%s\n' "${api_entry_ids[@]}" | sort -u | wc -l | tr -d ' ')"
 [[ "$unique_api_entry_count" == "$api_entry_count" ]]
-# The last 4 entries (spinner, command-check, version, update) are the
-# "Workflow helpers" split; everything before them is "Visual components".
-helper_boundary=$((api_entry_count - 4))
-[[ "${api_entry_ids[*]: -4}" == "moma-spinner moma-command-check moma-version moma-update" ]]
-rg -Fq "API_ENTRIES.slice(0, $helper_boundary)" "$web_src/pages/index.astro"
-rg -Fq "API_ENTRIES.slice($helper_boundary)" "$web_src/pages/index.astro"
-rg -Fq 'visualEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
-rg -Fq 'helperEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
+# Every API entry renders in exactly one of the six ApiSections below,
+# derived from its own `group` field (see apiEntries.ts) rather than a
+# slice boundary - inserting, reordering, or regrouping an entry there is
+# enough on its own to move it, with nothing here to keep in sync.
+mapfile -t entry_groups < <(rg -o "^    group: '([a-z]+)'" -r '$1' "$api_entries_file")
+[[ "${#entry_groups[@]}" == "$api_entry_count" ]]
+for entry_group in "${entry_groups[@]}"; do
+  case "$entry_group" in
+    visual | interactive | selection | decorative | utils | self) ;;
+    *)
+      printf 'smoke: unknown API entry group: %s\n' "$entry_group" >&2
+      exit 1
+      ;;
+  esac
+done
+for group_var in visualEntries interactiveEntries selectionEntries decorativeEntries utilsEntries selfEntries; do
+  rg -Fq "${group_var}.map((entry) => <ApiEntry {...entry} />)" "$web_src/pages/index.astro"
+done
+for group_name in visual interactive selection decorative utils self; do
+  rg -Fq "API_ENTRIES.filter((entry) => entry.group === '$group_name')" "$web_src/pages/index.astro"
+done
 
 # Output previews are real terminal screenshots (screenshots.ts, looked up
 # by id from web/src/assets/screenshots/<id>.png) for every entry except
-# moma-update, which performs a real network install and keeps the one
-# remaining hand-authored TerminalWindow wireframe as a fallback.
+# moma-update (a real network install), moma-preview, and moma-help (whose
+# real output runs taller than the screenshot tool's fixed capture canvas -
+# see screenshots/README.md), which keep hand-authored TerminalWindow
+# wireframe fallbacks instead.
 rg -Fq "import.meta.glob" "$web_src/data/screenshots.ts"
 rg -Fq "'../assets/screenshots/*.png'" "$web_src/data/screenshots.ts"
-rg -Fq 'import { getScreenshot }' "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq 'getScreenshot' "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq "from '../../data/screenshots'" "$web_src/components/ApiEntry/ApiEntry.astro"
 rg -Fq "import { Image } from 'astro:assets'" "$web_src/components/ApiEntry/ApiEntry.astro"
 
 screenshots_dir="$web_src/assets/screenshots"
@@ -1262,16 +1286,20 @@ mapfile -t screenshot_ids < <(
     sed 's/\.png$//' | sort
 )
 mapfile -t entries_without_wireframe_fallback < <(
-  printf '%s\n' "${api_entry_ids[@]}" | grep -v '^moma-update$' | sort
+  printf '%s\n' "${api_entry_ids[@]}" |
+    grep -vE '^(moma-update|moma-preview|moma-help)$' | sort
 )
 if [[ "$(printf '%s\n' "${screenshot_ids[@]}")" != "$(printf '%s\n' "${entries_without_wireframe_fallback[@]}")" ]]; then
-  printf 'smoke: web/src/assets/screenshots/*.png does not exactly match every API entry except moma-update\n' >&2
+  printf 'smoke: web/src/assets/screenshots/*.png does not exactly match every API entry except moma-update/moma-preview/moma-help\n' >&2
   exit 1
 fi
 
-# moma-update is the only entry keeping the hand-authored wireframe.
+# moma-update, moma-preview, and moma-help are the only entries keeping a
+# hand-authored wireframe.
 wireframe_count="$(rg -c "^    wireframe: \{" "$api_entries_file")"
-[[ "$wireframe_count" == "1" ]]
+[[ "$wireframe_count" == "3" ]]
+rg -Fq "id: 'moma-preview'" "$api_entries_file"
+rg -Fq "id: 'moma-help'" "$api_entries_file"
 rg -Fq "id: 'moma-update'" "$api_entries_file"
 
 # Terminal-preview structure: one reusable component, used solely by
@@ -1323,48 +1351,26 @@ body_line="$(rg -n 'terminal-window__body' "$terminal_window_astro" | head -1 | 
 ((body_line > controls_line))
 [[ "$(rg -c 'terminal-window__control--(success|warning|error)' "$terminal_window_astro")" == "3" ]]
 
-# Every sidebar link must resolve to exactly one real id, and ids must be
-# unique across the API entries, CLI function rows, and top-level sections
-# they can target.
+# Sidebar links are entirely derived from API_ENTRIES and FUNCTION_ROWS
+# (targetId: entry.id / row.id, not a hand-maintained id list - see
+# DocsNav.data.ts's own header comment), so every entry automatically gets
+# exactly one sidebar link with nothing here to keep in sync. There's no
+# literal id left in that file to reverse-extract; confirm the derivation
+# itself instead - that it covers every entry (targetId: entry.id/row.id)
+# under exactly the six groups apiEntries.ts's entries can have.
 docs_nav_data="$web_src/components/DocsNav/DocsNav.data.ts"
-mapfile -t nav_target_ids < <(
-  {
-    rg -o "'(moma-[a-z0-9-]+)'" -r '$1' "$docs_nav_data"
-    rg -o "targetId: '([a-z0-9-]+)'" -r '$1' "$docs_nav_data"
-  } | sort -u
-)
-((${#nav_target_ids[@]} > 0))
+rg -Fq 'targetId: entry.id' "$docs_nav_data"
+rg -Fq 'targetId: row.id' "$docs_nav_data"
+rg -Fq "GROUP_ORDER: ApiEntryGroup[] = ['visual', 'interactive', 'selection', 'decorative', 'utils', 'self']" \
+  "$docs_nav_data"
 
+# Ids must be unique across the API entries, CLI function rows, and
+# top-level sections they can target.
 mapfile -t function_row_ids < <(rg -o "id: '([a-z0-9-]+)'" -r '$1' "$web_src/data/functionRows.ts")
-mapfile -t section_ids < <(rg -o 'id="(components|helpers|cli)"' -r '$1' "$web_src/pages/index.astro")
+mapfile -t section_ids < <(rg -o 'id="(colors|visual|interactive|selection|decorative|utils|self|cli)"' -r '$1' "$web_src/pages/index.astro")
 mapfile -t all_page_ids < <(printf '%s\n' "${api_entry_ids[@]}" "${function_row_ids[@]}" "${section_ids[@]}")
 unique_all_page_id_count="$(printf '%s\n' "${all_page_ids[@]}" | sort -u | wc -l | tr -d ' ')"
 [[ "$unique_all_page_id_count" == "${#all_page_ids[@]}" ]]
-
-for nav_target_id in "${nav_target_ids[@]}"; do
-  id_matches=0
-  for page_id in "${all_page_ids[@]}"; do
-    [[ "$page_id" == "$nav_target_id" ]] && id_matches=$((id_matches + 1))
-  done
-  if [[ "$id_matches" != "1" ]]; then
-    printf 'smoke: sidebar link #%s resolves to %s ids, expected 1\n' \
-      "$nav_target_id" "$id_matches" >&2
-    exit 1
-  fi
-done
-
-# Reverse direction: every documented, filterable (moma-*) API entry also
-# has a sidebar entry, so the nav can never silently drift behind the data.
-for api_entry_id in "${api_entry_ids[@]}"; do
-  found_in_nav=false
-  for nav_target_id in "${nav_target_ids[@]}"; do
-    [[ "$nav_target_id" == "$api_entry_id" ]] && found_in_nav=true && break
-  done
-  if ! $found_in_nav; then
-    printf 'smoke: %s is missing from the sidebar navigation\n' "$api_entry_id" >&2
-    exit 1
-  fi
-done
 
 # Mobile navigation trigger accessibility contract.
 rg -Fq 'class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"' \
