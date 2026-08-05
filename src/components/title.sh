@@ -258,6 +258,54 @@ EOF
     "$min_width" "$no_color" "$width" "$max_width" "$icon" "$border"
 }
 
+# Render the marker + text(+detail) line and the underline beneath it.
+# Shared core behind moma-title-sub and moma-prompt: the two differ only
+# in what wraps this (leading blank line, optional message vs. a read
+# cursor, which stream it goes to) - not in the line/underline itself.
+_moma_render_marker_underline() {
+  local text="$1"
+  local detail="${2:-}"
+  local resolved_color="$3"
+  local reset="$4"
+  local box_width="$5"
+  local left_glyph="${6:- }"
+  local border="${7:-open}"
+
+  local combined_text="$text"
+  [[ -n "$detail" ]] && combined_text+=" $detail"
+
+  # Left margin ("  " + marker + "  ") is 5 columns, and the closing line
+  # is always box_width + 3 columns wide ("  └" + dashes + "┘"); pad the
+  # gap before the mirrored marker so it lands under that closing ┘.
+  local mirror_gap=$((box_width - ${#combined_text} - 3))
+  ((mirror_gap < 1)) && mirror_gap=1
+
+  if [[ -n "$detail" ]]; then
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" \
+        "$(printf '%*s' "$mirror_gap" '')" "$left_glyph"
+    else
+      printf '  %s  %b%s %b%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
+    fi
+  else
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" \
+        "$(printf '%*s' "$((mirror_gap - 1))" '')" "$left_glyph"
+    else
+      printf '  %s  %b%s %b\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color"
+    fi
+  fi
+  if [[ "$border" == open ]]; then
+    printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
+  else
+    printf '  └%s┘\n' "$(_moma_repeat_char "─" "$((box_width - 1))")"
+  fi
+}
+
 # Render a secondary title from normalized arguments.
 _moma_render_title_sub() {
   local text="$1"
@@ -297,37 +345,10 @@ _moma_render_title_sub() {
   # a missing icon is just blank filler, not a │.
   local left_glyph="${icon:- }"
 
-  # Left margin ("  " + marker + "  ") is 5 columns, and the closing line
-  # is always box_width + 3 columns wide ("  └" + dashes + "┘"); pad the
-  # gap before the mirrored marker so it lands under that closing ┘.
-  local mirror_gap=$((box_width - ${#combined_text} - 3))
-  ((mirror_gap < 1)) && mirror_gap=1
-
   printf '%b\n' "$resolved_color"
-  if [[ -n "$detail" ]]; then
-    if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s%s%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" \
-        "$(printf '%*s' "$mirror_gap" '')" "$left_glyph"
-    else
-      printf '  %s  %b%s %b%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
-    fi
-  else
-    if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" \
-        "$(printf '%*s' "$((mirror_gap - 1))" '')" "$left_glyph"
-    else
-      printf '  %s  %b%s %b\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color"
-    fi
-  fi
-  if [[ "$border" == open ]]; then
-    printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
-  else
-    printf '  └%s┘\n' "$(_moma_repeat_char "─" "$((box_width - 1))")"
-  fi
+  _moma_render_marker_underline \
+    "$text" "$detail" "$resolved_color" "$reset" "$box_width" \
+    "$left_glyph" "$border"
   if [[ -n "$message" ]]; then
     printf '\n'
     printf '     %b%s\n' "$reset" "$message"

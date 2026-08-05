@@ -39,7 +39,7 @@ supported for backward compatibility but are not the recommended interface.
 | `box` | Print a boxed message. |
 | `resume` | Print a titled, colored content block. |
 | `divider` | Print a marker-led horizontal rule. |
-| `prompt` | Print a prompt. |
+| `prompt` | Read a free-text answer. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
 | `select` | Select one value with the arrow keys (alias for `single-select`). |

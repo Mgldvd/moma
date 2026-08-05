@@ -46,7 +46,7 @@ supported for backward compatibility but are not the recommended interface.
 | `box` | Print a boxed message. |
 | `resume` | Print a titled, colored content block. |
 | `divider` | Print a marker-led horizontal rule. |
-| `prompt` | Print a prompt. |
+| `prompt` | Read a free-text answer. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |
 | `select` | Select one value with the arrow keys (alias for `single-select`). |
@@ -643,27 +643,6 @@ moma divider --icon "⏻" --border line
 
 ![moma-divider preview](../.img/moma-divider.png)
 
-### `moma-prompt`
-
-Question lead-in used before confirmation or free-form interaction.
-
-```text
-moma prompt "Continue with the installation?" --color pink [--width number] [--max-width number]
-```
-
-```bash
-# Example 1
-moma prompt "Continue with the installation?"
-
-# Example 2
-moma prompt "Select an environment" --color cyan
-
-# Example 3
-moma prompt "Deploy now?" --default "yes" --icon "?"
-```
-
-![moma-prompt preview](../.img/moma-prompt.png)
-
 ### `moma-label`
 
 Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.
@@ -728,6 +707,32 @@ password="$(moma input --title "Password" --read --secret --required)"
 ```
 
 ![moma-input preview](../.img/moma-input.png)
+
+### `moma-prompt`
+
+Free-text prompt with `moma-title-sub`'s own marker + underline look
+instead of `moma-input`'s boxed field - the two share the same read,
+validation, and secret-masking machinery, and differ only in how the
+question is drawn. Answers a ❯ cursor printed on the line below the
+underline; `--default`, `--required`, `--trim`, `--secret`, and `--mask`
+all work exactly as they do on `moma-input`.
+
+```text
+moma prompt "<question>" [--success|--error|--warning|--info] [--color color] [--icon char] [--no-icon] [--border mirror|line|open] [--cursor char] [--default value] [--secret] [--mask char] [--required] [--trim] [--min-width number] [--width number] [--max-width number]
+```
+
+```bash
+# Example 1
+answer="$(moma prompt "Continue with the installation?")"
+
+# Example 2: pre-filled default, shown as "[yes]"
+answer="$(moma prompt "Deploy now?" --default "yes")"
+
+# Example 3: required, masked
+token="$(moma prompt "API token" --secret --required)"
+```
+
+![moma-prompt preview](../.img/moma-prompt.png)
 
 ### `moma-single-select`
 
@@ -1856,7 +1861,7 @@ list	moma-list	Print an unordered list.
 box	moma-box	Print a boxed message.
 resume	moma-resume	Print a titled, colored content block.
 divider	moma-divider	Print a marker-led horizontal rule.
-prompt	moma-prompt	Print a prompt.
+prompt	moma-prompt	Read a free-text answer.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.
 select	moma-select	Select one value (alias for single-select).
@@ -2340,6 +2345,54 @@ EOF
     "$min_width" "$no_color" "$width" "$max_width" "$icon" "$border"
 }
 
+# Render the marker + text(+detail) line and the underline beneath it.
+# Shared core behind moma-title-sub and moma-prompt: the two differ only
+# in what wraps this (leading blank line, optional message vs. a read
+# cursor, which stream it goes to) - not in the line/underline itself.
+_moma_render_marker_underline() {
+  local text="$1"
+  local detail="${2:-}"
+  local resolved_color="$3"
+  local reset="$4"
+  local box_width="$5"
+  local left_glyph="${6:- }"
+  local border="${7:-open}"
+
+  local combined_text="$text"
+  [[ -n "$detail" ]] && combined_text+=" $detail"
+
+  # Left margin ("  " + marker + "  ") is 5 columns, and the closing line
+  # is always box_width + 3 columns wide ("  └" + dashes + "┘"); pad the
+  # gap before the mirrored marker so it lands under that closing ┘.
+  local mirror_gap=$((box_width - ${#combined_text} - 3))
+  ((mirror_gap < 1)) && mirror_gap=1
+
+  if [[ -n "$detail" ]]; then
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" \
+        "$(printf '%*s' "$mirror_gap" '')" "$left_glyph"
+    else
+      printf '  %s  %b%s %b%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
+    fi
+  else
+    if [[ "$border" == mirror ]]; then
+      printf '  %s  %b%s %b%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" \
+        "$(printf '%*s' "$((mirror_gap - 1))" '')" "$left_glyph"
+    else
+      printf '  %s  %b%s %b\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color"
+    fi
+  fi
+  if [[ "$border" == open ]]; then
+    printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
+  else
+    printf '  └%s┘\n' "$(_moma_repeat_char "─" "$((box_width - 1))")"
+  fi
+}
+
 # Render a secondary title from normalized arguments.
 _moma_render_title_sub() {
   local text="$1"
@@ -2379,37 +2432,10 @@ _moma_render_title_sub() {
   # a missing icon is just blank filler, not a │.
   local left_glyph="${icon:- }"
 
-  # Left margin ("  " + marker + "  ") is 5 columns, and the closing line
-  # is always box_width + 3 columns wide ("  └" + dashes + "┘"); pad the
-  # gap before the mirrored marker so it lands under that closing ┘.
-  local mirror_gap=$((box_width - ${#combined_text} - 3))
-  ((mirror_gap < 1)) && mirror_gap=1
-
   printf '%b\n' "$resolved_color"
-  if [[ -n "$detail" ]]; then
-    if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s%s%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" \
-        "$(printf '%*s' "$mirror_gap" '')" "$left_glyph"
-    else
-      printf '  %s  %b%s %b%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
-    fi
-  else
-    if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" \
-        "$(printf '%*s' "$((mirror_gap - 1))" '')" "$left_glyph"
-    else
-      printf '  %s  %b%s %b\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color"
-    fi
-  fi
-  if [[ "$border" == open ]]; then
-    printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
-  else
-    printf '  └%s┘\n' "$(_moma_repeat_char "─" "$((box_width - 1))")"
-  fi
+  _moma_render_marker_underline \
+    "$text" "$detail" "$resolved_color" "$reset" "$box_width" \
+    "$left_glyph" "$border"
   if [[ -n "$message" ]]; then
     printf '\n'
     printf '     %b%s\n' "$reset" "$message"
@@ -3172,8 +3198,8 @@ EOF
   done
 }
 
-# module: src/components/box-prompt.sh
-# Box and prompt components.
+# module: src/components/box.sh
+# Box component.
 # Render a framed message from normalized box arguments.
 _moma_render_box() {
   local text="$1"
@@ -3339,149 +3365,6 @@ EOF
   fi
   _moma_render_box \
     "$text" "$color" "$icon" "$width" "$padding" "$no_color" "$max_width"
-}
-
-# Render a prompt from normalized prompt arguments.
-_moma_render_prompt() {
-  local question="$1"
-  local color="${2:-$MOMA_COLOR_WARNING}"
-  local icon="${3:-▪}"
-  local default_value="${4:-}"
-  local no_color="${5:-false}"
-  local width="${6:-}"
-  local max_width="${7:-}"
-
-  local resolved_color reset prompt_text box_width
-  resolved_color="$(
-    _moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color"
-  )"
-  reset="$(_moma_reset_color "$no_color")"
-  prompt_text="$question"
-  if [[ -n "$default_value" ]]; then
-    prompt_text+=" [$default_value]"
-  fi
-  box_width="$(
-    _moma_resolve_decor_width \
-      "$((${#prompt_text} + 6))" 30 "$width" "$max_width" 8
-  )"
-
-  printf '%b\n' "$resolved_color"
-  printf '  %s  %b%s%b\n' "$icon" "$reset" "$prompt_text" "$resolved_color"
-  printf '  └%s\n' "$(_moma_repeat_char "─" "$box_width")"
-}
-
-# Parse prompt options and print a question lead-in.
-moma-prompt() {
-  local question=""
-  local color="$MOMA_COLOR_WARNING"
-  local icon="▪"
-  local default_value=""
-  local no_color=false
-  local width=""
-  local max_width=""
-  local -a positional=()
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --color | -c)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-prompt "$1"
-          return 1
-        fi
-        color="$2"
-        shift 2
-        ;;
-      --color=*)
-        color="${1#*=}"
-        shift
-        ;;
-      --icon | -i)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-prompt "$1"
-          return 1
-        fi
-        icon="$2"
-        shift 2
-        ;;
-      --icon=*)
-        icon="${1#*=}"
-        shift
-        ;;
-      --default)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-prompt "$1"
-          return 1
-        fi
-        default_value="$2"
-        shift 2
-        ;;
-      --default=*)
-        default_value="${1#*=}"
-        shift
-        ;;
-      --width)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-prompt "$1"
-          return 1
-        fi
-        width="$2"
-        shift 2
-        ;;
-      --width=*)
-        width="${1#*=}"
-        shift
-        ;;
-      --max-width)
-        if [[ $# -lt 2 ]]; then
-          _moma_option_requires_value moma-prompt "$1"
-          return 1
-        fi
-        max_width="$2"
-        shift 2
-        ;;
-      --max-width=*)
-        max_width="${1#*=}"
-        shift
-        ;;
-      --no-color)
-        no_color=true
-        shift
-        ;;
-      --help | -h)
-        cat <<'EOF'
-Usage: moma-prompt "<question>" [--color <color>] [--icon <icon>] [--default <value>] [--width <n>] [--max-width <n>] [--no-color]
-EOF
-        return 0
-        ;;
-      --)
-        shift
-        positional+=("$@")
-        break
-        ;;
-      -*)
-        _moma_unknown_option moma-prompt "$1"
-        return 1
-        ;;
-      *)
-        positional+=("$1")
-        shift
-        ;;
-    esac
-  done
-
-  question="${positional[*]}"
-  if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
-    _moma_usage_error moma-prompt "invalid width: $width"
-    return 2
-  fi
-  if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
-    _moma_usage_error moma-prompt "invalid max width: $max_width"
-    return 2
-  fi
-  _moma_render_prompt \
-    "$question" "$color" "$icon" "$default_value" \
-    "$no_color" "$width" "$max_width"
-  printf '%b' "$(_moma_reset_color "$no_color")"
 }
 
 # module: src/components/resume.sh
@@ -4589,6 +4472,306 @@ EOF
       moma-msg "This field is required" --error >&2
     else
       printf 'moma-input: value is required\n' >&2
+    fi
+  done
+}
+
+# module: src/components/prompt.sh
+# Prompt component.
+# An interactive free-text prompt: the same "marker + text, underline"
+# look as moma-title-sub, followed by a ❯ cursor where the answer is
+# typed. The read/resolve/emit machinery is shared with moma-input (see
+# input.sh) - the difference between the two components is the look, not
+# the capability.
+
+# Render the open prompt (marker + question + underline + cursor) to
+# stderr, leaving the cursor ready for the caller to read a response.
+_moma_render_prompt_open() {
+  local question="$1"
+  local detail="${2:-}"
+  local color="${3:-$MOMA_COLOR_WARNING}"
+  local min_width="${4:-30}"
+  local no_color="${5:-false}"
+  local width="${6:-}"
+  local max_width="${7:-}"
+  local icon="${8-▪}"
+  local border="${9:-open}"
+  local cursor="${10:-❯}"
+
+  question="$(_moma_trim "$question")"
+  if [[ ! "$min_width" =~ ^[0-9]+$ ]]; then
+    min_width=30
+  fi
+
+  local resolved_color reset combined_text box_width
+  resolved_color="$(
+    _moma_resolve_color "$color" "$MOMA_COLOR_WARNING" "$no_color"
+  )"
+  reset="$(_moma_reset_color "$no_color")"
+  combined_text="$question"
+  [[ -n "$detail" ]] && combined_text+=" $detail"
+  box_width="$(
+    _moma_resolve_decor_width \
+      "$((${#combined_text} + 6))" "$min_width" "$width" "$max_width" 8
+  )"
+
+  # There's no left box edge to fall back to here (unlike moma-title), so
+  # a missing icon is just blank filler, not a │.
+  local left_glyph="${icon:- }"
+
+  {
+    printf '%b\n' "$resolved_color"
+    _moma_render_marker_underline \
+      "$question" "$detail" "$resolved_color" "$reset" "$box_width" \
+      "$left_glyph" "$border"
+    printf '  %b%s%b ' "$resolved_color" "$cursor" "$reset"
+  } >&2
+}
+
+# Parse prompt options, print the question, and read an answer.
+moma-prompt() {
+  local question=""
+  local color="$MOMA_COLOR_WARNING"
+  local default_value=""
+  local icon="▪"
+  local border="open"
+  local cursor="❯"
+  local min_width=30
+  local width=""
+  local max_width=""
+  local secret_mask="*"
+  local secret=false
+  local required=false
+  local trim=false
+  local no_color=false
+  local -a positional=()
+  local style
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --success | --error | --warning | --info)
+        style="$(_moma_apply_semantic_style "${1#--}")"
+        color="${style%%$'\t'*}"
+        icon="${style#*$'\t'}"
+        shift
+        ;;
+      --color | -c)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        color="$2"
+        shift 2
+        ;;
+      --color=*)
+        color="${1#*=}"
+        shift
+        ;;
+      --icon | -i)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        icon="$2"
+        shift 2
+        ;;
+      --icon=*)
+        icon="${1#*=}"
+        shift
+        ;;
+      --no-icon)
+        icon=""
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
+        shift
+        ;;
+      --cursor)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        cursor="$2"
+        shift 2
+        ;;
+      --cursor=*)
+        cursor="${1#*=}"
+        shift
+        ;;
+      --default)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        default_value="$2"
+        shift 2
+        ;;
+      --default=*)
+        default_value="${1#*=}"
+        shift
+        ;;
+      --secret)
+        secret=true
+        shift
+        ;;
+      --mask)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        secret_mask="$2"
+        shift 2
+        ;;
+      --mask=*)
+        secret_mask="${1#*=}"
+        shift
+        ;;
+      --required)
+        required=true
+        shift
+        ;;
+      --trim)
+        trim=true
+        shift
+        ;;
+      --min-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        min_width="$2"
+        shift 2
+        ;;
+      --min-width=*)
+        min_width="${1#*=}"
+        shift
+        ;;
+      --width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        width="$2"
+        shift 2
+        ;;
+      --width=*)
+        width="${1#*=}"
+        shift
+        ;;
+      --max-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-prompt "$1"
+          return 1
+        fi
+        max_width="$2"
+        shift 2
+        ;;
+      --max-width=*)
+        max_width="${1#*=}"
+        shift
+        ;;
+      --no-color)
+        no_color=true
+        shift
+        ;;
+      --help | -h)
+        cat <<'EOF'
+Usage: moma-prompt "<question>" [--success|--error|--warning|--info] [--color <color>] [--icon <char>] [--no-icon] [--border mirror|line|open] [--cursor <char>] [--default <value>] [--secret] [--mask <char>] [--required] [--trim] [--min-width <n>] [--width <n>] [--max-width <n>] [--no-color]
+
+Prints the question with moma-title-sub's own marker + underline look,
+then reads an answer from a ❯ cursor on the line below - the difference
+from moma-input is the look, not the capability. --default pre-fills the
+answer (shown as "[value]") when Enter is pressed with nothing typed.
+EOF
+        return 0
+        ;;
+      --)
+        shift
+        positional+=("$@")
+        break
+        ;;
+      -*)
+        _moma_unknown_option moma-prompt "$1"
+        return 1
+        ;;
+      *)
+        positional+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  question="${positional[*]}"
+  case "$border" in
+    mirror | line | open) ;;
+    *)
+      _moma_usage_error moma-prompt "invalid border: $border (expected mirror, line, or open)"
+      return 2
+      ;;
+  esac
+  if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
+    _moma_usage_error moma-prompt "invalid width: $width"
+    return 2
+  fi
+  if [[ -n "$max_width" ]] && ! _moma_is_positive_int "$max_width"; then
+    _moma_usage_error moma-prompt "invalid max width: $max_width"
+    return 2
+  fi
+
+  local detail=""
+  [[ -n "$default_value" ]] && detail="[$default_value]"
+
+  local response result read_status
+  while true; do
+    _moma_render_prompt_open \
+      "$question" "$detail" "$color" "$min_width" "$no_color" \
+      "$width" "$max_width" "$icon" "$border" "$cursor" || return 1
+
+    if $secret; then
+      if _moma_read_secret response "$secret_mask"; then
+        read_status=0
+      else
+        read_status=$?
+      fi
+    else
+      IFS= read -r response
+      read_status=$?
+    fi
+
+    if [[ -t 0 ]]; then
+      printf '\n' >&2
+    else
+      printf '\n\n' >&2
+    fi
+
+    result="$(
+      _moma_input_resolve_result \
+        "$response" "$default_value" "" "$trim"
+    )"
+
+    if ! $required || [[ -n "$result" ]]; then
+      _moma_input_emit_result "$result"
+      return 0
+    fi
+
+    if ((read_status != 0)); then
+      printf 'moma-prompt: value is required\n' >&2
+      return 1
+    fi
+
+    if declare -F moma-msg >/dev/null; then
+      moma-msg "This field is required" --error >&2
+    else
+      printf 'moma-prompt: value is required\n' >&2
     fi
   done
 }
@@ -7019,11 +7202,6 @@ _moma_preview_render_dividers() {
   moma-divider --success --border line
 }
 
-# Render the prompt examples.
-_moma_preview_render_prompt() {
-  moma-prompt "Continue with the installation?" --color pink
-}
-
 # Render the label examples.
 _moma_preview_render_label() {
   moma-label "TEXT HERE"
@@ -7034,6 +7212,11 @@ _moma_preview_render_inputs() {
   moma-input --title "Project name" --placeholder "my-project"
   moma-input --title "Environment" --value "production" --info
   moma-input --title "Danger zone" --warning --color yellow
+}
+
+# Render the prompt examples.
+_moma_preview_render_prompt() {
+  printf 'Yes, continue\n' | moma-prompt "Continue with the installation?" 2>&1
 }
 
 # Render the single-selection examples.
@@ -7221,10 +7404,6 @@ _moma_preview() {
     "03" "Interaction" \
     "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
-    "moma-prompt" "Question or confirmation lead-in." \
-    'moma prompt "Continue?" --color pink' \
-    _moma_preview_render_prompt
-  _moma_preview_component \
     "moma-label" "Decorated label aligned with input field headers." \
     'moma label "TEXT HERE"' \
     _moma_preview_render_label
@@ -7232,6 +7411,10 @@ _moma_preview() {
     "moma-input" "Display and interactive input states." \
     'moma input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
+  _moma_preview_component \
+    "moma-prompt" "Free-text prompt with moma-title-sub's own look." \
+    'answer="$(moma prompt "Continue?")"' \
+    _moma_preview_render_prompt
   _moma_preview_component \
     "moma-select" "Arrow-key selection with radio-style indicators." \
     'moma select "Development" "Staging" "Production" --title "Environment"' \

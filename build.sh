@@ -25,11 +25,12 @@ modules=(
   components/title.sh
   components/section-message.sh
   components/simple-list.sh
-  components/box-prompt.sh
+  components/box.sh
   components/resume.sh
   components/divider.sh
   components/label.sh
   components/input.sh
+  components/prompt.sh
   components/select-common.sh
   components/single-select.sh
   components/single-select-groups.sh

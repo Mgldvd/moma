@@ -47,7 +47,8 @@ project_name="$(
     --trim
 )"
 
-moma prompt "Choose the target environment" --color pink
+ticket="$(moma prompt "Deployment ticket reference" --color pink --trim)"
+
 select_args=(
   "Development"
   "Staging"
@@ -59,7 +60,6 @@ if [[ ! -t 0 || ! -t 2 ]]; then
 fi
 environment="$(moma select "${select_args[@]}")"
 
-moma prompt "Choose the deployment command" --color pink
 single_group_args=(
   --title "Deployment command"
   --group "Docker" --option "Up" --option "Down" --option "Stop"
@@ -89,7 +89,6 @@ for feature in "${features[@]}"; do
   features_summary+="$feature"
 done
 
-moma prompt "Choose the deployment regions" --color pink
 multi_group_args=(
   --title "Deployment regions"
   --group "North America" --option "United States" --option "Canada"
@@ -109,7 +108,6 @@ for region in "${regions[@]}"; do
   regions_summary+="$region"
 done
 
-moma prompt "Choose the log verbosity" --color pink
 log_level_args=("info" "debug" "warn" --title "Log level")
 if [[ ! -t 0 || ! -t 2 ]]; then
   log_level_args+=(--choose 1)
@@ -142,6 +140,7 @@ moma resume \
   --title "Project configuration" \
   --color yellow \
   --item "Project" "$project_name" \
+  --item "Ticket" "$ticket" \
   --item "Environment" "$environment" \
   --item "Command" "$deploy_command" \
   --item "Features" "$features_summary" \
