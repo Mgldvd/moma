@@ -1222,14 +1222,11 @@ fi
 
 # The website's displayed version badge must match the library's actual
 # version so the two never silently drift apart. Header.astro renders it
-# from a `version` prop index.astro feeds from SITE.version, and the
-# moma-version API entry's terminal preview reuses that same constant
-# instead of a second hardcoded literal.
+# from a `version` prop index.astro feeds from SITE.version.
 site_version="$(rg -o "version: '([^']+)'" -r '$1' "$web_src/data/site.ts")"
 [[ "$site_version" == "$("$MOMA_DIST" version)" ]]
 rg -Fq 'data-moma-version={version}' "$web_src/components/Header/Header.astro"
 rg -Fq '>v{version}<' "$web_src/components/Header/Header.astro"
-rg -Fq 'bodyHtml: SITE.version' "$web_src/data/apiEntries.ts"
 
 # Every API entry becomes one <ApiEntry> card (data-api attribute). Derive
 # the count from the data file instead of hardcoding it, and make sure the
@@ -1249,23 +1246,44 @@ rg -Fq "API_ENTRIES.slice($helper_boundary)" "$web_src/pages/index.astro"
 rg -Fq 'visualEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
 rg -Fq 'helperEntries.map((entry) => <ApiEntry {...entry} />)' "$web_src/pages/index.astro"
 
-# Terminal-preview structure: one reusable component for every literal
-# terminal output, with obsolete per-system visual classes fully retired.
+# Output previews are real terminal screenshots (screenshots.ts, looked up
+# by id from web/src/assets/screenshots/<id>.png) for every entry except
+# moma-update, which performs a real network install and keeps the one
+# remaining hand-authored TerminalWindow wireframe as a fallback.
+rg -Fq "import.meta.glob" "$web_src/data/screenshots.ts"
+rg -Fq "'../assets/screenshots/*.png'" "$web_src/data/screenshots.ts"
+rg -Fq 'import { getScreenshot }' "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq "import { Image } from 'astro:assets'" "$web_src/components/ApiEntry/ApiEntry.astro"
+
+screenshots_dir="$web_src/assets/screenshots"
+[[ -d "$screenshots_dir" ]]
+mapfile -t screenshot_ids < <(
+  find "$screenshots_dir" -maxdepth 1 -name '*.png' -printf '%f\n' |
+    sed 's/\.png$//' | sort
+)
+mapfile -t entries_without_wireframe_fallback < <(
+  printf '%s\n' "${api_entry_ids[@]}" | grep -v '^moma-update$' | sort
+)
+if [[ "$(printf '%s\n' "${screenshot_ids[@]}")" != "$(printf '%s\n' "${entries_without_wireframe_fallback[@]}")" ]]; then
+  printf 'smoke: web/src/assets/screenshots/*.png does not exactly match every API entry except moma-update\n' >&2
+  exit 1
+fi
+
+# moma-update is the only entry keeping the hand-authored wireframe.
+wireframe_count="$(rg -c "^    wireframe: \{" "$api_entries_file")"
+[[ "$wireframe_count" == "1" ]]
+rg -Fq "id: 'moma-update'" "$api_entries_file"
+
+# Terminal-preview structure: one reusable component, used solely by
+# moma-update's fallback, with obsolete per-system visual classes retired.
 terminal_window_astro="$web_src/components/TerminalWindow/TerminalWindow.astro"
 [[ "$(rg -Fc '<div class="terminal-window" role="group"' "$terminal_window_astro")" == "1" ]]
 [[ "$(rg -Fc '<div class="terminal-window__chrome" aria-hidden="true">' "$terminal_window_astro")" == "1" ]]
-[[ "$(rg -Fc "'terminal-window__body'" "$terminal_window_astro")" == "1" ]]
+[[ "$(rg -Fc 'class="terminal-window__body"' "$terminal_window_astro")" == "1" ]]
 
-# Every literal terminal output is rendered through this one component, not
-# a bespoke per-entry markup pattern.
 mapfile -t terminal_window_users < <(rg -l '<TerminalWindow' "$web_src")
 [[ "${#terminal_window_users[@]}" == "1" ]]
 [[ "${terminal_window_users[0]}" == *"/ApiEntry/ApiEntry.astro" ]]
-
-# At least 20 API entries actually render one of these previews (derived
-# from the data, not hardcoded).
-wireframe_count="$(rg -c "^    wireframe: \{" "$api_entries_file")"
-((wireframe_count >= 20))
 
 if rg -q 'class="(terminal-art|semantic-list|terminal-lines|dot-lines|select-list)' "$web_src"; then
   printf 'smoke: obsolete terminal preview classes remain under web/src\n' >&2
@@ -1311,12 +1329,18 @@ for nav_target_id in "${nav_target_ids[@]}"; do
   fi
 done
 
-# NOTE: the reverse direction of the old contract - every documented
-# component also has a sidebar entry - is deliberately not asserted here.
-# web/src/components/DocsNav/DocsNav.data.ts is currently missing an entry
-# for `moma-block` (documented in apiEntries.ts and rendered as an
-# <ApiEntry> via the "Visual components" section), and fixing that is a
-# web/src content change outside this task's scope.
+# Reverse direction: every documented, filterable (moma-*) API entry also
+# has a sidebar entry, so the nav can never silently drift behind the data.
+for api_entry_id in "${api_entry_ids[@]}"; do
+  found_in_nav=false
+  for nav_target_id in "${nav_target_ids[@]}"; do
+    [[ "$nav_target_id" == "$api_entry_id" ]] && found_in_nav=true && break
+  done
+  if ! $found_in_nav; then
+    printf 'smoke: %s is missing from the sidebar navigation\n' "$api_entry_id" >&2
+    exit 1
+  fi
+done
 
 # Mobile navigation trigger accessibility contract.
 rg -Fq 'class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"' \

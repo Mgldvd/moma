@@ -188,6 +188,11 @@ moma spinner "$pid" "Preparing workspace" --delay 0.03
         title="moma command-check",
         script="moma command-check bash curl",
     ),
+    Command(
+        id="moma-version",
+        title="moma version",
+        script="moma version",
+    ),
 ]
 
 COMMANDS_BY_ID = {command.id: command for command in COMMANDS}

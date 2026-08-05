@@ -1,17 +1,24 @@
 ---
+import { Image } from 'astro:assets';
 import './ApiEntry.scss';
 import CopyButton from '../CopyButton/CopyButton.astro';
 import TerminalWindow from '../TerminalWindow/TerminalWindow.astro';
+import { getScreenshot } from '../../data/screenshots';
 import type { Props } from './ApiEntry.types';
 
 const { id, kind, name, descriptionHtml, signature, searchText, examples, wireframe } = Astro.props as Props;
 
-// Matches the source site's own behavior: every entry has example
-// snippets defined, but they are only displayed alongside a wireframe
-// (the source's DOM-insertion logic anchored the examples block to the
-// wireframe and silently no-ops without one - moma-select is the one
-// entry with examples that were never shown).
-const showExamples = Boolean(wireframe && examples && examples.length > 0);
+// Every entry's output preview is a real screenshot (screenshots.ts, keyed
+// by id) except moma-update, which performs a real network install and
+// falls back to the one remaining hand-authored wireframe.
+const screenshot = getScreenshot(id);
+const hasPreview = Boolean(screenshot || wireframe);
+
+// Examples are only shown alongside an output preview - in practice every
+// entry has one now that real screenshots exist for the whole catalog, but
+// this guard is what silently hid moma-select's examples on the old site
+// (it had neither a hand-authored wireframe nor, until now, a screenshot).
+const showExamples = Boolean(hasPreview && examples && examples.length > 0);
 ---
 
 <article class="api-entry" id={id} data-api={searchText}>
@@ -38,10 +45,15 @@ const showExamples = Boolean(wireframe && examples && examples.length > 0);
     </section>
   )}
 
-  {wireframe && (
+  {screenshot ? (
     <div class="wireframe">
       <p class="wireframe__label">Output</p>
-      <TerminalWindow ariaLabel={`${name} output`} variant={wireframe.variant}>
+      <Image class="wireframe__screenshot" src={screenshot} alt={`${name} output`} loading="lazy" />
+    </div>
+  ) : wireframe && (
+    <div class="wireframe">
+      <p class="wireframe__label">Output</p>
+      <TerminalWindow ariaLabel={`${name} output`}>
         <Fragment set:html={wireframe.bodyHtml} />
       </TerminalWindow>
     </div>

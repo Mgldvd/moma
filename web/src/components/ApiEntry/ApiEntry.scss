@@ -111,4 +111,14 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
+
+  // Real terminal screenshots (see screenshots.ts) always render at the
+  // capture tool's fixed canvas size; scale down to fit the column instead
+  // of shipping oversized markup like the old TerminalWindow mockup did.
+  &__screenshot {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: auto;
+  }
 }
