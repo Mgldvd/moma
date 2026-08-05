@@ -9,39 +9,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem max(1rem, calc((100% - var(--docs-max-width)) / 2));
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--canvas) 92%, transparent);
   backdrop-filter: blur(16px);
-
-  @include bp.mq-up(bp.$bp-tablet) {
-    padding-inline: 2rem;
-  }
-
-  @include bp.mq-up(bp.$bp-wide) {
-    padding-inline: 3rem;
-  }
-
-  &__nav {
-    display: none;
-
-    @include bp.mq-up(bp.$bp-tablet) {
-      display: flex;
-      gap: 1.3rem;
-    }
-  }
-
-  &__link {
-    color: var(--muted);
-    font: 700 calc(0.75rem + 2px) var(--font-mono);
-    letter-spacing: 0.04em;
-    text-decoration: none;
-    text-transform: uppercase;
-
-    &:hover {
-      color: var(--pink);
-    }
-  }
 
   &__actions {
     display: flex;
@@ -61,7 +32,6 @@
   &__mark {
     width: 3.2rem;
     height: 3.2rem;
-    border: 1px solid #f7bdc4;
     object-fit: cover;
   }
 
@@ -86,20 +56,26 @@
     font-weight: 700;
     letter-spacing: 0.02em;
   }
+}
 
-  &__label {
-    display: none;
-    color: var(--faint);
-    font-size: calc(0.72rem + 2px);
-
-    @include bp.mq-up(bp.$bp-cursor) {
-      display: inline;
-    }
-  }
+.brand__name {
+  font-size: calc(0.82rem + 2px);
+  font-weight: 800;
+  margin: 0 15px 0 10px;
 }
 
 @keyframes brand-cursor-blink {
   50% { opacity: 0; }
+}
+
+.brand__label {
+  display: none;
+  color: var(--faint);
+  font-size: calc(0.72rem + 2px);
+
+  @include bp.mq-up(bp.$bp-cursor) {
+    display: inline;
+  }
 }
 
 .nav-toggle {
@@ -128,38 +104,6 @@
 
   .no-js & {
     display: none;
-  }
-
-  @include bp.mq-up(bp.$bp-nav) {
-    display: none;
-  }
-}
-
-.theme-toggle {
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 0;
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-
-  &__icon {
-    color: var(--pink);
-    font-size: calc(1rem + 2px);
-  }
-
-  &__text {
-    display: none;
-    font: 700 calc(0.68rem + 2px) var(--font-mono);
-    text-transform: uppercase;
-
-    @include bp.mq-up(bp.$bp-cursor) {
-      display: inline;
-    }
   }
 }
 

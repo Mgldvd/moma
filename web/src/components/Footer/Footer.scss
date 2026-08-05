@@ -15,18 +15,20 @@
   }
 
   &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     margin: 0;
+  }
+
+  &__brand-name {
     font: 800 calc(1rem + 2px) var(--font-mono);
   }
 
-  &__cursor {
-    color: var(--pink);
-  }
-
-  &__copy {
-    margin: 0;
-    color: var(--muted);
-    font-size: calc(0.82rem + 2px);
+  &__logo {
+    width: auto;
+    height: 100px;
+    object-fit: contain;
   }
 
   &__links {
@@ -39,5 +41,33 @@
     color: var(--pink);
     font-size: calc(0.82rem + 2px);
     text-decoration: none;
+  }
+}
+
+.theme-toggle {
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+
+  &__icon {
+    color: var(--pink);
+    font-size: calc(1rem + 2px);
+  }
+
+  &__text {
+    display: none;
+    font: 700 calc(0.68rem + 2px) var(--font-mono);
+    text-transform: uppercase;
+
+    @include bp.mq-up(bp.$bp-cursor) {
+      display: inline;
+    }
   }
 }

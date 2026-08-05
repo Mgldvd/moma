@@ -16,11 +16,13 @@ import { SITE } from '../data/site';
 import { API_ENTRIES } from '../data/apiEntries';
 import { FUNCTION_ROWS } from '../data/functionRows';
 
-// The source page groups the same 23 API entries into "Visual components"
-// (the first 19) and "Workflow helpers" (the last 4) - see
-// src/data/apiEntries.ts for the full, ordered list.
-const visualEntries = API_ENTRIES.slice(0, 19);
-const helperEntries = API_ENTRIES.slice(19);
+// Which ApiSection each entry renders in - "Visual components" or "Workflow
+// helpers" - comes from its own `section` field (see apiEntries.ts) rather
+// than a fixed slice boundary, so inserting or reordering entries there is
+// enough on its own to move them between sections; nothing here needs to
+// change to match.
+const visualEntries = API_ENTRIES.filter((entry) => entry.section === 'components');
+const helperEntries = API_ENTRIES.filter((entry) => entry.section === 'helpers');
 
 const indexLinks = [
   { href: '#components', number: '01', label: 'Visual components', count: SITE.visualComponentCount },

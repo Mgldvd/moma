@@ -10,14 +10,18 @@ html {
   }
 }
 
+// anchorFocus.client.ts lands keyboard focus on whatever in-page section a
+// hash link points to (sections/articles/<main> have no focus style of
+// their own since they're not natively interactive).
+[tabindex='-1']:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
+
 .page {
   min-width: 320px;
   margin: 0;
   overflow-x: clip;
-  background:
-    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(214 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
-    linear-gradient(0deg, transparent 0, transparent calc(100% - 1px), rgba(120 209 219 / 0.08) calc(100% - 1px)) 0 0 / 2rem 2rem,
-    var(--canvas);
   background-color: var(--canvas);
   color: var(--ink);
   font: 20px/1.65 var(--font-sans);
