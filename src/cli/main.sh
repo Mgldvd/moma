@@ -93,7 +93,7 @@ _moma_main() {
     msg-simple) moma-msg-simple "$@" ;;
     list) moma-list "$@" ;;
     box) moma-box "$@" ;;
-    block) moma-block "$@" ;;
+    resume) moma-resume "$@" ;;
     prompt) moma-prompt "$@" ;;
     label) moma-label "$@" ;;
     input) moma-input "$@" ;;

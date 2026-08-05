@@ -10,7 +10,7 @@ export const FUNCTION_ROWS: FunctionRowData[] = [
     id: 'cli-component-commands',
     name: 'Component commands',
     description: 'Call any visual component without sourcing the library.',
-    signature: 'moma title | title-sub | section | msg | msg-simple | list | box | block | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit',
+    signature: 'moma title | title-sub | section | msg | msg-simple | list | box | resume | prompt | label | input | select | single-select | single-select-groups | multi-select | multi-select-groups | rabbit',
   },
   {
     id: 'cli-helper-commands',

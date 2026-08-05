@@ -139,12 +139,12 @@ _moma_preview_render_boxes() {
   moma-box "Back up your files before continuing." --warning
 }
 
-# Render the content-block examples.
-_moma_preview_render_blocks() {
-  moma-block --title "Shells" --color blue \
+# Render the resume examples.
+_moma_preview_render_resumes() {
+  moma-resume --title "Shells" --color blue \
     --item "Bash" "GNU command shell and scripting environment." \
     --item "Zsh" "Interactive shell with advanced completion."
-  moma-block --title "Review" --warning \
+  moma-resume --title "Review" --warning \
     --item "Environment" "production" \
     --text "Confirm the target before deploying."
 }
@@ -334,10 +334,10 @@ _moma_preview() {
     'moma box "Your configuration is ready." --success' \
     _moma_preview_render_boxes
   _moma_preview_component \
-    "moma-block" \
+    "moma-resume" \
     "A titled, colored block of aligned term/description rows or plain text." \
-    'moma block --title "Shells" --item "Bash" "GNU command shell." ...' \
-    _moma_preview_render_blocks
+    'moma resume --title "Shells" --item "Bash" "GNU command shell." ...' \
+    _moma_preview_render_resumes
 
   _moma_preview_section \
     "03" "Interaction" \

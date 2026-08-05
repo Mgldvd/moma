@@ -108,16 +108,16 @@ moma box "A long notice wraps inside its border." --info --max-width 32
 """.strip(),
     ),
     Command(
-        id="moma-block",
-        title="moma block",
+        id="moma-resume",
+        title="moma resume",
         script="""
-moma block --title "Shells" --color blue \\
+moma resume --title "Shells" --color blue \\
   --item "Bash" "GNU command shell." \\
   --item "Zsh" "Interactive shell with completion."
-moma block --title "Summary" \\
+moma resume --title "Summary" \\
   --text "All checks passed." \\
   --text "No manual follow-up required."
-moma block --title "Review" --warning \\
+moma resume --title "Review" --warning \\
   --item "Environment" "production" \\
   --text "Confirm the target before deploying."
 """.strip(),

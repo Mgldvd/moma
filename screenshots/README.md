@@ -32,7 +32,7 @@ actually prints:
 `generate.py` asserts this after every render, so a config change that
 breaks the invariant fails loudly instead of silently producing
 mismatched images. The defaults (84 columns x 23 rows) were sized to fit
-the widest (`moma-block`, ~66 columns) and tallest
+the widest (`moma-resume`, ~66 columns) and tallest
 (`moma-multi-select-groups`, ~20 lines) entries in the catalog with a
 little headroom - see the `--cols`/`--rows` flags to change this.
 
@@ -54,7 +54,7 @@ Requires Python 3.10+ (uv will fetch an interpreter if needed) and a built
 ```bash
 uv run generate.py                          # every command in the catalog
 uv run generate.py --list                   # show available command ids
-uv run generate.py --commands block box     # only these
+uv run generate.py --commands resume box    # only these
 uv run generate.py --output ../.img         # regenerate the repo's docs/README screenshots
 uv run generate.py --cols 100 --rows 30      # a different fixed terminal size
 ```

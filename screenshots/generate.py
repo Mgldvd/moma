@@ -10,7 +10,7 @@ image) is sized in advance, not fitted to the content afterward.
 Usage (via uv, from this directory):
     uv run generate.py                       # every catalog command
     uv run generate.py --list                # show what would run
-    uv run generate.py --commands block box   # only these (by id suffix)
+    uv run generate.py --commands resume box  # only these (by id suffix)
     uv run generate.py --output ../.img       # write straight into the repo docs
 
 Requires the repo's dist/moma to be built (`../build.sh`) and the
@@ -89,7 +89,7 @@ def main() -> int:
         "--commands",
         nargs="+",
         metavar="ID",
-        help="Only these commands (matched by id or id suffix, e.g. 'block' for 'moma-block'). Default: all.",
+        help="Only these commands (matched by id or id suffix, e.g. 'resume' for 'moma-resume'). Default: all.",
     )
     parser.add_argument(
         "--output",

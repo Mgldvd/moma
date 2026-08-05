@@ -10,7 +10,7 @@ msg	moma-msg	Print a styled message.
 msg-simple	moma-msg-simple	Print a compact message.
 list	moma-list	Print an unordered list.
 box	moma-box	Print a boxed message.
-block	moma-block	Print a titled, colored content block.
+resume	moma-resume	Print a titled, colored content block.
 prompt	moma-prompt	Print a prompt.
 label	moma-label	Print a decorated label.
 input	moma-input	Print or read an input field.

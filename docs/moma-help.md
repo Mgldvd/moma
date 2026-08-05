@@ -36,7 +36,7 @@ supported for backward compatibility but are not the recommended interface.
 | `msg-simple` | Print a simple message with a dot marker. |
 | `list` | Print an unordered list. |
 | `box` | Print a boxed message. |
-| `block` | Print a titled, colored content block. |
+| `resume` | Print a titled, colored content block. |
 | `prompt` | Print a prompt. |
 | `label` | Print a decorated input-style label. |
 | `input` | Print or read an input field. |

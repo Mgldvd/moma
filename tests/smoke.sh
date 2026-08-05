@@ -187,32 +187,32 @@ label_spacing="$({
 })"
 [[ "$label_spacing" == *$'┐\n\nNEXT' ]]
 
-block_output="$(
-  NO_COLOR=1 "$MOMA_DIST" block \
+resume_output="$(
+  NO_COLOR=1 "$MOMA_DIST" resume \
     --title "Shells" \
     --item "Bash" "GNU shell." \
     --item "Zsh" "Interactive shell." \
     --text "Plain note."
 )"
-[[ "$block_output" == $'  ┌ Shells\n  │ Bash  GNU shell.\n  │ Zsh   Interactive shell.\n  │ Plain note.\n  └' ]]
+[[ "$resume_output" == $'  ┌ Shells\n  │ Bash  GNU shell.\n  │ Zsh   Interactive shell.\n  │ Plain note.\n  └' ]]
 
-block_spacing="$({
-  NO_COLOR=1 "$MOMA_DIST" block --title "One" --text "First."
+resume_spacing="$({
+  NO_COLOR=1 "$MOMA_DIST" resume --title "One" --text "First."
   printf 'NEXT'
 })"
-[[ "$block_spacing" == $'  ┌ One\n  │ First.\n  └\n\nNEXT' ]]
+[[ "$resume_spacing" == $'  ┌ One\n  │ First.\n  └\n\nNEXT' ]]
 
-block_semantic_output="$(
-  env -u NO_COLOR "$MOMA_DIST" block --title "Review" --warning --text "Check"
+resume_semantic_output="$(
+  env -u NO_COLOR "$MOMA_DIST" resume --title "Review" --warning --text "Check"
 )"
-[[ "$block_semantic_output" == *$'\033[33m'*'└'* ]]
+[[ "$resume_semantic_output" == *$'\033[33m'*'└'* ]]
 
 set +e
-block_missing_title="$(NO_COLOR=1 "$MOMA_DIST" block --text "x" 2>&1)"
-block_missing_title_status=$?
+resume_missing_title="$(NO_COLOR=1 "$MOMA_DIST" resume --text "x" 2>&1)"
+resume_missing_title_status=$?
 set -e
-[[ "$block_missing_title_status" -eq 2 ]]
-[[ "$block_missing_title" == *"--title is required"* ]]
+[[ "$resume_missing_title_status" -eq 2 ]]
+[[ "$resume_missing_title" == *"--title is required"* ]]
 
 fixed_boxes="$({
   NO_COLOR=1 MOMA_WIDTH=50 \
@@ -911,7 +911,6 @@ set -e
 [[ "$command_status" -eq 1 ]]
 
 mapfile -t expected_functions <<'EOF'
-moma-block
 moma-box
 moma-command-check
 moma-confirm
@@ -925,6 +924,7 @@ moma-multi-select
 moma-multi-select-groups
 moma-prompt
 moma-rabbit
+moma-resume
 moma-section
 moma-select
 moma-single-select
