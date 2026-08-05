@@ -297,19 +297,27 @@ _moma_render_title_sub() {
   # a missing icon is just blank filler, not a │.
   local left_glyph="${icon:- }"
 
+  # Left margin ("  " + marker + "  ") is 5 columns, and the closing line
+  # is always box_width + 3 columns wide ("  └" + dashes + "┘"); pad the
+  # gap before the mirrored marker so it lands under that closing ┘.
+  local mirror_gap=$((box_width - ${#combined_text} - 3))
+  ((mirror_gap < 1)) && mirror_gap=1
+
   printf '%b\n' "$resolved_color"
   if [[ -n "$detail" ]]; then
     if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s %s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" "$left_glyph"
+      printf '  %s  %b%s %b%s%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" "$detail" \
+        "$(printf '%*s' "$mirror_gap" '')" "$left_glyph"
     else
       printf '  %s  %b%s %b%s\n' \
         "$left_glyph" "$reset" "$text" "$resolved_color" "$detail"
     fi
   else
     if [[ "$border" == mirror ]]; then
-      printf '  %s  %b%s %b%s\n' \
-        "$left_glyph" "$reset" "$text" "$resolved_color" "$left_glyph"
+      printf '  %s  %b%s %b%s%s\n' \
+        "$left_glyph" "$reset" "$text" "$resolved_color" \
+        "$(printf '%*s' "$((mirror_gap - 1))" '')" "$left_glyph"
     else
       printf '  %s  %b%s %b\n' \
         "$left_glyph" "$reset" "$text" "$resolved_color"
