@@ -7,6 +7,9 @@ _moma_render_label() {
   local icon="${4:-}"
   local no_color="${5:-false}"
   local max_width="${6:-}"
+  local min_width="${7:-35}"
+  local edge="${8:-top}"
+  local border="${9:-line}"
 
   local label="$text"
   if [[ -n "$icon" && -n "$label" ]]; then
@@ -15,21 +18,40 @@ _moma_render_label() {
     label="$icon"
   fi
 
+  if [[ ! "$min_width" =~ ^[0-9]+$ ]]; then
+    min_width=35
+  fi
+
   width="$(
     _moma_resolve_decor_width \
-      "$((${#label} + 4))" 40 "$width" "$max_width" 8
+      "$((${#label} + 4))" "$min_width" "$width" "$max_width" 8
   )"
   label="$(_moma_truncate_text "$label" "$((width - 4))")"
 
-  local dash_count resolved_color reset
-  dash_count=$((width - ${#label} - 3))
+  local corner_left corner_right dash_count resolved_color reset
+  if [[ "$edge" == bottom ]]; then
+    corner_left="└"
+    corner_right="┘"
+  else
+    corner_left="┌"
+    corner_right="┐"
+  fi
   resolved_color="$(
     _moma_resolve_color "$color" "$MOMA_COLOR_PRIMARY" "$no_color"
   )"
   reset="$(_moma_reset_color "$no_color")"
 
-  printf '%b  ┌─ %s %s┐%b\n\n' \
-    "$resolved_color" "$label" "$(_moma_repeat_char "─" "$dash_count")" "$reset"
+  if [[ "$border" == open ]]; then
+    dash_count=$((width - ${#label} - 2))
+    printf '%b  %s─ %s %s%b\n\n' \
+      "$resolved_color" "$corner_left" "$label" \
+      "$(_moma_repeat_char "─" "$dash_count")" "$reset"
+  else
+    dash_count=$((width - ${#label} - 3))
+    printf '%b  %s─ %s %s%s%b\n\n' \
+      "$resolved_color" "$corner_left" "$label" \
+      "$(_moma_repeat_char "─" "$dash_count")" "$corner_right" "$reset"
+  fi
 }
 
 # Parse label options and print a decorated label.
@@ -37,8 +59,11 @@ moma-label() {
   local text=""
   local width=""
   local max_width=""
+  local min_width=35
   local color="$MOMA_COLOR_PRIMARY"
   local icon=""
+  local edge="top"
+  local border="line"
   local no_color=false
   local -a positional=()
   local style
@@ -55,6 +80,42 @@ moma-label() {
         ;;
       --width=*)
         width="${1#*=}"
+        shift
+        ;;
+      --min-width)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-label "$1"
+          return 1
+        fi
+        min_width="$2"
+        shift 2
+        ;;
+      --min-width=*)
+        min_width="${1#*=}"
+        shift
+        ;;
+      --edge)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-label "$1"
+          return 1
+        fi
+        edge="$2"
+        shift 2
+        ;;
+      --edge=*)
+        edge="${1#*=}"
+        shift
+        ;;
+      --border)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-label "$1"
+          return 1
+        fi
+        border="$2"
+        shift 2
+        ;;
+      --border=*)
+        border="${1#*=}"
         shift
         ;;
       --max-width)
@@ -105,7 +166,11 @@ moma-label() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-label "<text>" [--width <number>] [--max-width <number>] [--color <color>] [--icon <symbol>] [--success|--error|--warning|--info] [--no-color]
+Usage: moma-label "<text>" [--width <number>] [--min-width <number>] [--max-width <number>] [--color <color>] [--icon <symbol>] [--edge top|bottom] [--border line|open] [--success|--error|--warning|--info] [--no-color]
+
+--edge picks which corner the rule uses: top (default) draws ┌/┐, bottom
+draws └/┘. --border controls the right end: line (default) closes it
+with the matching corner, open leaves it as a bare rule instead.
 EOF
         return 0
         ;;
@@ -126,6 +191,20 @@ EOF
   done
 
   text="${positional[*]}"
+  case "$edge" in
+    top | bottom) ;;
+    *)
+      _moma_usage_error moma-label "invalid edge: $edge (expected top or bottom)"
+      return 2
+      ;;
+  esac
+  case "$border" in
+    line | open) ;;
+    *)
+      _moma_usage_error moma-label "invalid border: $border (expected line or open)"
+      return 2
+      ;;
+  esac
   if [[ -n "$width" ]] && ! _moma_is_positive_int "$width"; then
     _moma_usage_error moma-label "invalid width: $width"
     return 2
@@ -134,5 +213,7 @@ EOF
     _moma_usage_error moma-label "invalid max width: $max_width"
     return 2
   fi
-  _moma_render_label "$text" "$width" "$color" "$icon" "$no_color" "$max_width"
+  _moma_render_label \
+    "$text" "$width" "$color" "$icon" "$no_color" "$max_width" \
+    "$min_width" "$edge" "$border"
 }

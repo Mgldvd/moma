@@ -147,6 +147,7 @@ moma divider --icon "★" --border line
 moma label "PROJECT NAME"
 moma label "DEPLOYMENT" --success
 moma label "NOTES" --width 52 --color cyan --icon "→"
+moma label "END OF REPORT" --edge bottom --border open
 """.strip(),
     ),
     Command(

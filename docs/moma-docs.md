@@ -382,10 +382,10 @@ moma divider --icon "⏻" --border line
 
 ### `moma-label`
 
-Print an input-style decorated label with automatic width, semantic color support, and one blank line below it.
+Print an input-style decorated label with automatic width, semantic color support, and one blank line below it. `--edge` picks which corner the rule uses (`top` draws `┌`/`┐`, `bottom` draws `└`/`┘`); `--border` controls whether the far end closes with the matching corner (`line`, default) or stays a bare rule (`open`).
 
 ```text
-moma label "TEXT HERE" [--width number] [--max-width number] [--color color] [--icon symbol]
+moma label "TEXT HERE" [--width number] [--min-width number] [--max-width number] [--color color] [--icon symbol] [--edge top|bottom] [--border line|open]
 ```
 
 ```bash
@@ -397,6 +397,9 @@ moma label "DEPLOYMENT" --success
 
 # Example 3
 moma label "NOTES" --width 52 --color cyan --icon "→"
+
+# Example 4: closing the bottom of a section instead of opening one
+moma label "END OF REPORT" --edge bottom --border open
 ```
 
 ![moma-label preview](../.img/moma-label.png)

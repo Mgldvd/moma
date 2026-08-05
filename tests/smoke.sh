@@ -146,7 +146,7 @@ list_output="$(
 [[ "$list_output" == $'  ▪   Clone repository\n  ▪   Install dependencies' ]]
 
 label_output="$(NO_COLOR=1 "$MOMA_DIST" label "TEXT HERE")"
-[[ "$label_output" == '  ┌─ TEXT HERE ────────────────────────────┐' ]]
+[[ "$label_output" == '  ┌─ TEXT HERE ───────────────────────┐' ]]
 
 header_output="$(NO_COLOR=1 "$MOMA_DIST" header "Type Something")"
 expected_header=$'\n░▀█▀░█░█░█▀█░█▀▀░░░█▀▀░█▀█░█▄█░█▀▀░▀█▀░█░█░▀█▀░█▀█░█▀▀\n'
@@ -397,6 +397,35 @@ fixed_label="$(
     "$MOMA_DIST" label "Short"
 )"
 [[ "$fixed_label" == "  ┌─ Short ──────────────────────────────────────┐" ]]
+
+label_top_open="$(NO_COLOR=1 "$MOMA_DIST" label "PROJECT NAME" --border open)"
+[[ "$label_top_open" == "  ┌─ PROJECT NAME ─────────────────────" ]]
+
+label_top_closed="$(NO_COLOR=1 "$MOMA_DIST" label "PROJECT NAME")"
+[[ "$label_top_closed" == "  ┌─ PROJECT NAME ────────────────────┐" ]]
+
+label_bottom_closed="$(NO_COLOR=1 "$MOMA_DIST" label "PROJECT NAME" --edge bottom)"
+[[ "$label_bottom_closed" == "  └─ PROJECT NAME ────────────────────┘" ]]
+
+label_bottom_open="$(
+  NO_COLOR=1 "$MOMA_DIST" label "PROJECT NAME" --edge bottom --border open
+)"
+[[ "$label_bottom_open" == "  └─ PROJECT NAME ─────────────────────" ]]
+
+[[ "${#label_top_open}" -eq "${#label_top_closed}" ]]
+[[ "${#label_top_closed}" -eq "${#label_bottom_closed}" ]]
+[[ "${#label_bottom_closed}" -eq "${#label_bottom_open}" ]]
+
+set +e
+label_bad_edge="$(NO_COLOR=1 "$MOMA_DIST" label "x" --edge sideways 2>&1)"
+label_bad_edge_status=$?
+label_bad_border="$(NO_COLOR=1 "$MOMA_DIST" label "x" --border sideways 2>&1)"
+label_bad_border_status=$?
+set -e
+[[ "$label_bad_edge_status" -eq 2 ]]
+[[ "$label_bad_edge" == *"invalid edge"* ]]
+[[ "$label_bad_border_status" -eq 2 ]]
+[[ "$label_bad_border" == *"invalid border"* ]]
 
 fixed_input="$(
   NO_COLOR=1 MOMA_WIDTH="$shared_width" \
