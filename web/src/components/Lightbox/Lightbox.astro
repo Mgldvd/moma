@@ -1,0 +1,17 @@
+---
+import './Lightbox.scss';
+---
+
+<div class="lightbox" data-open="false" hidden>
+  <button type="button" class="lightbox__close" aria-label="Close">✕</button>
+  <button type="button" class="lightbox__nav lightbox__nav--prev" aria-label="Previous screenshot">‹</button>
+  <button type="button" class="lightbox__nav lightbox__nav--next" aria-label="Next screenshot">›</button>
+  <figure class="lightbox__figure">
+    <img class="lightbox__image" src="" alt="" />
+    <figcaption class="lightbox__caption"></figcaption>
+  </figure>
+</div>
+
+<script>
+  import './Lightbox.client';
+</script>

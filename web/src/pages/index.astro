@@ -8,6 +8,7 @@ import ApiSection from '../components/ApiSection/ApiSection.astro';
 import ApiEntry from '../components/ApiEntry/ApiEntry.astro';
 import FunctionRow from '../components/FunctionRow/FunctionRow.astro';
 import EmptyState from '../components/EmptyState/EmptyState.astro';
+import Lightbox from '../components/Lightbox/Lightbox.astro';
 import Footer from '../components/Footer/Footer.astro';
 import '../styles/pages/index.scss';
 import '../styles/pages/index-screenshot.scss';
@@ -77,4 +78,5 @@ const indexLinks = [
   </div>
 
   <Footer repoUrl={SITE.repoUrl} functionCount={SITE.functionCount} />
+  <Lightbox />
 </BaseLayout>
