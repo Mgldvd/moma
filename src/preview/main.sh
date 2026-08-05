@@ -105,6 +105,11 @@ _moma_preview_render_title_sub() {
   moma-title-sub "Deployment" "Production environment"
 }
 
+# Render the rule-first secondary-title examples.
+_moma_preview_render_sub_title() {
+  moma-sub-title "Deployment" "Production environment"
+}
+
 # Render the section-heading examples.
 _moma_preview_render_sections() {
   moma-section "Dependencies ready" --success
@@ -309,6 +314,10 @@ _moma_preview() {
     "moma-title-sub" "Secondary workflow header." \
     'moma title-sub "Deployment" "Production environment"' \
     _moma_preview_render_title_sub
+  _moma_preview_component \
+    "moma-sub-title" "Rule-first secondary workflow header." \
+    'moma sub-title "Deployment" "Production environment"' \
+    _moma_preview_render_sub_title
 
   _moma_preview_section \
     "02" "Status and feedback" \

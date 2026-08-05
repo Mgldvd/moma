@@ -336,6 +336,34 @@ set -e
 [[ "$title_sub_bad_border_status" -eq 2 ]]
 [[ "$title_sub_bad_border" == *"invalid border"* ]]
 
+sub_title_default="$(
+  NO_COLOR=1 "$MOMA_DIST" sub-title "Moma" "Terminal UI library"
+)"
+[[ "$sub_title_default" == $'\n  ┌───────────────────────────────────┐\n  ▪  Moma Terminal UI library         ▪'* ]]
+
+sub_title_open_no_icon="$(
+  NO_COLOR=1 "$MOMA_DIST" sub-title "Moma" "Terminal UI library" \
+    --no-icon --border open
+)"
+[[ "$sub_title_open_no_icon" == $'\n  ┌────────────────────────────────────\n     Moma Terminal UI library'* ]]
+[[ "$sub_title_open_no_icon" != *'┐'* ]]
+
+sub_title_line="$(
+  NO_COLOR=1 "$MOMA_DIST" sub-title "Moma" "Terminal UI library" \
+    --border line
+)"
+[[ "$sub_title_line" == $'\n  ┌───────────────────────────────────┐\n  ▪  Moma Terminal UI library'* ]]
+[[ "$sub_title_line" != *'▪  Moma Terminal UI library'*'▪'* ]]
+
+set +e
+sub_title_bad_border="$(
+  NO_COLOR=1 "$MOMA_DIST" sub-title "x" --border sideways 2>&1
+)"
+sub_title_bad_border_status=$?
+set -e
+[[ "$sub_title_bad_border_status" -eq 2 ]]
+[[ "$sub_title_bad_border" == *"invalid border"* ]]
+
 fixed_label="$(
   NO_COLOR=1 MOMA_WIDTH="$shared_width" \
     "$MOMA_DIST" label "Short"
@@ -1018,6 +1046,7 @@ moma-select
 moma-single-select
 moma-single-select-groups
 moma-spinner
+moma-sub-title
 moma-title
 moma-title-sub
 moma-update

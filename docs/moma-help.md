@@ -31,6 +31,7 @@ supported for backward compatibility but are not the recommended interface.
 | `header` | Print a Pagga ASCII heading. |
 | `title` | Print a title and subtitle. |
 | `title-sub` | Print a secondary title. |
+| `sub-title` | Print a rule-first secondary title. |
 | `section` | Print a section heading. |
 | `msg` | Print a styled message. |
 | `msg-simple` | Print a simple message with a dot marker. |
@@ -159,10 +160,11 @@ deterministic.
 - `MOMA_MAX_WIDTH=<number>`: Let decorations grow automatically, but not beyond this width.
 
 A fixed width takes priority over a maximum width. `moma-title`,
-`moma-title-sub`, `moma-box`, `moma-prompt`, `moma-label`, and `moma-input`
-also accept component-level `--width` and `--max-width` options. Long boxed
-content wraps inside the selected width. The minimum effective decoration
-width is 8 columns and box padding may require a larger value.
+`moma-title-sub`, `moma-sub-title`, `moma-box`, `moma-prompt`, `moma-label`,
+`moma-input`, and `moma-resume` also accept component-level `--width` and
+`--max-width` options. Long boxed content wraps inside the selected width.
+The minimum effective decoration width is 8 columns and box padding may
+require a larger value.
 
 ## Binary examples
 
