@@ -319,9 +319,15 @@ _moma_preview() {
 
   _moma_preview_header
 
+  # Section grouping and order mirror the website's own (see
+  # DocsNav.data.ts's GROUP_ORDER/GROUP_HEADINGS, derived from each
+  # apiEntries.ts entry's `group` field) so the terminal and browser
+  # previews read as the same catalogue. "self" (moma talking about
+  # itself - update/version/preview/help) has no visual output worth
+  # previewing here and is intentionally left out.
   _moma_preview_section \
-    "01" "Structure" \
-    "Large-format headings for scripts and workflow stages."
+    "01" "Visual" \
+    "Print-only components for structure, status, and layout."
   _moma_preview_component \
     "moma-header" \
     'moma header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
@@ -338,10 +344,6 @@ _moma_preview() {
     "moma-sub-title" \
     'moma sub-title "Deployment" "Production environment"' \
     _moma_preview_render_sub_title
-
-  _moma_preview_section \
-    "02" "Status and feedback" \
-    "Semantic variants share one consistent visual language."
   _moma_preview_component \
     "moma-section" \
     'moma section "Dependencies ready" --success' \
@@ -370,14 +372,14 @@ _moma_preview() {
     "moma-divider" \
     'moma divider --success --border line' \
     _moma_preview_render_dividers
-
-  _moma_preview_section \
-    "03" "Interaction" \
-    "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
     "moma-label" \
     'moma label "TEXT HERE"' \
     _moma_preview_render_label
+
+  _moma_preview_section \
+    "02" "Interactive" \
+    "Components that read a value or a choice back from the user."
   _moma_preview_component \
     "moma-input" \
     'moma input --title "Project name" --placeholder "my-project"' \
@@ -386,6 +388,14 @@ _moma_preview() {
     "moma-prompt" \
     'answer="$(moma prompt "Continue?")"' \
     _moma_preview_render_prompt
+  _moma_preview_component \
+    "moma-confirm" \
+    'moma confirm "Continue?" --default yes' \
+    _moma_preview_render_confirm
+
+  _moma_preview_section \
+    "03" "Selection" \
+    "Arrow-key pickers for one or more choices."
   _moma_preview_component \
     "moma-select" \
     'moma select "Development" "Staging" "Production" --title "Environment"' \
@@ -402,18 +412,18 @@ _moma_preview() {
     "moma-multi-select-groups" \
     'moma multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
     _moma_preview_render_multi_select_groups
+
+  _moma_preview_section \
+    "04" "Decorative" \
+    "Branded flourishes with no functional role."
   _moma_preview_component \
     "moma-rabbit" \
     'moma rabbit "Preparing workspace" --info' \
     _moma_preview_render_rabbits
 
   _moma_preview_section \
-    "04" "Helpers" \
-    "Reusable interaction and environment checks for Bash workflows."
-  _moma_preview_component \
-    "moma-confirm" \
-    'moma confirm "Continue?" --default yes' \
-    _moma_preview_render_confirm
+    "05" "Utils" \
+    "Process and environment helpers for Bash workflows."
   local spinner_example="moma spinner \"\$pid\" \"Preparing workspace\""
   _moma_preview_component \
     "moma-spinner" \
