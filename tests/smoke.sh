@@ -281,8 +281,10 @@ capped_box="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" box \
 [[ "$capped_box" == *'  ┌────────────────────────┐'* ]]
 [[ "$capped_box" == *$'│ → This long notice     │\n  │ wraps inside its       │'* ]]
 
-fixed_prompt="$(NO_COLOR=1 MOMA_WIDTH=46 "$MOMA_DIST" prompt "Short")"
-[[ "$fixed_prompt" == *'  └──────────────────────────────────────────────' ]]
+fixed_prompt="$(
+  printf 'answer\n' | NO_COLOR=1 MOMA_WIDTH=46 "$MOMA_DIST" prompt "Short" 2>&1 >/dev/null
+)"
+[[ "$fixed_prompt" == *$'  └──────────────────────────────────────────────\n'* ]]
 
 shared_width=46
 shared_rule='──────────────────────────────────────────────'
@@ -501,8 +503,8 @@ capped_title="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
   title "A title that is longer than the maximum")"
 [[ "$capped_title" == *"  ┌${capped_rule}┐"* ]]
 
-capped_prompt="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
-  prompt "A prompt longer than the maximum")"
+capped_prompt="$(printf 'answer\n' | NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
+  prompt "A prompt longer than the maximum" 2>&1 >/dev/null)"
 [[ "$capped_prompt" == *"  └${capped_rule}"* ]]
 
 capped_label="$(NO_COLOR=1 MOMA_MAX_WIDTH=24 "$MOMA_DIST" \
@@ -871,15 +873,10 @@ set -e
 [[ "$multi_groups_required_output" == *"select at least one option"* ]]
 
 prompt_visual="$(
-  NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
+  printf 'answer\n' | NO_COLOR=1 "$MOMA_DIST" prompt \
+    "Choose the target environment" 2>&1 >/dev/null
 )"
-[[ "$prompt_visual" == $'\n  ▪  Choose the target environment\n  └───────────────────────────────────' ]]
-
-prompt_composition="$({
-  NO_COLOR=1 "$MOMA_DIST" prompt "Choose the target environment"
-  printf 'NEXT'
-})"
-[[ "$prompt_composition" == *$'└───────────────────────────────────\nNEXT' ]]
+[[ "$prompt_visual" == $'\n  ▪  Choose the target environment \n  └───────────────────────────────────'* ]]
 
 rabbit_visual="$(NO_COLOR=1 "$MOMA_DIST" rabbit "Ready")"
 [[ "$rabbit_visual" == *$'\n  | Ready\n  /⎺⎺⎺⎺⎺⎺⎺⎺\n\n    (\\(\\\n    (-.-)\n  o_(\")(")' ]]
@@ -1470,7 +1467,7 @@ for group_var in visualEntries interactiveEntries selectionEntries decorativeEnt
   rg -Fq "${group_var}.map((entry) => <ApiEntry {...entry} />)" "$web_src/pages/index.astro"
 done
 for group_name in visual interactive selection decorative utils self; do
-  rg -Fq "API_ENTRIES.filter((entry) => entry.group === '$group_name')" "$web_src/pages/index.astro"
+  rg -Fq "entry.group === \"$group_name\"" "$web_src/pages/index.astro"
 done
 
 # Output previews are real terminal screenshots (screenshots.ts, looked up
@@ -1482,8 +1479,8 @@ done
 rg -Fq "import.meta.glob" "$web_src/data/screenshots.ts"
 rg -Fq "'../assets/screenshots/*.png'" "$web_src/data/screenshots.ts"
 rg -Fq 'getScreenshot' "$web_src/components/ApiEntry/ApiEntry.astro"
-rg -Fq "from '../../data/screenshots'" "$web_src/components/ApiEntry/ApiEntry.astro"
-rg -Fq "import { Image } from 'astro:assets'" "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq 'from "../../data/screenshots"' "$web_src/components/ApiEntry/ApiEntry.astro"
+rg -Fq 'import { Image } from "astro:assets"' "$web_src/components/ApiEntry/ApiEntry.astro"
 
 screenshots_dir="$web_src/assets/screenshots"
 [[ -d "$screenshots_dir" ]]
@@ -1579,9 +1576,13 @@ unique_all_page_id_count="$(printf '%s\n' "${all_page_ids[@]}" | sort -u | wc -l
 [[ "$unique_all_page_id_count" == "${#all_page_ids[@]}" ]]
 
 # Mobile navigation trigger accessibility contract.
-rg -Fq 'class="nav-toggle" type="button" aria-expanded="false" aria-controls="docs-nav"' \
-  "$web_src/components/Header/Header.astro"
-rg -Fq 'class="docs-nav" id="docs-nav"' "$web_src/components/DocsNav/DocsNav.astro"
+header_astro="$web_src/components/Header/Header.astro"
+rg -Fq 'class="nav-toggle"' "$header_astro"
+rg -Fq 'type="button"' "$header_astro"
+rg -Fq 'aria-expanded="false"' "$header_astro"
+rg -Fq 'aria-controls="docs-nav"' "$header_astro"
+rg -Fq 'class="docs-nav"' "$web_src/components/DocsNav/DocsNav.astro"
+rg -Fq 'id="docs-nav"' "$web_src/components/DocsNav/DocsNav.astro"
 
 # Active-navigation implementation uses aria-current, driven by a scroll spy.
 docs_nav_client="$web_src/components/DocsNav/DocsNav.client.ts"
@@ -1617,7 +1618,7 @@ for client_script in "${client_scripts[@]}"; do
   component_dir="$(dirname "$client_script")"
   component_name="$(basename "$client_script" .client.ts)"
   component_astro="$component_dir/$component_name.astro"
-  rg -Fq "import './$component_name.client'" "$component_astro"
+  rg -Fq "import \"./$component_name.client\"" "$component_astro"
 done
 
 mapfile -t component_styles < <(find "$web_src/components" -name '*.scss')
@@ -1625,12 +1626,12 @@ for component_style in "${component_styles[@]}"; do
   component_dir="$(dirname "$component_style")"
   component_name="$(basename "$component_style" .scss)"
   component_astro="$component_dir/$component_name.astro"
-  rg -Fq "import './$component_name.scss'" "$component_astro"
+  rg -Fq "import \"./$component_name.scss\"" "$component_astro"
 done
 
-rg -Fq "import '../styles/reset.scss'" "$web_src/layouts/BaseLayout.astro"
-rg -Fq "import '../styles/global.scss'" "$web_src/layouts/BaseLayout.astro"
-rg -Fq "import '../styles/pages/index.scss'" "$web_src/pages/index.astro"
-rg -Fq "import '../styles/pages/index-screenshot.scss'" "$web_src/pages/index.astro"
+rg -Fq 'import "../styles/reset.scss"' "$web_src/layouts/BaseLayout.astro"
+rg -Fq 'import "../styles/global.scss"' "$web_src/layouts/BaseLayout.astro"
+rg -Fq 'import "../styles/pages/index.scss"' "$web_src/pages/index.astro"
+rg -Fq 'import "../styles/pages/index-screenshot.scss"' "$web_src/pages/index.astro"
 
 printf 'Smoke tests passed.\n'

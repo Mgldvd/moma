@@ -1119,6 +1119,30 @@ _moma_repeat_char() {
   printf '%s' "${output// /$char}"
 }
 
+# Count display columns in a string, independent of the caller's locale.
+# `${#value}` counts *bytes* under a non-UTF-8 locale (this library's own
+# usual environment, since it never sets one itself) - that overcounts
+# every multi-byte glyph moma prints (✔, →, ▪, …, box-drawing corners, ...)
+# by however many continuation bytes it has, throwing off any width math
+# that includes one. Every glyph moma uses is single-column (see
+# screenshots/README.md), so counting UTF-8 lead bytes - forcing the C
+# locale locally so the byte-wise slice below is deterministic regardless
+# of the caller's locale - gives the right answer everywhere.
+_moma_display_width() {
+  local value="${1:-}"
+  (
+    LC_ALL=C
+    local byte_len="${#value}"
+    local width=0 i byte ord
+    for ((i = 0; i < byte_len; i++)); do
+      byte="${value:i:1}"
+      printf -v ord '%d' "'$byte"
+      (((ord & 0xC0) == 0x80)) || width=$((width + 1))
+    done
+    printf '%s' "$width"
+  )
+}
+
 # Resolve the inner width used by terminal decorations. A component-specific
 # fixed width wins over the library-wide fixed width. Fixed widths win over
 # maximum widths so callers can override a global cap for one component.
@@ -3216,22 +3240,30 @@ _moma_render_box() {
   if [[ ! "$padding" =~ ^[0-9]+$ ]]; then
     padding=1
   fi
-  local display_text="$text"
-  if [[ -n "$icon" ]]; then
-    display_text="$icon $display_text"
-  fi
 
-  local natural_width=$((${#display_text} + padding * 2))
+  # Measured separately from the wrapped text, never merged into the same
+  # string - a multi-byte icon like ✔ would otherwise throw off every
+  # width below it once ${#} miscounts it. See _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    icon_prefix="$icon "
+    icon_width=$(($(_moma_display_width "$icon") + 1))
+  fi
+  local text_width_natural
+  text_width_natural="$(_moma_display_width "$text")"
+
+  local natural_width=$((text_width_natural + icon_width + padding * 2))
   local hard_min_width=$((padding * 2 + 1))
   ((hard_min_width >= 8)) || hard_min_width=8
   local content_width
   content_width="$(_moma_resolve_decor_width \
     "$natural_width" 0 "$width" "$max_width" "$hard_min_width")"
 
-  local left_pad right_pad line
-  local text_width=$((content_width - padding * 2))
+  local left_pad right_pad line line_width first=true
+  local text_width=$((content_width - padding * 2 - icon_width))
+  ((text_width > 0)) || text_width=1
   local -a lines=()
-  mapfile -t lines < <(_moma_wrap_text "$display_text" "$text_width")
+  mapfile -t lines < <(_moma_wrap_text "$text" "$text_width")
   left_pad="$(_moma_repeat_char " " "$padding")"
 
   local resolved_color reset
@@ -3243,10 +3275,20 @@ _moma_render_box() {
   printf '%b' "$resolved_color"
   printf '  ┌%s┐\n' "$(_moma_repeat_char "─" "$content_width")"
   for line in "${lines[@]}"; do
-    right_pad="$(
-      _moma_repeat_char " " "$((content_width - ${#line} - padding))"
-    )"
-    printf '  │%s%s%s│\n' "$left_pad" "$line" "$right_pad"
+    line_width="$(_moma_display_width "$line")"
+    if $first; then
+      right_pad="$(
+        _moma_repeat_char " " \
+          "$((content_width - icon_width - line_width - padding))"
+      )"
+      printf '  │%s%s%s%s│\n' "$left_pad" "$icon_prefix" "$line" "$right_pad"
+      first=false
+    else
+      right_pad="$(
+        _moma_repeat_char " " "$((content_width - line_width - padding))"
+      )"
+      printf '  │%s%s%s│\n' "$left_pad" "$line" "$right_pad"
+    fi
   done
   printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$content_width")" "$reset"
 }
@@ -3848,22 +3890,37 @@ _moma_render_label() {
   local edge="${8:-top}"
   local border="${9:-line}"
 
-  local label="$text"
-  if [[ -n "$icon" && -n "$label" ]]; then
-    label="$icon $label"
-  elif [[ -n "$icon" ]]; then
-    label="$icon"
+  # Measured separately from the text (never merged into the same string
+  # before it's truncated) so a multi-byte icon like ✔ never throws off
+  # the width math - see _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    if [[ -n "$text" ]]; then
+      icon_prefix="$icon "
+      icon_width=$(($(_moma_display_width "$icon") + 1))
+    else
+      icon_prefix="$icon"
+      icon_width="$(_moma_display_width "$icon")"
+    fi
   fi
 
   if [[ ! "$min_width" =~ ^[0-9]+$ ]]; then
     min_width=35
   fi
 
+  local text_display_width
+  text_display_width="$(_moma_display_width "$text")"
   width="$(
     _moma_resolve_decor_width \
-      "$((${#label} + 4))" "$min_width" "$width" "$max_width" 8
+      "$((text_display_width + icon_width + 4))" \
+      "$min_width" "$width" "$max_width" 8
   )"
-  label="$(_moma_truncate_text "$label" "$((width - 4))")"
+  local text_budget=$((width - 4 - icon_width))
+  ((text_budget > 0)) || text_budget=0
+  text="$(_moma_truncate_text "$text" "$text_budget")"
+  local label="${icon_prefix}${text}"
+  local label_width
+  label_width="$(_moma_display_width "$label")"
 
   local corner_left corner_right dash_count resolved_color reset
   if [[ "$edge" == bottom ]]; then
@@ -3879,12 +3936,12 @@ _moma_render_label() {
   reset="$(_moma_reset_color "$no_color")"
 
   if [[ "$border" == open ]]; then
-    dash_count=$((width - ${#label} - 2))
+    dash_count=$((width - label_width - 2))
     printf '%b  %s─ %s %s%b\n\n' \
       "$resolved_color" "$corner_left" "$label" \
       "$(_moma_repeat_char "─" "$dash_count")" "$reset"
   else
-    dash_count=$((width - ${#label} - 3))
+    dash_count=$((width - label_width - 3))
     printf '%b  %s─ %s %s%s%b\n\n' \
       "$resolved_color" "$corner_left" "$label" \
       "$(_moma_repeat_char "─" "$dash_count")" "$corner_right" "$reset"

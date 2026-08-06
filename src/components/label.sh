@@ -11,22 +11,37 @@ _moma_render_label() {
   local edge="${8:-top}"
   local border="${9:-line}"
 
-  local label="$text"
-  if [[ -n "$icon" && -n "$label" ]]; then
-    label="$icon $label"
-  elif [[ -n "$icon" ]]; then
-    label="$icon"
+  # Measured separately from the text (never merged into the same string
+  # before it's truncated) so a multi-byte icon like ✔ never throws off
+  # the width math - see _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    if [[ -n "$text" ]]; then
+      icon_prefix="$icon "
+      icon_width=$(($(_moma_display_width "$icon") + 1))
+    else
+      icon_prefix="$icon"
+      icon_width="$(_moma_display_width "$icon")"
+    fi
   fi
 
   if [[ ! "$min_width" =~ ^[0-9]+$ ]]; then
     min_width=35
   fi
 
+  local text_display_width
+  text_display_width="$(_moma_display_width "$text")"
   width="$(
     _moma_resolve_decor_width \
-      "$((${#label} + 4))" "$min_width" "$width" "$max_width" 8
+      "$((text_display_width + icon_width + 4))" \
+      "$min_width" "$width" "$max_width" 8
   )"
-  label="$(_moma_truncate_text "$label" "$((width - 4))")"
+  local text_budget=$((width - 4 - icon_width))
+  ((text_budget > 0)) || text_budget=0
+  text="$(_moma_truncate_text "$text" "$text_budget")"
+  local label="${icon_prefix}${text}"
+  local label_width
+  label_width="$(_moma_display_width "$label")"
 
   local corner_left corner_right dash_count resolved_color reset
   if [[ "$edge" == bottom ]]; then
@@ -42,12 +57,12 @@ _moma_render_label() {
   reset="$(_moma_reset_color "$no_color")"
 
   if [[ "$border" == open ]]; then
-    dash_count=$((width - ${#label} - 2))
+    dash_count=$((width - label_width - 2))
     printf '%b  %s─ %s %s%b\n\n' \
       "$resolved_color" "$corner_left" "$label" \
       "$(_moma_repeat_char "─" "$dash_count")" "$reset"
   else
-    dash_count=$((width - ${#label} - 3))
+    dash_count=$((width - label_width - 3))
     printf '%b  %s─ %s %s%s%b\n\n' \
       "$resolved_color" "$corner_left" "$label" \
       "$(_moma_repeat_char "─" "$dash_count")" "$corner_right" "$reset"

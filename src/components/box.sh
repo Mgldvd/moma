@@ -12,22 +12,30 @@ _moma_render_box() {
   if [[ ! "$padding" =~ ^[0-9]+$ ]]; then
     padding=1
   fi
-  local display_text="$text"
-  if [[ -n "$icon" ]]; then
-    display_text="$icon $display_text"
-  fi
 
-  local natural_width=$((${#display_text} + padding * 2))
+  # Measured separately from the wrapped text, never merged into the same
+  # string - a multi-byte icon like ✔ would otherwise throw off every
+  # width below it once ${#} miscounts it. See _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    icon_prefix="$icon "
+    icon_width=$(($(_moma_display_width "$icon") + 1))
+  fi
+  local text_width_natural
+  text_width_natural="$(_moma_display_width "$text")"
+
+  local natural_width=$((text_width_natural + icon_width + padding * 2))
   local hard_min_width=$((padding * 2 + 1))
   ((hard_min_width >= 8)) || hard_min_width=8
   local content_width
   content_width="$(_moma_resolve_decor_width \
     "$natural_width" 0 "$width" "$max_width" "$hard_min_width")"
 
-  local left_pad right_pad line
-  local text_width=$((content_width - padding * 2))
+  local left_pad right_pad line line_width first=true
+  local text_width=$((content_width - padding * 2 - icon_width))
+  ((text_width > 0)) || text_width=1
   local -a lines=()
-  mapfile -t lines < <(_moma_wrap_text "$display_text" "$text_width")
+  mapfile -t lines < <(_moma_wrap_text "$text" "$text_width")
   left_pad="$(_moma_repeat_char " " "$padding")"
 
   local resolved_color reset
@@ -39,10 +47,20 @@ _moma_render_box() {
   printf '%b' "$resolved_color"
   printf '  ┌%s┐\n' "$(_moma_repeat_char "─" "$content_width")"
   for line in "${lines[@]}"; do
-    right_pad="$(
-      _moma_repeat_char " " "$((content_width - ${#line} - padding))"
-    )"
-    printf '  │%s%s%s│\n' "$left_pad" "$line" "$right_pad"
+    line_width="$(_moma_display_width "$line")"
+    if $first; then
+      right_pad="$(
+        _moma_repeat_char " " \
+          "$((content_width - icon_width - line_width - padding))"
+      )"
+      printf '  │%s%s%s%s│\n' "$left_pad" "$icon_prefix" "$line" "$right_pad"
+      first=false
+    else
+      right_pad="$(
+        _moma_repeat_char " " "$((content_width - line_width - padding))"
+      )"
+      printf '  │%s%s%s│\n' "$left_pad" "$line" "$right_pad"
+    fi
   done
   printf '  └%s┘%b\n' "$(_moma_repeat_char "─" "$content_width")" "$reset"
 }

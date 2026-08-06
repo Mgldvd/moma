@@ -21,6 +21,30 @@ _moma_repeat_char() {
   printf '%s' "${output// /$char}"
 }
 
+# Count display columns in a string, independent of the caller's locale.
+# `${#value}` counts *bytes* under a non-UTF-8 locale (this library's own
+# usual environment, since it never sets one itself) - that overcounts
+# every multi-byte glyph moma prints (✔, →, ▪, …, box-drawing corners, ...)
+# by however many continuation bytes it has, throwing off any width math
+# that includes one. Every glyph moma uses is single-column (see
+# screenshots/README.md), so counting UTF-8 lead bytes - forcing the C
+# locale locally so the byte-wise slice below is deterministic regardless
+# of the caller's locale - gives the right answer everywhere.
+_moma_display_width() {
+  local value="${1:-}"
+  (
+    LC_ALL=C
+    local byte_len="${#value}"
+    local width=0 i byte ord
+    for ((i = 0; i < byte_len; i++)); do
+      byte="${value:i:1}"
+      printf -v ord '%d' "'$byte"
+      (((ord & 0xC0) == 0x80)) || width=$((width + 1))
+    done
+    printf '%s' "$width"
+  )
+}
+
 # Resolve the inner width used by terminal decorations. A component-specific
 # fixed width wins over the library-wide fixed width. Fixed widths win over
 # maximum widths so callers can override a global cap for one component.

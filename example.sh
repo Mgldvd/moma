@@ -29,6 +29,7 @@ MOMA_WIDTH="${MOMA_WIDTH:-48}"
 moma header "Project setup" --color cyan
 moma title "Project setup" "Interactive form example"
 moma title-sub "Component showcase" "All public Moma components"
+moma sub-title "Deployment" "Choose your target setup" --border mirror
 moma box "Complete the form to create a project configuration." --info
 
 moma section "Preflight" --success
@@ -114,6 +115,7 @@ if [[ ! -t 0 || ! -t 2 ]]; then
 fi
 log_level="$(moma single-select "${log_level_args[@]}")"
 
+moma divider --success --border line
 moma label "Ownership and credentials" --color yellow
 owner="$(
   moma input \
