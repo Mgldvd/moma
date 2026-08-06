@@ -7293,7 +7293,7 @@ _moma_preview_component() {
 
   printf '%b┌─ %s\n' "$MOMA_COLOR_GRAY" "$name"
   printf '│  %b$%b %s\n' "$MOMA_COLOR_PINK" "$MOMA_COLOR_GRAY" "$example"
-  printf '└─ %boutput%b:\n\n' "$MOMA_COLOR_YELLOW" "$MOMA_COLOR_RESET"
+  printf '└─ %boutput%b:\n\n' "$MOMA_COLOR_GRAY" "$MOMA_COLOR_RESET"
   "$renderer"
   printf '\n\n'
 }

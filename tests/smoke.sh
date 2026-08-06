@@ -1363,7 +1363,7 @@ expected_legend+="  ${preview_cyan}● info${preview_reset}"
 [[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
 [[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma section \"Dependencies ready\" --success"* ]]
 [[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma select \"Development\" \"Staging\" \"Production\" --title \"Environment\""* ]]
-[[ "$colored_terminal_preview" == *"└─ ${preview_yellow}output${preview_reset}:"* ]]
+[[ "$colored_terminal_preview" == *"└─ ${preview_gray}output${preview_reset}:"* ]]
 
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
 [[ "$markdown_preview" == *"# Moma Documentation"* ]]
