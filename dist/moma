@@ -7288,16 +7288,14 @@ _moma_preview_section() {
 # Print one component example and invoke its renderer.
 _moma_preview_component() {
   local name="$1"
-  local purpose="$2"
-  local example="$3"
-  local renderer="$4"
+  local example="$2"
+  local renderer="$3"
 
   printf '%b┌─ %s\n' "$MOMA_COLOR_GRAY" "$name"
-  printf '│  %s\n' "$purpose"
-  printf '│  $ %s\n' "$example"
+  printf '│  %b$%b %s\n' "$MOMA_COLOR_PINK" "$MOMA_COLOR_GRAY" "$example"
   printf '└─ %boutput%b:\n\n' "$MOMA_COLOR_YELLOW" "$MOMA_COLOR_RESET"
   "$renderer"
-  printf '\n'
+  printf '\n\n'
 }
 
 # Render the primary-title examples.
@@ -7535,19 +7533,19 @@ _moma_preview() {
     "01" "Structure" \
     "Large-format headings for scripts and workflow stages."
   _moma_preview_component \
-    "moma-header" "Pagga ASCII heading for a prominent script identity." \
+    "moma-header" \
     'moma header "Moma" --color cyan --margin-top 0 --margin-bottom 0' \
     _moma_preview_render_header
   _moma_preview_component \
-    "moma-title" "Primary script header." \
+    "moma-title" \
     'moma title "Moma" "Terminal UI library"' \
     _moma_preview_render_title
   _moma_preview_component \
-    "moma-title-sub" "Secondary workflow header." \
+    "moma-title-sub" \
     'moma title-sub "Deployment" "Production environment"' \
     _moma_preview_render_title_sub
   _moma_preview_component \
-    "moma-sub-title" "Rule-first secondary workflow header." \
+    "moma-sub-title" \
     'moma sub-title "Deployment" "Production environment"' \
     _moma_preview_render_sub_title
 
@@ -7555,32 +7553,31 @@ _moma_preview() {
     "02" "Status and feedback" \
     "Semantic variants share one consistent visual language."
   _moma_preview_component \
-    "moma-section" "Section headings in every semantic state." \
+    "moma-section" \
     'moma section "Dependencies ready" --success' \
     _moma_preview_render_sections
   _moma_preview_component \
-    "moma-msg" "Compact inline feedback and custom icons." \
+    "moma-msg" \
     'moma msg "Package installed" --success' \
     _moma_preview_render_messages
   _moma_preview_component \
-    "moma-msg-simple" "A clean message with only a dot marker." \
+    "moma-msg-simple" \
     'moma msg-simple "Package installed"' \
     _moma_preview_render_simple_message
   _moma_preview_component \
-    "moma-list" "An unordered list with one marker per item." \
+    "moma-list" \
     'moma list "Clone repository" "Install dependencies"' \
     _moma_preview_render_list
   _moma_preview_component \
-    "moma-box" "Notices that need stronger visual emphasis." \
+    "moma-box" \
     'moma box "Your configuration is ready." --success' \
     _moma_preview_render_boxes
   _moma_preview_component \
     "moma-resume" \
-    "A titled, colored block of aligned term/description rows or plain text." \
     'moma resume --title "Shells" --item "Bash" "GNU command shell." ...' \
     _moma_preview_render_resumes
   _moma_preview_component \
-    "moma-divider" "A marker-led horizontal rule." \
+    "moma-divider" \
     'moma divider --success --border line' \
     _moma_preview_render_dividers
 
@@ -7588,38 +7585,35 @@ _moma_preview() {
     "03" "Interaction" \
     "Prompts, fields, and progress-oriented components."
   _moma_preview_component \
-    "moma-label" "Decorated label aligned with input field headers." \
+    "moma-label" \
     'moma label "TEXT HERE"' \
     _moma_preview_render_label
   _moma_preview_component \
-    "moma-input" "Display and interactive input states." \
+    "moma-input" \
     'moma input --title "Project name" --placeholder "my-project"' \
     _moma_preview_render_inputs
   _moma_preview_component \
-    "moma-prompt" "Free-text prompt with moma-title-sub's own look." \
+    "moma-prompt" \
     'answer="$(moma prompt "Continue?")"' \
     _moma_preview_render_prompt
   _moma_preview_component \
-    "moma-select" "Arrow-key selection with radio-style indicators." \
+    "moma-select" \
     'moma select "Development" "Staging" "Production" --title "Environment"' \
     _moma_preview_render_select
   _moma_preview_component \
     "moma-single-select-groups" \
-    "Radio-style selection organized under named group headings." \
     'moma single-select-groups --title "Features" --group "Docker" --option "Up" ...' \
     _moma_preview_render_single_select_groups
   _moma_preview_component \
     "moma-multi-select" \
-    "Toggle multiple choices with empty and filled square markers." \
     'moma multi-select "Docker" "CI" "Tests"' \
     _moma_preview_render_multi_select
   _moma_preview_component \
     "moma-multi-select-groups" \
-    "Toggle multiple choices organized under named group headings." \
     'moma multi-select-groups --title "Features" --group "North America" --option "United States" ...' \
     _moma_preview_render_multi_select_groups
   _moma_preview_component \
-    "moma-rabbit" "Branded activity and completion feedback." \
+    "moma-rabbit" \
     'moma rabbit "Preparing workspace" --info' \
     _moma_preview_render_rabbits
 
@@ -7628,17 +7622,15 @@ _moma_preview() {
     "Reusable interaction and environment checks for Bash workflows."
   _moma_preview_component \
     "moma-confirm" \
-    "Arrow-key Yes/No selection with y and n shortcuts." \
     'moma confirm "Continue?" --default yes' \
     _moma_preview_render_confirm
   local spinner_example="moma spinner \"\$pid\" \"Preparing workspace\""
   _moma_preview_component \
     "moma-spinner" \
-    "Process progress followed by a semantic completion message." \
     "$spinner_example" \
     _moma_preview_render_spinner
   _moma_preview_component \
-    "moma-command-check" "Check one or more executable dependencies." \
+    "moma-command-check" \
     'moma command-check bash curl' \
     _moma_preview_render_command_check
 
