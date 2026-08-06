@@ -11,11 +11,18 @@ _moma_render_input() {
   local no_color="$8"
   local max_width="${9:-}"
 
-  local label="$title"
-  if [[ -n "$icon" && -n "$label" ]]; then
-    label="$icon $label"
-  elif [[ -n "$icon" ]]; then
-    label="$icon"
+  # Measured separately from the title (never merged into the same
+  # string before it's truncated) so a multi-byte icon like → never
+  # throws off the width math - see _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    if [[ -n "$title" ]]; then
+      icon_prefix="$icon "
+      icon_width=$(($(_moma_display_width "$icon") + 1))
+    else
+      icon_prefix="$icon"
+      icon_width="$(_moma_display_width "$icon")"
+    fi
   fi
 
   local display_value=""
@@ -27,9 +34,10 @@ _moma_render_input() {
     display_value="$placeholder"
   fi
 
-  local label_width=${#label}
-  local display_width=${#display_value}
-  local natural_width=$((label_width + 4))
+  local title_width display_width
+  title_width="$(_moma_display_width "$title")"
+  display_width="$(_moma_display_width "$display_value")"
+  local natural_width=$((title_width + icon_width + 4))
   if ((display_width + 2 > natural_width)); then
     natural_width=$((display_width + 2))
   fi
@@ -37,10 +45,14 @@ _moma_render_input() {
     _moma_resolve_decor_width \
       "$natural_width" 40 "$width" "$max_width" 8
   )"
-  label="$(_moma_truncate_text "$label" "$((width - 4))")"
-  label_width=${#label}
+  local title_budget=$((width - 4 - icon_width))
+  ((title_budget > 0)) || title_budget=0
+  title="$(_moma_truncate_text "$title" "$title_budget")"
+  local label="${icon_prefix}${title}"
+  local label_width
+  label_width="$(_moma_display_width "$label")"
 
-  local resolved_color reset dash_count value_space display_line
+  local resolved_color reset dash_count value_space display_line display_line_width
   local -a display_lines=()
   mapfile -t display_lines < <(
     _moma_wrap_text "$display_value" "$((width - 2))"
@@ -69,7 +81,8 @@ _moma_render_input() {
       "$(_moma_repeat_char "─" "$dash_count")" "$reset"
   fi
   for display_line in "${display_lines[@]}"; do
-    value_space=$((width - ${#display_line} - 2))
+    display_line_width="$(_moma_display_width "$display_line")"
+    value_space=$((width - display_line_width - 2))
     printf '%b  │ %s%s │%b\n' \
       "$resolved_color" "$display_line" \
       "$(printf '%*s' "$value_space" '')" "$reset"
@@ -91,18 +104,26 @@ _moma_render_input_open() {
   local no_color="$9"
   local max_width="${10:-}"
 
-  local label="$title"
-  if [[ -n "$icon" && -n "$label" ]]; then
-    label="$icon $label"
-  elif [[ -n "$icon" ]]; then
-    label="$icon"
+  # Measured separately from the title (never merged into the same
+  # string before it's truncated) so a multi-byte icon like → never
+  # throws off the width math - see _moma_display_width.
+  local icon_prefix="" icon_width=0
+  if [[ -n "$icon" ]]; then
+    if [[ -n "$title" ]]; then
+      icon_prefix="$icon "
+      icon_width=$(($(_moma_display_width "$icon") + 1))
+    else
+      icon_prefix="$icon"
+      icon_width="$(_moma_display_width "$icon")"
+    fi
   fi
 
-  local label_width=${#label}
-  local placeholder_width=${#placeholder}
-  local default_width=${#default_value}
-  local value_width=${#value}
-  local natural_width=$((label_width + 4))
+  local title_width placeholder_width default_width value_width
+  title_width="$(_moma_display_width "$title")"
+  placeholder_width="$(_moma_display_width "$placeholder")"
+  default_width="$(_moma_display_width "$default_value")"
+  value_width="$(_moma_display_width "$value")"
+  local natural_width=$((title_width + icon_width + 4))
   ((placeholder_width + 2 <= natural_width)) ||
     natural_width=$((placeholder_width + 2))
   ((default_width + 2 <= natural_width)) || natural_width=$((default_width + 2))
@@ -111,8 +132,12 @@ _moma_render_input_open() {
     _moma_resolve_decor_width \
       "$natural_width" 40 "$width" "$max_width" 8
   )"
-  label="$(_moma_truncate_text "$label" "$((width - 4))")"
-  label_width=${#label}
+  local title_budget=$((width - 4 - icon_width))
+  ((title_budget > 0)) || title_budget=0
+  title="$(_moma_truncate_text "$title" "$title_budget")"
+  local label="${icon_prefix}${title}"
+  local label_width
+  label_width="$(_moma_display_width "$label")"
 
   local resolved_color reset dash_count prompt_text
   resolved_color="$(
