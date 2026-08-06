@@ -9,7 +9,7 @@ export const SITE = {
   description: 'Complete Moma Bash API and terminal component reference.',
   url: 'https://mgldvd.github.io/moma/',
   repoUrl: 'https://github.com/Mgldvd/moma',
-  version: '1.3.0',
+  version: '2.0.0',
   // Derived from API_ENTRIES.length (rather than hardcoded) so adding or
   // removing an entry there updates every count shown across the site
   // (footer) without a second place to remember to edit.
