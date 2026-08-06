@@ -7303,6 +7303,8 @@ _moma_preview_component() {
 # Render the primary-title examples.
 _moma_preview_render_title() {
   moma-title "Moma" "Terminal UI library"
+  moma-title "Backup" "Nightly job" --success --border line
+  moma-title "Moma" "Terminal UI library" --no-icon --border open
 }
 
 # Render Pagga ASCII header examples.
@@ -7313,11 +7315,15 @@ _moma_preview_render_header() {
 # Render the secondary-title examples.
 _moma_preview_render_title_sub() {
   moma-title-sub "Deployment" "Production environment"
+  moma-title-sub "Tests" "Running suite" --border mirror
+  moma-title-sub "Cleanup" --no-icon --border line
 }
 
 # Render the rule-first secondary-title examples.
 _moma_preview_render_sub_title() {
   moma-sub-title "Deployment" "Production environment"
+  moma-sub-title "Moma" "Terminal UI library" --border line
+  moma-sub-title "Moma" "Terminal UI library" --no-icon --border open
 }
 
 # Render the section-heading examples.
@@ -7346,12 +7352,14 @@ _moma_preview_render_simple_message() {
 # Render the list examples.
 _moma_preview_render_list() {
   moma-list "Clone repository" "Install dependencies" "Start application"
+  moma-list "Database ready" "Cache ready" --success
 }
 
 # Render the framed-box examples.
 _moma_preview_render_boxes() {
   moma-box "Your configuration is ready." --success
   moma-box "Back up your files before continuing." --warning
+  moma-box "Connection refused." --error
 }
 
 # Render the resume examples.
@@ -7362,17 +7370,22 @@ _moma_preview_render_resumes() {
   moma-resume --title "Review" --warning \
     --item "Environment" "production" \
     --text "Confirm the target before deploying."
+  moma-resume --title "Notes" --no-icon --border open \
+    --text "Freeform text without a definition list."
 }
 
 # Render the divider examples.
 _moma_preview_render_dividers() {
   moma-divider
   moma-divider --success --border line
+  moma-divider --icon "★" --border line
 }
 
 # Render the label examples.
 _moma_preview_render_label() {
   moma-label "TEXT HERE"
+  moma-label "DEPLOYMENT" --success
+  moma-label "END OF REPORT" --edge bottom --border open
 }
 
 # Render the input-field examples.
@@ -7385,6 +7398,7 @@ _moma_preview_render_inputs() {
 # Render the prompt examples.
 _moma_preview_render_prompt() {
   printf 'Yes, continue\n' | moma-prompt "Continue with the installation?" 2>&1
+  printf '\n' | moma-prompt "Deploy now?" --default "yes" 2>&1
 }
 
 # Render the single-selection examples.
@@ -7435,6 +7449,8 @@ _moma_preview_render_rabbits() {
   moma-rabbit "Preparing workspace" --info
   printf '\n'
   moma-rabbit "Task completed" --success
+  printf '\n'
+  moma-rabbit "Build needs attention" --warning
 }
 
 # Render the confirmation examples.
@@ -7451,7 +7467,7 @@ _moma_preview_render_spinner() {
 
 # Render the command-availability examples.
 _moma_preview_render_command_check() {
-  moma-command-check bash
+  moma-command-check bash curl
 }
 
 # Print terminal-preview follow-up commands.
