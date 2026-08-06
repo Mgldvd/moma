@@ -31,7 +31,9 @@ _moma_render_rabbit() {
     done
 
     local last_index=$((${#lines[@]} - 1))
-    local tail_length=$((${#lines[$last_index]} + 3))
+    local last_line_width
+    last_line_width="$(_moma_display_width "${lines[$last_index]}")"
+    local tail_length=$((last_line_width + 3))
     output+="  /$(_moma_repeat_char "⎺" "$tail_length")"$'\n'
   fi
 
