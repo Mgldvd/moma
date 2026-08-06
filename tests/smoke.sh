@@ -1347,6 +1347,7 @@ terminal_preview="$(NO_COLOR=1 "$MOMA_DIST" preview)"
 
 colored_terminal_preview="$(env -u NO_COLOR "$MOMA_DIST" preview)"
 preview_gray=$'\033[38;2;200;200;200m'
+preview_pink=$'\033[38;2;255;144;231m'
 preview_green=$'\033[32m'
 preview_red=$'\033[31m'
 preview_yellow=$'\033[33m'
@@ -1360,8 +1361,8 @@ expected_legend+="  ${preview_cyan}● info${preview_reset}"
 [[ "$colored_terminal_preview" == *"${preview_gray}────────────────"* ]]
 [[ "$colored_terminal_preview" == *"  02  Status and feedback"* ]]
 [[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
-[[ "$colored_terminal_preview" == *'$ moma section "Dependencies ready" --success'* ]]
-[[ "$colored_terminal_preview" == *'$ moma select "Development" "Staging" "Production" --title "Environment"'* ]]
+[[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma section \"Dependencies ready\" --success"* ]]
+[[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma select \"Development\" \"Staging\" \"Production\" --title \"Environment\""* ]]
 [[ "$colored_terminal_preview" == *"└─ ${preview_yellow}output${preview_reset}:"* ]]
 
 markdown_preview="$(PATH=/usr/bin:/bin "$MOMA_DIST" preview md)"
