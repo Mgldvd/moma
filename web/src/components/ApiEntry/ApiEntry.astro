@@ -24,12 +24,14 @@ const optionsId = `${id}-options`;
 
 // Every entry's output preview is a real screenshot (screenshots.ts, keyed
 // by id) except moma-update, which performs a real network install and
-// falls back to the one remaining hand-authored wireframe. Entries with
-// per-example frames (getCarouselFrames) show those in a carousel instead
-// of the single combined screenshot.
+// falls back to the one remaining hand-authored wireframe. Entries whose
+// catalog.yaml component has complementary shots (getCarouselFrames) show
+// a carousel instead of a single image: the principal screenshot always
+// leads as frame 0, followed by its complementary shots in order.
 const screenshot = getScreenshot(id);
-const carouselFrames = getCarouselFrames(id);
-const hasCarousel = Boolean(carouselFrames && carouselFrames.length > 1);
+const complementaryFrames = getCarouselFrames(id) ?? [];
+const carouselFrames = screenshot ? [screenshot, ...complementaryFrames] : complementaryFrames;
+const hasCarousel = carouselFrames.length > 1;
 const hasPreview = Boolean(screenshot || wireframe || hasCarousel);
 
 // Examples are only shown alongside an output preview - in practice every
@@ -107,7 +109,7 @@ const showExamples = Boolean(hasPreview && examples && examples.length > 0);
         hasCarousel ? (
             <div class="wireframe">
                 <p class="wireframe__label">Output</p>
-                <OutputCarousel name={name} frames={carouselFrames!} />
+                <OutputCarousel name={name} frames={carouselFrames} />
             </div>
         ) : screenshot ? (
             <div class="wireframe">

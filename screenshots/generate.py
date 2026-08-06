@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """Generate fixed-size terminal screenshots of the moma CLI.
 
-Every command in `moma_screenshots/commands.py` is executed for real inside
-a pseudo-terminal of a fixed size (see `RenderConfig`), so the resulting PNG
-- one per command - always has the exact same pixel dimensions no matter how
-short or long that command's actual output is: the pty (and therefore the
-image) is sized in advance, not fitted to the content afterward.
+Every shot in `catalog.yaml` is executed for real inside a pseudo-terminal
+of a fixed size (see `RenderConfig`), so the resulting PNG - one per shot -
+always has the exact same pixel dimensions no matter how short or long that
+shot's actual output is: the pty (and therefore the image) is sized in
+advance, not fitted to the content afterward.
 
 Usage (via uv, from this directory):
-    uv run generate.py                       # every catalog command
+    uv run generate.py                       # every catalog component
     uv run generate.py --list                # show what would run
     uv run generate.py --commands resume box  # only these (by id suffix)
     uv run generate.py --output ../.img       # write straight into the repo docs
+
+After reviewing the staged output/ folder, `uv run sync.py` publishes it
+into the docs site's own asset tree (`web/src/assets/screenshots/`).
 
 Requires the repo's dist/moma to be built (`../build.sh`) and the
 dependencies declared in pyproject.toml (`uv sync`).
@@ -31,7 +34,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from moma_screenshots import render  # noqa: E402
 from moma_screenshots.capture import run_in_pty  # noqa: E402
-from moma_screenshots.commands import COMMANDS, COMMANDS_BY_ID  # noqa: E402
+from moma_screenshots.catalog import load_catalog_or_exit  # noqa: E402
 
 
 def build_env(cols: int, rows: int) -> dict[str, str]:
@@ -92,6 +95,12 @@ def main() -> int:
         help="Only these commands (matched by id or id suffix, e.g. 'resume' for 'moma-resume'). Default: all.",
     )
     parser.add_argument(
+        "--catalog",
+        type=Path,
+        default=SCRIPT_DIR / "catalog.yaml",
+        help="Path to the screenshot catalog (default: screenshots/catalog.yaml).",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=SCRIPT_DIR / "output",
@@ -117,9 +126,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    components = load_catalog_or_exit(args.catalog)
+    components_by_id = {component.id: component for component in components}
+
     if args.list:
-        for command in COMMANDS:
-            print(command.id)
+        for component in components:
+            print(component.id)
         return 0
 
     if not args.moma.is_file():
@@ -133,13 +145,13 @@ def main() -> int:
     if args.commands:
         selected = []
         for wanted in args.commands:
-            match = COMMANDS_BY_ID.get(wanted) or COMMANDS_BY_ID.get(f"moma-{wanted}")
+            match = components_by_id.get(wanted) or components_by_id.get(f"moma-{wanted}")
             if not match:
                 print(f"error: unknown command id: {wanted}", file=sys.stderr)
                 return 1
             selected.append(match)
     else:
-        selected = COMMANDS
+        selected = components
 
     cfg = render.RenderConfig(
         cols=args.cols, rows=args.rows, font_size=args.font_size
@@ -147,40 +159,42 @@ def main() -> int:
     args.output.mkdir(parents=True, exist_ok=True)
 
     width, height = render.canvas_size(cfg)
-    print(f"Rendering {len(selected)} command(s) at a fixed {width}x{height}px...")
+    print(f"Rendering {len(selected)} component(s) at a fixed {width}x{height}px...")
 
-    frame_total = 0
-    for command in selected:
+    complementary_total = 0
+    for component in selected:
+        principal_shot = component.principal_shot
         image = render_script(
-            command.script, command.title, label=command.id,
+            "\n".join(principal_shot.commands), component.title, label=component.id,
             moma_dist=args.moma, cfg=cfg, timeout=args.timeout,
         )
         assert image.size == (width, height), (
-            f"{command.id} produced {image.size}, expected {(width, height)}"
+            f"{component.id} produced {image.size}, expected {(width, height)}"
         )
-        out_path = args.output / f"{command.id}.png"
+        out_path = args.output / f"{component.id}.png"
         image.save(out_path)
         print(f"  {_relative_to_repo(out_path)}")
 
-        if command.frames:
-            frame_dir = args.output / "carousel" / command.id
-            frame_dir.mkdir(parents=True, exist_ok=True)
-            for index, frame_script in enumerate(command.frames):
-                frame_image = render_script(
-                    frame_script, command.title, label=f"{command.id} frame {index}",
+        complementary_shots = component.complementary_shots
+        if complementary_shots:
+            shot_dir = args.output / "carousel" / component.id
+            shot_dir.mkdir(parents=True, exist_ok=True)
+            for index, shot in enumerate(complementary_shots):
+                shot_image = render_script(
+                    "\n".join(shot.commands), component.title, label=f"{component.id} shot {index}",
                     moma_dist=args.moma, cfg=cfg, timeout=args.timeout,
                 )
-                assert frame_image.size == (width, height), (
-                    f"{command.id} frame {index} produced {frame_image.size}, expected {(width, height)}"
+                assert shot_image.size == (width, height), (
+                    f"{component.id} shot {index} produced {shot_image.size}, expected {(width, height)}"
                 )
-                frame_path = frame_dir / f"{index}.png"
-                frame_image.save(frame_path)
-                print(f"  {_relative_to_repo(frame_path)}")
-                frame_total += 1
+                shot_path = shot_dir / f"{index}.png"
+                shot_image.save(shot_path)
+                print(f"  {_relative_to_repo(shot_path)}")
+                complementary_total += 1
 
     print(
         f"Done. {len(selected)} screenshot(s)"
-        + (f" + {frame_total} carousel frame(s)" if frame_total else "")
+        + (f" + {complementary_total} carousel frame(s)" if complementary_total else "")
         + f" written to {args.output}"
     )
     return 0
