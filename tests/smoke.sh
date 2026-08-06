@@ -1358,8 +1358,8 @@ expected_legend+="  ${preview_red}● error${preview_reset}"
 expected_legend+="  ${preview_yellow}● warning${preview_reset}"
 expected_legend+="  ${preview_cyan}● info${preview_reset}"
 [[ "$colored_terminal_preview" == *"$expected_legend"* ]]
-[[ "$colored_terminal_preview" == *"${preview_gray}────────────────"* ]]
-[[ "$colored_terminal_preview" == *"  01  Visual"* ]]
+[[ "$colored_terminal_preview" == *"${preview_gray}▍"* ]]
+[[ "$colored_terminal_preview" == *"▍ 01  Visual"* ]]
 [[ "$colored_terminal_preview" == *"${preview_gray}┌─ moma-section"* ]]
 [[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma section \"Dependencies ready\" --success"* ]]
 [[ "$colored_terminal_preview" == *"${preview_pink}\$${preview_gray} moma select \"Development\" \"Staging\" \"Production\" --title \"Environment\""* ]]
