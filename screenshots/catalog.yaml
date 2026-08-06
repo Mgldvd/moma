@@ -1,0 +1,450 @@
+# Catalog of moma CLI invocations to screenshot.
+#
+# Loaded by moma_screenshots/catalog.py. Each component has one or more
+# "shots" - a shot is a group of one or more commands rendered together,
+# after `source dist/moma`, into a single screenshot (real shell source,
+# run verbatim inside a pty, never a stand-in or a description of what the
+# command does). Exactly one shot per component must be marked
+# `principal: true`: it produces `<id>.png`, embedded in README.md,
+# docs/moma-docs.md, and (as the website's carousel frame 0) the docs site.
+# Every other shot is "complementary" - each renders as its own
+# `carousel/<id>/<index>.png`, and the docs site shows the full principal +
+# complementary set as one carousel.
+#
+# Every component carries at least 3 complementary shots, so every entry's
+# carousel on the docs site has real variety to page through - the one
+# exception is moma-version, which takes no flags and therefore has no
+# distinct invocation to show beyond its single principal shot.
+#
+# Interactive components use their non-interactive flags (--choose,
+# --answer) so a run is deterministic, the same way src/preview/main.sh and
+# example.sh already demonstrate them; moma-update is intentionally
+# excluded because it performs a real network install and has no such flag.
+
+components:
+  - id: moma-header
+    title: moma header
+    shots:
+      - principal: true
+        commands:
+          - moma header "Moma"
+          - moma header "Deploy" --color pink --margin-bottom 3
+          - moma header "Build ready" --margin-top 0 --margin-bottom 0 --margin-left 0 --no-color
+      - commands:
+          - moma header "Moma is awsome"
+      - commands:
+          - moma header "Deploy" --color red --margin-top 3
+      - commands:
+          - moma header "Build ready" --color green --margin-top 3 --margin-bottom 0 --margin-left 3
+
+  - id: moma-title
+    title: moma title
+    shots:
+      - principal: true
+        commands:
+          - moma title "Moma" "Terminal UI library"
+          - moma title "Deploy" "Production" --primary cyan
+          - moma title "Backup" "Nightly job" --accent yellow --min-width 48
+      - commands:
+          - moma title "API Gateway" "Service mesh"
+      - commands:
+          - moma title "Rollback" "Staging" --primary yellow
+      - commands:
+          - moma title "Cleanup" "Nightly job" --accent cyan --min-width 40
+
+  - id: moma-title-sub
+    title: moma title-sub
+    shots:
+      - principal: true
+        commands:
+          - moma title-sub "Dependencies" "Installing packages"
+          - moma title-sub "Deploy" "Production" --color cyan
+          - moma title-sub "Tests" --message "Running suite" --min-width 42
+      - commands:
+          - moma title-sub "Cache" "Warming up"
+      - commands:
+          - moma title-sub "Rollback" "Staging" --color yellow
+      - commands:
+          - moma title-sub "Backups" --message "Archiving" --min-width 36
+
+  - id: moma-sub-title
+    title: moma sub-title
+    shots:
+      - principal: true
+        commands:
+          - moma sub-title "Moma" "Terminal UI library"
+          - moma sub-title "Moma" "Terminal UI library" --no-icon --border open
+          - moma sub-title "Moma" "Terminal UI library" --border line
+      - commands:
+          - moma sub-title "Moma CLI" "v2 release notes"
+      - commands:
+          - moma sub-title "Moma CLI" "v2 release notes" --no-icon --border line
+      - commands:
+          - moma sub-title "Moma CLI" "v2 release notes" --border open
+
+  - id: moma-section
+    title: moma section
+    shots:
+      - principal: true
+        commands:
+          - moma section "Dependencies ready" --success
+          - moma section "Configuration failed" --error
+          - moma section "Next step" --info --icon "→"
+      - commands:
+          - moma section "Build cache warmed" --success
+      - commands:
+          - moma section "Migration failed" --error
+      - commands:
+          - moma section "Awaiting approval" --info --icon "→"
+
+  - id: moma-msg
+    title: moma msg
+    shots:
+      - principal: true
+        commands:
+          - moma msg "Package installed" --success
+          - moma msg "Connection refused" --error
+          - moma msg "Downloading metadata" --color cyan --icon "→"
+      - commands:
+          - moma msg "Backup completed" --success
+      - commands:
+          - moma msg "Disk space low" --error
+      - commands:
+          - moma msg "Syncing changes" --color yellow --icon "→"
+
+  - id: moma-msg-simple
+    title: moma msg-simple
+    shots:
+      - principal: true
+        commands:
+          - moma msg-simple "Package installed"
+          - moma msg-simple "Package installation failed" --error
+      - commands:
+          - moma msg-simple "Cache cleared"
+      - commands:
+          - moma msg-simple "Retrying" --color cyan
+      - commands:
+          - moma msg-simple "Queued" --color yellow --marker "•"
+
+  - id: moma-list
+    title: moma list
+    shots:
+      - principal: true
+        commands:
+          - moma list "Clone repository" "Install dependencies" "Start application"
+          - moma list "Database ready" "Cache ready" --success
+          - moma list "Review logs" "Retry deployment" --marker "→" --color yellow
+      - commands:
+          - moma list "Build cache warmed" "Assets compiled" --success
+      - commands:
+          - moma list "Migration failed" "Rollback required" --error
+      - commands:
+          - moma list "Configure DNS" "Update TLS" --marker "→" --color cyan
+
+  - id: moma-box
+    title: moma box
+    shots:
+      - principal: true
+        commands:
+          - moma box "Configuration is ready." --success
+          - moma box "Review the deployment settings." --warning --width 48
+          - moma box "A long notice wraps inside its border." --info --max-width 32
+      - commands:
+          - moma box "Backup completed successfully." --success
+      - commands:
+          - moma box "Certificate expires soon." --warning --width 44
+      - commands:
+          - moma box "This is a fairly long informational message that wraps." --info --max-width 36
+
+  - id: moma-resume
+    title: moma resume
+    shots:
+      - principal: true
+        commands:
+          - |-
+            moma resume --title "Shells" --color blue \
+              --item "Bash" "GNU command shell." \
+              --item "Zsh" "Interactive shell with completion."
+          - |-
+            moma resume --title "Summary" \
+              --text "All checks passed." \
+              --text "No manual follow-up required."
+          - |-
+            moma resume --title "Review" --warning \
+              --item "Environment" "production" \
+              --text "Confirm the target before deploying."
+      - commands:
+          - |-
+            moma resume --title "Services" --color cyan \
+              --item "API" "Handles HTTP requests." \
+              --item "Worker" "Processes background jobs."
+      - commands:
+          - |-
+            moma resume --title "Migration" \
+              --text "Schema updated." \
+              --text "No rollback needed."
+      - commands:
+          - |-
+            moma resume --title "Incident" --warning \
+              --item "Severity" "P2" \
+              --text "Escalate if unresolved in 30 minutes."
+
+  - id: moma-divider
+    title: moma divider
+    shots:
+      - principal: true
+        commands:
+          - moma divider
+          - moma divider --success --border line
+          - moma divider --icon "★" --border line
+      - commands:
+          - moma divider --border line
+      - commands:
+          - moma divider --error --border line
+      - commands:
+          - moma divider --icon "→" --success
+
+  - id: moma-label
+    title: moma label
+    shots:
+      - principal: true
+        commands:
+          - moma label "PROJECT NAME"
+          - moma label "DEPLOYMENT" --success
+          - moma label "NOTES" --width 52 --color cyan --icon "→"
+          - moma label "END OF REPORT" --edge bottom --border open
+      - commands:
+          - moma label "BUILD STATUS"
+      - commands:
+          - moma label "ROLLOUT" --success
+      - commands:
+          - moma label "WARNINGS" --width 48 --color yellow --icon "!"
+      - commands:
+          - moma label "CHANGELOG" --edge bottom --border open
+
+  - id: moma-input
+    title: moma input
+    shots:
+      - principal: true
+        commands:
+          - moma input --title "Project name" --placeholder "my-project"
+          - moma input --title "Environment" --value "production" --info
+          - moma input --title "Danger zone" --warning --color yellow
+      - commands:
+          - moma input --title "Service name" --placeholder "api-gateway"
+      - commands:
+          - moma input --title "Region" --value "us-east-1" --info
+      - commands:
+          - moma input --title "Force push" --warning --color red
+
+  - id: moma-prompt
+    title: moma prompt
+    shots:
+      - principal: true
+        commands:
+          - moma prompt "Continue with the installation?" <<< "Yes, continue"
+          - moma prompt "Deploy now?" --default "yes" <<< ""
+          - moma prompt "API token" --secret --required <<< "s3cr3t-token"
+      - commands:
+          - moma prompt "Confirm deletion?" <<< "yes"
+      - commands:
+          - moma prompt "Retry attempts" --default "3" <<< ""
+      - commands:
+          - moma prompt "SSH passphrase" --secret <<< "correct horse battery staple"
+
+  - id: moma-select
+    title: moma select
+    shots:
+      - principal: true
+        commands:
+          - moma select "Development" "Staging" "Production" --title "Environment" --choose 2
+      - commands:
+          - moma select "Postgres" "MySQL" "SQLite" --title "Database" --choose 1
+      - commands:
+          - moma select "US" "EU" "APAC" --title "Region" --initial 2 --color cyan --choose 2
+      - commands:
+          - moma select "Blue" "Green" "Canary" --title "Deployment strategy" --choose 1
+
+  - id: moma-single-select
+    title: moma single-select
+    shots:
+      - principal: true
+        commands:
+          - moma single-select "info" "debug" "warn" --title "Log level" --choose 1
+      - commands:
+          - moma single-select "small" "medium" "large" --title "Instance size" --choose 2
+      - commands:
+          - moma single-select "low" "medium" "high" --title "Priority" --initial 2 --choose 3
+      - commands:
+          - moma single-select "us-east" "eu-west" "ap-south" --title "Region" --color yellow --choose 2
+
+  - id: moma-single-select-groups
+    title: moma single-select-groups
+    shots:
+      - principal: true
+        commands:
+          - |-
+            moma single-select-groups \
+              --title "Deployment command" \
+              --group "Docker" --option "Up" --option "Down" --option "Stop" \
+              --group "npm" --option "install" --option "run dev" --option "run deploy" \
+              --choose 1
+      - commands:
+          - |-
+            moma single-select-groups \
+              --title "Backup target" \
+              --group "Local" --option "Disk" --option "USB" \
+              --group "Cloud" --option "S3" --option "GCS" \
+              --choose 4
+      - commands:
+          - |-
+            moma single-select-groups \
+              --title "Release channel" \
+              --group "Stable" --option "1.0" --option "1.1" \
+              --group "Beta" --option "2.0-beta" --option "2.1-beta" \
+              --choose 3
+      - commands:
+          - |-
+            moma single-select-groups \
+              --title "Release checklist" \
+              --group "Frontend" --option "Lint" --option "Build" \
+              --group "Backend" --option "Test" --option "Deploy" \
+              --choose 2
+
+  - id: moma-multi-select
+    title: moma multi-select
+    shots:
+      - principal: true
+        commands:
+          - moma multi-select "Docker" "CI" "Tests" --title "Features" --choose 1,3
+      - commands:
+          - moma multi-select "Linting" "Formatting" "Type checks" --title "Pre-commit hooks" --choose 1,2
+      - commands:
+          - moma multi-select "Docker" "CI" "Tests" --title "Features" --choose 1,2,3 --required
+      - commands:
+          - moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required --choose 2
+
+  - id: moma-multi-select-groups
+    title: moma multi-select-groups
+    shots:
+      - principal: true
+        commands:
+          - |-
+            moma multi-select-groups \
+              --title "Deployment regions" \
+              --group "North America" --option "United States" --option "Canada" \
+              --option "Mexico" \
+              --group "South America" --option "Colombia" --option "Argentina" \
+              --option "Peru" \
+              --choose 1,4
+      - commands:
+          - |-
+            moma multi-select-groups \
+              --title "Notification channels" \
+              --group "Chat" --option "Slack" --option "Discord" \
+              --group "Email" --option "Team" --option "Oncall" \
+              --choose 2,4
+      - commands:
+          - |-
+            moma multi-select-groups \
+              --title "Deployment regions" \
+              --group "North America" --option "United States" --option "Canada" \
+              --option "Mexico" \
+              --group "South America" --option "Colombia" --option "Argentina" \
+              --option "Peru" \
+              --choose 1,3 --required
+      - commands:
+          - |-
+            moma multi-select-groups \
+              --title "Deployment regions" \
+              --group "North America" --option "United States" --option "Canada" \
+              --option "Mexico" \
+              --group "South America" --option "Colombia" --option "Argentina" \
+              --option "Peru" \
+              --choose 2,5
+
+  - id: moma-rabbit
+    title: moma rabbit
+    shots:
+      - principal: true
+        commands:
+          - moma rabbit "Preparing workspace" --info
+          - moma rabbit "Deployment complete" --success
+          - moma rabbit "Build needs attention" --warning --icon "!"
+      - commands:
+          - moma rabbit "Fetching dependencies" --info
+      - commands:
+          - moma rabbit "Tests passed" --success
+      - commands:
+          - moma rabbit "Disk almost full" --warning --icon "!"
+
+  - id: moma-confirm
+    title: moma confirm
+    shots:
+      - principal: true
+        commands:
+          - moma confirm "Continue with deployment?" --default yes --answer yes
+      - commands:
+          - moma confirm "Push to main?" --answer yes
+      - commands:
+          - moma confirm "Delete the cache?" --answer no
+      - commands:
+          - moma confirm "Rotate credentials?" --default no --answer yes
+
+  - id: moma-spinner
+    title: moma spinner
+    shots:
+      - principal: true
+        commands:
+          - |-
+            sleep 0.2 &
+            pid=$!
+            moma spinner "$pid" "Preparing workspace" --delay 0.03
+      - commands:
+          - |-
+            sleep 0.12 &
+            pid=$!
+            moma spinner "$pid" "Compiling" --delay 0.03
+      - commands:
+          - |-
+            sleep 0.1 &
+            pid=$!
+            moma spinner "$pid" "Backing up" --delay 0.02
+      - commands:
+          - |-
+            sleep 0.15 &
+            moma spinner --pid "$!" --message "Building" --delay 0.04
+
+  - id: moma-command-check
+    title: moma command-check
+    shots:
+      # The principal mirrors apiEntries.ts's first two examples for
+      # moma-command-check verbatim; the complementary shots below stay
+      # distinct from those two. The last one's `exit 1` is safe here even
+      # though it would truncate a *combined* capture if git were ever
+      # missing: each shot is its own independent pty run, and git is
+      # expected to be available wherever this catalog is rendered.
+      - principal: true
+        commands:
+          - moma command-check bash curl git
+          - moma command-check docker --quiet
+      - commands:
+          - moma command-check git curl
+      - commands:
+          - moma command-check bash --quiet
+      - commands:
+          - |-
+            if ! moma command-check git; then
+              exit 1
+            fi
+
+  - id: moma-version
+    title: moma version
+    shots:
+      # moma version takes no flags - every invocation prints the exact
+      # same line, so there's no distinct content for complementary shots
+      # to add. This is the one component in the catalog with just its
+      # principal shot; see the module header comment above.
+      - principal: true
+        commands:
+          - moma version
