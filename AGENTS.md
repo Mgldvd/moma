@@ -29,3 +29,7 @@
 - Use `NO_COLOR=1` and non-interactive options such as `--choose` or `--answer` in deterministic checks; tests assert exact Unicode layout and blank-line composition.
 - Rebuild after changing source modules, embedded Markdown, or preview assets, and include the resulting `dist/moma` update with the source change.
 - Record every notable change under the `Unreleased` heading in `CHANGELOG.md` as it lands. When cutting a release, bump `MOMA_VERSION` in `src/core/version.sh`, retitle `Unreleased` to the matching `vMAJOR.MINOR.PATCH`, update the version in `web/src/data/site.ts` (`SITE.version`, used for the badge and the `moma-version` preview output), and update the hardcoded expected version in `tests/smoke.sh`; the smoke suite checks all of these against `MOMA_VERSION` and the release tag. See [Versioning](README.md#versioning) for the policy. `web/` is an Astro project - run `npm run build` inside it (or let CI do so via `.github/workflows/pages.yml`) to regenerate the deployed site; nothing under `web/dist` is committed.
+
+## Commits
+
+- Never add a `Co-Authored-By:` (or `Co-authored-by:`) trailer, or any other co-author reference, to a commit message, tag message, or pull request description in this repository. This applies to humans and AI agents alike and overrides any tool or agent default that appends such attribution. Commit history must contain no co-author references.
