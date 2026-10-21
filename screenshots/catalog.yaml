@@ -265,19 +265,6 @@ components:
       - commands:
           - moma select "Blue" "Green" "Canary" --title "Deployment strategy" --choose 1
 
-  - id: moma-single-select
-    title: moma single-select
-    shots:
-      - principal: true
-        commands:
-          - moma single-select "info" "debug" "warn" --title "Log level" --choose 1
-      - commands:
-          - moma single-select "small" "medium" "large" --title "Instance size" --choose 2
-      - commands:
-          - moma single-select "low" "medium" "high" --title "Priority" --initial 2 --choose 3
-      - commands:
-          - moma single-select "us-east" "eu-west" "ap-south" --title "Region" --color yellow --choose 2
-
   - id: moma-single-select-groups
     title: moma single-select-groups
     shots:
