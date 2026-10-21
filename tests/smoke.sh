@@ -786,6 +786,30 @@ multi_select_visual="$(
 )"
 [[ "$multi_select_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › ▣ Docker\n    □ CI\n    ▣ Tests\n  ↑/↓ move · Space toggle · Enter confirm · q cancel\n\nNEXT' ]]
 
+multi_select_brackets_visual="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select \
+    Docker CI Tests --title Features --choose 1,3 --checkbox brackets \
+    2>&1 >/dev/null
+)"
+[[ "$multi_select_brackets_visual" == $'  ▪  Features\n  └──────────────────────────────\n  › [ x ] Docker\n    [   ] CI\n    [ x ] Tests\n  ↑/↓ move · Space toggle · Enter confirm · q cancel' ]]
+
+multi_select_checkbox_equals="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select \
+    Docker CI Tests --choose 2 --checkbox=brackets 2>&1 >/dev/null
+)"
+[[ "$multi_select_checkbox_equals" == *"› [   ] Docker"* ]]
+[[ "$multi_select_checkbox_equals" == *"  [ x ] CI"* ]]
+
+if NO_COLOR=1 "$MOMA_DIST" multi-select One --choose 1 \
+  --checkbox round >/dev/null 2>&1; then
+  exit 1
+fi
+multi_select_checkbox_error="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select One --choose 1 \
+    --checkbox round 2>&1 >/dev/null || true
+)"
+[[ "$multi_select_checkbox_error" == 'moma-multi-select: invalid checkbox style: round' ]]
+
 multi_select_groups_output="$(
   NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
     --title Features \
@@ -827,6 +851,33 @@ expected_multi_groups+=$'    North America\n    ▨ All\n  › ▣ United States
 expected_multi_groups+=$'    South America\n    □ All\n    □ Colombia\n    □ Argentina\n    □ Peru\n'
 expected_multi_groups+='  ↑/↓ move · Space toggle · Enter confirm · q cancel'
 [[ "$multi_select_groups_visual" == "$expected_multi_groups" ]]
+
+multi_select_groups_brackets_visual="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --title Features \
+    --group "North America" --option "United States" --option Canada \
+    --option Mexico \
+    --group "South America" --option Colombia --option Argentina \
+    --option Peru \
+    --choose 1,3 --checkbox brackets 2>&1 >/dev/null
+)"
+expected_multi_groups_brackets=$'  ▪  Features\n  └──────────────────────────────\n\n'
+expected_multi_groups_brackets+=$'    [ - ] Select All\n\n'
+expected_multi_groups_brackets+=$'    North America\n    [ - ] All\n'
+expected_multi_groups_brackets+=$'  › [ x ] United States\n    [   ] Canada\n'
+expected_multi_groups_brackets+=$'    [ x ] Mexico\n\n'
+expected_multi_groups_brackets+=$'    South America\n    [   ] All\n'
+expected_multi_groups_brackets+=$'    [   ] Colombia\n    [   ] Argentina\n'
+expected_multi_groups_brackets+=$'    [   ] Peru\n'
+expected_multi_groups_brackets+='  ↑/↓ move · Space toggle · Enter confirm · q cancel'
+[[ "$multi_select_groups_brackets_visual" == "$expected_multi_groups_brackets" ]]
+
+multi_select_groups_checkbox_error="$(
+  NO_COLOR=1 "$MOMA_DIST" multi-select-groups \
+    --group Docker --option Up --choose 1 \
+    --checkbox round 2>&1 >/dev/null || true
+)"
+[[ "$multi_select_groups_checkbox_error" == 'moma-multi-select-groups: invalid checkbox style: round' ]]
 
 set +e
 NO_COLOR=1 "$MOMA_DIST" single-select-groups --title Features \
@@ -981,6 +1032,18 @@ if [[ "${MOMA_TEST_TTY:-1}" == "1" ]] && command -v script &>/dev/null; then
   [[ "$multi_select_tty_output" == *'▣ Docker'* ]]
   [[ "$multi_select_tty_output" == *'▣ CI'* ]]
   [[ "$multi_select_tty_output" == *$'Docker\r\nCI\r'* ]]
+
+  multi_select_brackets_tty_output="$(
+    printf $' \033[B \n' |
+      script -qec \
+        "NO_COLOR=1 '$MOMA_DIST' multi-select Docker CI Tests \
+--title Features --checkbox brackets" /dev/null
+  )"
+  [[ "$multi_select_brackets_tty_output" == *'[   ] Tests'* ]]
+  [[ "$multi_select_brackets_tty_output" == *'[ x ] Docker'* ]]
+  [[ "$multi_select_brackets_tty_output" == *'[ x ] CI'* ]]
+  [[ "$multi_select_brackets_tty_output" != *'▣'* ]]
+  [[ "$multi_select_brackets_tty_output" == *$'Docker\r\nCI\r'* ]]
 
   # A list taller than the terminal must scroll a fixed-size window instead
   # of losing track of the active row: every redraw moves the cursor up by

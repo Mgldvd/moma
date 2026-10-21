@@ -153,6 +153,11 @@ and otherwise fills whatever is still unselected. Neither row counts as an
 option or is ever printed on stdout, so `--initial`, `--choose`, and
 `--selected` numbering is unaffected.
 
+Both multiple-selection components accept `--checkbox box|brackets`. `box`
+(the default) draws the `▣` / `▨` / `□` glyphs above; `brackets` draws the
+plain-text `[ x ]` (selected), `[ - ]` (partially selected "All" rows), and
+`[   ]` (empty) instead, for terminals and fonts without geometric shapes.
+
 When the full grouped layout is taller than the terminal, `moma-multi-select-groups`
 switches to a compact scrolling window like `moma-multi-select`'s: group
 heading lines are dropped, each group's "All" row is labeled with its group
@@ -795,10 +800,10 @@ action="$(
 
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not; `--checkbox brackets` switches to the plain-text `[ x ]` and `[   ]`. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
 
 ```text
-moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
+moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required] [--checkbox box|brackets]
 ```
 
 ```bash
@@ -810,16 +815,19 @@ features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"
 
 # Example 3
 features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
+
+# Example 4
+features="$(moma multi-select "Docker" "CI" "Tests" --checkbox brackets)"
 ```
 
 ![moma-multi-select preview](../.img/moma-multi-select.png)
 
 ### `moma-multi-select-groups`
 
-Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout. When the full layout is taller than the terminal, interactive navigation switches to a compact scrolling window with a "N more above/below" line: heading text is dropped and each group's All row is labeled with its group name instead, but the blank line between groups stays, so every option remains reachable, selectable, and visually grouped; `--choose` always renders the full layout, unwindowed.
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout. `--checkbox brackets` draws `[ x ]`, `[ - ]` (partial "All" rows), and `[   ]` instead of `▣`, `▨`, and `□`. When the full layout is taller than the terminal, interactive navigation switches to a compact scrolling window with a "N more above/below" line: heading text is dropped and each group's All row is labeled with its group name instead, but the blank line between groups stays, so every option remains reachable, selectable, and visually grouped; `--choose` always renders the full layout, unwindowed.
 
 ```text
-moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
+moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required] [--checkbox box|brackets]
 ```
 
 ```bash
@@ -5113,6 +5121,32 @@ _moma_multi_select_transition() {
   printf '%s\t%s\t%s\n' "$active_index" "$selected_state" "$result"
 }
 
+# Return success for a supported multiple-selection checkbox style.
+_moma_select_is_checkbox_style() {
+  case "$1" in
+    box | brackets) return 0 ;;
+  esac
+  return 1
+}
+
+# Print the checkbox glyph for a selection state ("all", "some", or "none")
+# in the given style: "box" uses ▣ / ▨ / □, and "brackets" uses the
+# plain-text [ x ] / [ - ] / [   ] for terminals and fonts without the
+# geometric shapes.
+_moma_select_checkbox_glyph() {
+  local style="$1"
+  local state="$2"
+
+  case "${style}:${state}" in
+    brackets:all) printf '[ x ]' ;;
+    brackets:some) printf '[ - ]' ;;
+    brackets:*) printf '[   ]' ;;
+    *:all) printf '▣' ;;
+    *:some) printf '▨' ;;
+    *) printf '□' ;;
+  esac
+}
+
 # Return success when an index exists in a selected-state list.
 _moma_multi_is_selected() {
   local selected_state="$1"
@@ -5626,7 +5660,8 @@ EOF
 # slice around active_index is drawn, with a "more above/below" indicator,
 # so a redraw always rewrites the same number of lines regardless of list
 # length. Non-interactive callers (--choose) pass windowed=false so their
-# output stays complete and deterministic.
+# output stays complete and deterministic. checkbox is a style accepted by
+# _moma_select_checkbox_glyph.
 _moma_render_multi_select() {
   local title="$1"
   local active_index="$2"
@@ -5635,7 +5670,8 @@ _moma_render_multi_select() {
   local no_color="$5"
   local redraw="$6"
   local windowed="$7"
-  shift 7
+  local checkbox="$8"
+  shift 8
   local -a options=("$@")
   local total="${#options[@]}"
 
@@ -5663,11 +5699,16 @@ _moma_render_multi_select() {
       "$window_start" "$((total - window_start - window_count))" "$redraw"
   fi
 
+  local glyph_on glyph_off
+  glyph_on="$(_moma_select_checkbox_glyph "$checkbox" all)"
+  glyph_off="$(_moma_select_checkbox_glyph "$checkbox" none)"
+
   local row flat_index glyph active
   for ((row = 0; row < window_count; row++)); do
     flat_index=$((window_start + row))
-    glyph="□"
-    _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
+    glyph="$glyph_off"
+    _moma_multi_is_selected "$selected_state" "$flat_index" &&
+      glyph="$glyph_on"
     active=false
     ((flat_index != active_index)) || active=true
     _moma_select_render_row \
@@ -5688,6 +5729,7 @@ moma-multi-select() {
   local choose_spec=""
   local choose_set=false
   local required=false
+  local checkbox=box
   local no_color=false
   local -a options=()
   local selected_state=""
@@ -5760,15 +5802,28 @@ moma-multi-select() {
         required=true
         shift
         ;;
+      --checkbox)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select "$1"
+          return 2
+        fi
+        checkbox="$2"
+        shift 2
+        ;;
+      --checkbox=*)
+        checkbox="${1#*=}"
+        shift
+        ;;
       --no-color)
         no_color=true
         shift
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-multi-select "option"... [--title <text>] [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--color <color>] [--no-color]
+Usage: moma-multi-select "option"... [--title <text>] [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--checkbox box|brackets] [--color <color>] [--no-color]
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
+--checkbox box (default) draws ▣ and □; --checkbox brackets draws [ x ] and [   ].
 Number lists are one-based and comma-separated. --choose selects immediately for scripts and tests.
 Each selected value is printed on its own line, in original visual order.
 EOF
@@ -5796,6 +5851,10 @@ EOF
   fi
   if ! _moma_is_index_in_range "$initial" "${#options[@]}"; then
     printf 'moma-multi-select: invalid initial option: %s\n' "$initial" >&2
+    return 2
+  fi
+  if ! _moma_select_is_checkbox_style "$checkbox"; then
+    printf 'moma-multi-select: invalid checkbox style: %s\n' "$checkbox" >&2
     return 2
   fi
 
@@ -5827,7 +5886,7 @@ EOF
     fi
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" false false "${options[@]}"
+      "$no_color" false false "$checkbox" "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -5842,7 +5901,7 @@ EOF
 
   _moma_render_multi_select \
     "$title" "$active_index" "$selected_state" "$color" \
-    "$no_color" false true "${options[@]}"
+    "$no_color" false true "$checkbox" "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -5877,7 +5936,7 @@ EOF
 
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" true true "${options[@]}"
+      "$no_color" true true "$checkbox" "${options[@]}"
   done
 }
 
@@ -5916,6 +5975,7 @@ _moma_multi_groups_window_blank_count() {
 # a session-constant budget; this keeps the total printed line count fixed
 # for the life of one component invocation, which is what makes
 # _moma_term_move_up's plain line-counting correct on every redraw.
+# checkbox is a style accepted by _moma_select_checkbox_glyph.
 _moma_render_multi_select_groups() {
   local title="$1"
   local active_row="$2"
@@ -5924,8 +5984,9 @@ _moma_render_multi_select_groups() {
   local no_color="$5"
   local redraw="$6"
   local windowed="$7"
-  local num_groups="$8"
-  shift 8
+  local checkbox="$8"
+  local num_groups="$9"
+  shift 9
   local -a group_names=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a group_counts=("${@:1:$num_groups}")
@@ -5938,6 +5999,9 @@ _moma_render_multi_select_groups() {
   # group, so the unwindowed blank-separator count is always this, with no
   # need to scan for it.
   local full_blank_count=$((1 + num_groups))
+  local glyph_on glyph_off
+  glyph_on="$(_moma_select_checkbox_glyph "$checkbox" all)"
+  glyph_off="$(_moma_select_checkbox_glyph "$checkbox" none)"
 
   local compact=false window_start=0 window_count="$row_count" \
     indicator_lines=0 blank_count="$full_blank_count" pad_lines=0
@@ -6028,7 +6092,8 @@ _moma_render_multi_select_groups() {
       case "$kind" in
         selectall)
           glyph="$(
-            _moma_multi_groups_range_glyph "$selected_state" 0 "$total_options"
+            _moma_multi_groups_range_glyph \
+              "$checkbox" "$selected_state" 0 "$total_options"
           )"
           label="Select All"
           ;;
@@ -6038,14 +6103,15 @@ _moma_render_multi_select_groups() {
               "${group_counts[@]}"
           )"
           glyph="$(
-            _moma_multi_groups_range_glyph \
+            _moma_multi_groups_range_glyph "$checkbox" \
               "$selected_state" "$offset" "${group_counts[$payload]}"
           )"
           label="All · ${group_names[$payload]}"
           ;;
         option)
-          glyph="□"
-          _moma_multi_is_selected "$selected_state" "$payload" && glyph="▣"
+          glyph="$glyph_off"
+          _moma_multi_is_selected "$selected_state" "$payload" &&
+            glyph="$glyph_on"
           label="${options[$payload]}"
           ;;
       esac
@@ -6070,7 +6136,10 @@ _moma_render_multi_select_groups() {
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
 
   local glyph active row_index=0
-  glyph="$(_moma_multi_groups_range_glyph "$selected_state" 0 "$total_options")"
+  glyph="$(
+    _moma_multi_groups_range_glyph \
+      "$checkbox" "$selected_state" 0 "$total_options"
+  )"
   active=false
   ((row_index != active_row)) || active=true
   _moma_select_render_blank "$redraw"
@@ -6084,7 +6153,7 @@ _moma_render_multi_select_groups() {
     _moma_select_render_group_heading "${group_names[$group_index]}" "$redraw"
 
     glyph_range="$(
-      _moma_multi_groups_range_glyph \
+      _moma_multi_groups_range_glyph "$checkbox" \
         "$selected_state" "$offset" "${group_counts[$group_index]}"
     )"
     active=false
@@ -6095,8 +6164,9 @@ _moma_render_multi_select_groups() {
 
     for ((row = 0; row < group_counts[group_index]; row++)); do
       flat_index=$((offset + row))
-      glyph="□"
-      _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
+      glyph="$glyph_off"
+      _moma_multi_is_selected "$selected_state" "$flat_index" &&
+        glyph="$glyph_on"
       active=false
       ((row_index != active_row)) || active=true
       _moma_select_render_row \
@@ -6133,14 +6203,14 @@ _moma_multi_groups_range_state() {
   fi
 }
 
-# Render the checkbox glyph for an option range: filled when every option is
-# selected, hatched for a partial selection, empty otherwise.
+# Render the checkbox glyph for an option range in the given checkbox style:
+# filled when every option is selected, partial for a partial selection,
+# empty otherwise.
 _moma_multi_groups_range_glyph() {
-  case "$(_moma_multi_groups_range_state "$@")" in
-    all) printf '▣' ;;
-    some) printf '▨' ;;
-    *) printf '□' ;;
-  esac
+  local style="$1"
+  shift
+  _moma_select_checkbox_glyph \
+    "$style" "$(_moma_multi_groups_range_state "$@")"
 }
 
 # Toggle every option in a flat index range as one unit: clear the range once
@@ -6305,6 +6375,7 @@ moma-multi-select-groups() {
   local choose_spec=""
   local choose_set=false
   local required=false
+  local checkbox=box
   local no_color=false
   local -a group_names=()
   local -a group_counts=()
@@ -6379,6 +6450,18 @@ moma-multi-select-groups() {
         required=true
         shift
         ;;
+      --checkbox)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        checkbox="$2"
+        shift 2
+        ;;
+      --checkbox=*)
+        checkbox="${1#*=}"
+        shift
+        ;;
       --group)
         if [[ $# -lt 2 ]]; then
           _moma_option_requires_value moma-multi-select-groups "$1"
@@ -6425,9 +6508,10 @@ moma-multi-select-groups() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--color <color>] [--no-color]
+Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--checkbox box|brackets] [--color <color>] [--no-color]
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
+--checkbox box (default) draws ▣, ▨, and □; --checkbox brackets draws [ x ], [ - ], and [   ].
 Group headings are display-only: they never receive focus and are never printed on stdout.
 Each group has a focusable "All" row above its options that toggles every option in that group, and a "Select All" row above every group toggles every option across all groups. Both fill when every option in their scope is selected, show a hatched glyph when only some are, and are never counted as options or printed on stdout.
 Number lists are one-based, comma-separated, count only options, and follow visual order across every group.
@@ -6452,6 +6536,11 @@ EOF
   fi
   _moma_validate_groups moma-multi-select-groups "${group_counts[@]}" ||
     return 2
+  if ! _moma_select_is_checkbox_style "$checkbox"; then
+    printf 'moma-multi-select-groups: invalid checkbox style: %s\n' \
+      "$checkbox" >&2
+    return 2
+  fi
 
   local num_groups="${#group_names[@]}"
   local total_options="${#options[@]}"
@@ -6497,8 +6586,8 @@ EOF
     fi
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-      false "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+      false "$checkbox" "$num_groups" "${group_names[@]}" \
+      "${group_counts[@]}" "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -6513,8 +6602,8 @@ EOF
 
   _moma_render_multi_select_groups \
     "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-    true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-    "${options[@]}"
+    true "$checkbox" "$num_groups" "${group_names[@]}" \
+    "${group_counts[@]}" "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -6550,8 +6639,8 @@ EOF
 
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
-      true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+      true "$checkbox" "$num_groups" "${group_names[@]}" \
+      "${group_counts[@]}" "${options[@]}"
   done
 }
 
@@ -7424,6 +7513,9 @@ _moma_preview_render_multi_select() {
     moma-multi-select \
       "Docker" "CI" "Tests" \
       --title "Features" --choose 1,3 >/dev/null
+    moma-multi-select \
+      "Docker" "CI" "Tests" \
+      --title "Features" --choose 1,3 --checkbox brackets >/dev/null
   } 2>&1
 }
 

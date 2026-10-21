@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Moma follows [Semantic Versioning](https://semver.org/). See
 [Versioning](README.md#versioning) in the README for the release policy.
 
+## [Unreleased]
+
+### Added
+
+- `moma-multi-select` and `moma-multi-select-groups` gain
+  `--checkbox box|brackets`. `box` (default, matches prior behavior) draws
+  `▣` / `▨` / `□`; `brackets` draws the plain-text `[ x ]` / `[ - ]` /
+  `[   ]` instead, for terminals and fonts without geometric shapes.
+
 ## [2.0.0] - 2026-08-06
 
 ### Added

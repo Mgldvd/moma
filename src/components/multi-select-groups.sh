@@ -32,6 +32,7 @@ _moma_multi_groups_window_blank_count() {
 # a session-constant budget; this keeps the total printed line count fixed
 # for the life of one component invocation, which is what makes
 # _moma_term_move_up's plain line-counting correct on every redraw.
+# checkbox is a style accepted by _moma_select_checkbox_glyph.
 _moma_render_multi_select_groups() {
   local title="$1"
   local active_row="$2"
@@ -40,8 +41,9 @@ _moma_render_multi_select_groups() {
   local no_color="$5"
   local redraw="$6"
   local windowed="$7"
-  local num_groups="$8"
-  shift 8
+  local checkbox="$8"
+  local num_groups="$9"
+  shift 9
   local -a group_names=("${@:1:$num_groups}")
   shift "$num_groups"
   local -a group_counts=("${@:1:$num_groups}")
@@ -54,6 +56,9 @@ _moma_render_multi_select_groups() {
   # group, so the unwindowed blank-separator count is always this, with no
   # need to scan for it.
   local full_blank_count=$((1 + num_groups))
+  local glyph_on glyph_off
+  glyph_on="$(_moma_select_checkbox_glyph "$checkbox" all)"
+  glyph_off="$(_moma_select_checkbox_glyph "$checkbox" none)"
 
   local compact=false window_start=0 window_count="$row_count" \
     indicator_lines=0 blank_count="$full_blank_count" pad_lines=0
@@ -144,7 +149,8 @@ _moma_render_multi_select_groups() {
       case "$kind" in
         selectall)
           glyph="$(
-            _moma_multi_groups_range_glyph "$selected_state" 0 "$total_options"
+            _moma_multi_groups_range_glyph \
+              "$checkbox" "$selected_state" 0 "$total_options"
           )"
           label="Select All"
           ;;
@@ -154,14 +160,15 @@ _moma_render_multi_select_groups() {
               "${group_counts[@]}"
           )"
           glyph="$(
-            _moma_multi_groups_range_glyph \
+            _moma_multi_groups_range_glyph "$checkbox" \
               "$selected_state" "$offset" "${group_counts[$payload]}"
           )"
           label="All · ${group_names[$payload]}"
           ;;
         option)
-          glyph="□"
-          _moma_multi_is_selected "$selected_state" "$payload" && glyph="▣"
+          glyph="$glyph_off"
+          _moma_multi_is_selected "$selected_state" "$payload" &&
+            glyph="$glyph_on"
           label="${options[$payload]}"
           ;;
       esac
@@ -186,7 +193,10 @@ _moma_render_multi_select_groups() {
   _moma_select_render_header "$title" "$color" "$no_color" "$redraw"
 
   local glyph active row_index=0
-  glyph="$(_moma_multi_groups_range_glyph "$selected_state" 0 "$total_options")"
+  glyph="$(
+    _moma_multi_groups_range_glyph \
+      "$checkbox" "$selected_state" 0 "$total_options"
+  )"
   active=false
   ((row_index != active_row)) || active=true
   _moma_select_render_blank "$redraw"
@@ -200,7 +210,7 @@ _moma_render_multi_select_groups() {
     _moma_select_render_group_heading "${group_names[$group_index]}" "$redraw"
 
     glyph_range="$(
-      _moma_multi_groups_range_glyph \
+      _moma_multi_groups_range_glyph "$checkbox" \
         "$selected_state" "$offset" "${group_counts[$group_index]}"
     )"
     active=false
@@ -211,8 +221,9 @@ _moma_render_multi_select_groups() {
 
     for ((row = 0; row < group_counts[group_index]; row++)); do
       flat_index=$((offset + row))
-      glyph="□"
-      _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
+      glyph="$glyph_off"
+      _moma_multi_is_selected "$selected_state" "$flat_index" &&
+        glyph="$glyph_on"
       active=false
       ((row_index != active_row)) || active=true
       _moma_select_render_row \
@@ -249,14 +260,14 @@ _moma_multi_groups_range_state() {
   fi
 }
 
-# Render the checkbox glyph for an option range: filled when every option is
-# selected, hatched for a partial selection, empty otherwise.
+# Render the checkbox glyph for an option range in the given checkbox style:
+# filled when every option is selected, partial for a partial selection,
+# empty otherwise.
 _moma_multi_groups_range_glyph() {
-  case "$(_moma_multi_groups_range_state "$@")" in
-    all) printf '▣' ;;
-    some) printf '▨' ;;
-    *) printf '□' ;;
-  esac
+  local style="$1"
+  shift
+  _moma_select_checkbox_glyph \
+    "$style" "$(_moma_multi_groups_range_state "$@")"
 }
 
 # Toggle every option in a flat index range as one unit: clear the range once
@@ -421,6 +432,7 @@ moma-multi-select-groups() {
   local choose_spec=""
   local choose_set=false
   local required=false
+  local checkbox=box
   local no_color=false
   local -a group_names=()
   local -a group_counts=()
@@ -495,6 +507,18 @@ moma-multi-select-groups() {
         required=true
         shift
         ;;
+      --checkbox)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select-groups "$1"
+          return 2
+        fi
+        checkbox="$2"
+        shift 2
+        ;;
+      --checkbox=*)
+        checkbox="${1#*=}"
+        shift
+        ;;
       --group)
         if [[ $# -lt 2 ]]; then
           _moma_option_requires_value moma-multi-select-groups "$1"
@@ -541,9 +565,10 @@ moma-multi-select-groups() {
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--color <color>] [--no-color]
+Usage: moma-multi-select-groups --title <text> (--group <name> --option <value>...)... [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--checkbox box|brackets] [--color <color>] [--no-color]
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
+--checkbox box (default) draws ▣, ▨, and □; --checkbox brackets draws [ x ], [ - ], and [   ].
 Group headings are display-only: they never receive focus and are never printed on stdout.
 Each group has a focusable "All" row above its options that toggles every option in that group, and a "Select All" row above every group toggles every option across all groups. Both fill when every option in their scope is selected, show a hatched glyph when only some are, and are never counted as options or printed on stdout.
 Number lists are one-based, comma-separated, count only options, and follow visual order across every group.
@@ -568,6 +593,11 @@ EOF
   fi
   _moma_validate_groups moma-multi-select-groups "${group_counts[@]}" ||
     return 2
+  if ! _moma_select_is_checkbox_style "$checkbox"; then
+    printf 'moma-multi-select-groups: invalid checkbox style: %s\n' \
+      "$checkbox" >&2
+    return 2
+  fi
 
   local num_groups="${#group_names[@]}"
   local total_options="${#options[@]}"
@@ -613,8 +643,8 @@ EOF
     fi
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-      false "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+      false "$checkbox" "$num_groups" "${group_names[@]}" \
+      "${group_counts[@]}" "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -629,8 +659,8 @@ EOF
 
   _moma_render_multi_select_groups \
     "$title" "$active_row" "$selected_state" "$color" "$no_color" false \
-    true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-    "${options[@]}"
+    true "$checkbox" "$num_groups" "${group_names[@]}" \
+    "${group_counts[@]}" "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -666,7 +696,7 @@ EOF
 
     _moma_render_multi_select_groups \
       "$title" "$active_row" "$selected_state" "$color" "$no_color" true \
-      true "$num_groups" "${group_names[@]}" "${group_counts[@]}" \
-      "${options[@]}"
+      true "$checkbox" "$num_groups" "${group_names[@]}" \
+      "${group_counts[@]}" "${options[@]}"
   done
 }

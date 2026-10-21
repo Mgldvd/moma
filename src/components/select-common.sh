@@ -168,6 +168,32 @@ _moma_multi_select_transition() {
   printf '%s\t%s\t%s\n' "$active_index" "$selected_state" "$result"
 }
 
+# Return success for a supported multiple-selection checkbox style.
+_moma_select_is_checkbox_style() {
+  case "$1" in
+    box | brackets) return 0 ;;
+  esac
+  return 1
+}
+
+# Print the checkbox glyph for a selection state ("all", "some", or "none")
+# in the given style: "box" uses ▣ / ▨ / □, and "brackets" uses the
+# plain-text [ x ] / [ - ] / [   ] for terminals and fonts without the
+# geometric shapes.
+_moma_select_checkbox_glyph() {
+  local style="$1"
+  local state="$2"
+
+  case "${style}:${state}" in
+    brackets:all) printf '[ x ]' ;;
+    brackets:some) printf '[ - ]' ;;
+    brackets:*) printf '[   ]' ;;
+    *:all) printf '▣' ;;
+    *:some) printf '▨' ;;
+    *) printf '□' ;;
+  esac
+}
+
 # Return success when an index exists in a selected-state list.
 _moma_multi_is_selected() {
   local selected_state="$1"

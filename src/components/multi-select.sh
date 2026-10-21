@@ -4,7 +4,8 @@
 # slice around active_index is drawn, with a "more above/below" indicator,
 # so a redraw always rewrites the same number of lines regardless of list
 # length. Non-interactive callers (--choose) pass windowed=false so their
-# output stays complete and deterministic.
+# output stays complete and deterministic. checkbox is a style accepted by
+# _moma_select_checkbox_glyph.
 _moma_render_multi_select() {
   local title="$1"
   local active_index="$2"
@@ -13,7 +14,8 @@ _moma_render_multi_select() {
   local no_color="$5"
   local redraw="$6"
   local windowed="$7"
-  shift 7
+  local checkbox="$8"
+  shift 8
   local -a options=("$@")
   local total="${#options[@]}"
 
@@ -41,11 +43,16 @@ _moma_render_multi_select() {
       "$window_start" "$((total - window_start - window_count))" "$redraw"
   fi
 
+  local glyph_on glyph_off
+  glyph_on="$(_moma_select_checkbox_glyph "$checkbox" all)"
+  glyph_off="$(_moma_select_checkbox_glyph "$checkbox" none)"
+
   local row flat_index glyph active
   for ((row = 0; row < window_count; row++)); do
     flat_index=$((window_start + row))
-    glyph="□"
-    _moma_multi_is_selected "$selected_state" "$flat_index" && glyph="▣"
+    glyph="$glyph_off"
+    _moma_multi_is_selected "$selected_state" "$flat_index" &&
+      glyph="$glyph_on"
     active=false
     ((flat_index != active_index)) || active=true
     _moma_select_render_row \
@@ -66,6 +73,7 @@ moma-multi-select() {
   local choose_spec=""
   local choose_set=false
   local required=false
+  local checkbox=box
   local no_color=false
   local -a options=()
   local selected_state=""
@@ -138,15 +146,28 @@ moma-multi-select() {
         required=true
         shift
         ;;
+      --checkbox)
+        if [[ $# -lt 2 ]]; then
+          _moma_option_requires_value moma-multi-select "$1"
+          return 2
+        fi
+        checkbox="$2"
+        shift 2
+        ;;
+      --checkbox=*)
+        checkbox="${1#*=}"
+        shift
+        ;;
       --no-color)
         no_color=true
         shift
         ;;
       --help | -h)
         cat <<'EOF'
-Usage: moma-multi-select "option"... [--title <text>] [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--color <color>] [--no-color]
+Usage: moma-multi-select "option"... [--title <text>] [--initial <number>] [--selected <numbers>] [--choose <numbers>] [--required] [--checkbox box|brackets] [--color <color>] [--no-color]
 
 Use the up and down arrow keys to move, Space to toggle, Enter to confirm, and q or Escape to cancel.
+--checkbox box (default) draws ▣ and □; --checkbox brackets draws [ x ] and [   ].
 Number lists are one-based and comma-separated. --choose selects immediately for scripts and tests.
 Each selected value is printed on its own line, in original visual order.
 EOF
@@ -174,6 +195,10 @@ EOF
   fi
   if ! _moma_is_index_in_range "$initial" "${#options[@]}"; then
     printf 'moma-multi-select: invalid initial option: %s\n' "$initial" >&2
+    return 2
+  fi
+  if ! _moma_select_is_checkbox_style "$checkbox"; then
+    printf 'moma-multi-select: invalid checkbox style: %s\n' "$checkbox" >&2
     return 2
   fi
 
@@ -205,7 +230,7 @@ EOF
     fi
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" false false "${options[@]}"
+      "$no_color" false false "$checkbox" "${options[@]}"
     printf '\n' >&2
     _moma_emit_multi_select "$selected_state" "${options[@]}"
     return 0
@@ -220,7 +245,7 @@ EOF
 
   _moma_render_multi_select \
     "$title" "$active_index" "$selected_state" "$color" \
-    "$no_color" false true "${options[@]}"
+    "$no_color" false true "$checkbox" "${options[@]}"
 
   local event transition remainder transition_status
   while true; do
@@ -255,6 +280,6 @@ EOF
 
     _moma_render_multi_select \
       "$title" "$active_index" "$selected_state" "$color" \
-      "$no_color" true true "${options[@]}"
+      "$no_color" true true "$checkbox" "${options[@]}"
   done
 }

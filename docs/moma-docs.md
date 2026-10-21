@@ -532,10 +532,10 @@ action="$(
 
 ### `moma-multi-select`
 
-Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
+Toggle multiple values below a decorated Moma heading and return every selection on its own line, in original visual order. Each row shows a checkbox indicator: `▣` when selected and `□` when not; `--checkbox brackets` switches to the plain-text `[ x ]` and `[   ]`. When the list is taller than the terminal, interactive navigation scrolls a fixed-size window and shows a "N more above/below" line instead of losing track of the active row; `--choose` always renders every option, unwindowed.
 
 ```text
-moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]
+moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required] [--checkbox box|brackets]
 ```
 
 ```bash
@@ -547,16 +547,19 @@ features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"
 
 # Example 3
 features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"
+
+# Example 4
+features="$(moma multi-select "Docker" "CI" "Tests" --checkbox brackets)"
 ```
 
 ![moma-multi-select preview](../.img/moma-multi-select.png)
 
 ### `moma-multi-select-groups`
 
-Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout. When the full layout is taller than the terminal, interactive navigation switches to a compact scrolling window with a "N more above/below" line: heading text is dropped and each group's All row is labeled with its group name instead, but the blank line between groups stays, so every option remains reachable, selectable, and visually grouped; `--choose` always renders the full layout, unwindowed.
+Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order. Repeat `--group <name>` followed by one or more `--option <value>` pairs; `--selected` and `--choose` use comma-separated, one-based indexes that count only options, in visual order across every group. Each group gets a focusable "All" row that toggles every option in that group, and a "Select All" row above the first group toggles every option across all groups; neither counts as an option or appears on stdout. `--checkbox brackets` draws `[ x ]`, `[ - ]` (partial "All" rows), and `[   ]` instead of `▣`, `▨`, and `□`. When the full layout is taller than the terminal, interactive navigation switches to a compact scrolling window with a "N more above/below" line: heading text is dropped and each group's All row is labeled with its group name instead, but the blank line between groups stays, so every option remains reachable, selectable, and visually grouped; `--choose` always renders the full layout, unwindowed.
 
 ```text
-moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]
+moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required] [--checkbox box|brackets]
 ```
 
 ```bash

@@ -443,19 +443,21 @@ export const API_ENTRIES: ApiEntryData[] = [
     kind: 'Multiple select',
     name: 'multi-select',
     descriptionHtml: 'Toggle multiple values below a decorated Moma heading and return every selection on its own line.',
-    signature: 'moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required]',
-    searchText: 'moma-multi-select interactive multiple selection list arrows space checkbox empty filled square',
+    signature: 'moma multi-select "Docker" "CI" "Tests" [--selected 1,3] [--required] [--checkbox box|brackets]',
+    searchText: 'moma-multi-select interactive multiple selection list arrows space checkbox empty filled square brackets',
     group: 'selection',
     examples: [
       'features="$(moma multi-select "Docker" "CI" "Tests" --title "Features")"',
       'features="$(moma multi-select "Docker" "CI" "Tests" --choose 1,3)"',
       'features="$(moma multi-select "Docker" "CI" "Tests" --selected 1,2 --required)"',
+      'features="$(moma multi-select "Docker" "CI" "Tests" --checkbox brackets)"',
     ],
     options: [
       { flag: '--title <text>', description: 'Heading shown above the menu. Defaults to "Select options".' },
       { flag: '--choose <numbers>', description: 'Comma-separated one-based indices to select immediately without interaction, for scripts and tests.' },
       { flag: '--selected <numbers>', description: 'Comma-separated one-based indices pre-checked before the menu is shown. None selected by default.' },
       { flag: '--required', description: 'Requires at least one option to be selected before confirming. Not required by default.' },
+      { flag: '--checkbox box|brackets', description: 'Checkbox style: box (default) draws ▣ and □, brackets draws [ x ] and [   ].' },
     ],
   },
   {
@@ -463,8 +465,8 @@ export const API_ENTRIES: ApiEntryData[] = [
     kind: 'Multiple select',
     name: 'multi-select-groups',
     descriptionHtml: 'Toggle multiple values organized under named, non-selectable group headings and return every selection on its own line, in original visual order.',
-    signature: 'moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required]',
-    searchText: 'moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square groups headings',
+    signature: 'moma multi-select-groups --title text (--group name --option value...)... [--selected numbers] [--choose numbers] [--required] [--checkbox box|brackets]',
+    searchText: 'moma-multi-select-groups interactive multiple selection list arrows space checkbox empty filled square brackets groups headings',
     group: 'selection',
     examples: [
       'countries="$(moma multi-select-groups --title "Features" --group "North America" --option "United States" --option "Canada" --option "Mexico" --group "South America" --option "Colombia" --option "Argentina" --option "Peru")"',
@@ -477,6 +479,7 @@ export const API_ENTRIES: ApiEntryData[] = [
       { flag: '--selected <numbers>', description: 'Comma-separated one-based global option indices pre-checked before the menu opens. None by default.' },
       { flag: '--choose <numbers>', description: 'Comma-separated one-based global option indices to select immediately without interaction, for scripts and tests.' },
       { flag: '--required', description: 'Requires at least one option selected before confirming. Not required by default.' },
+      { flag: '--checkbox box|brackets', description: 'Checkbox style: box (default) draws ▣, ▨ and □, brackets draws [ x ], [ - ] and [   ].' },
     ],
   },
   {

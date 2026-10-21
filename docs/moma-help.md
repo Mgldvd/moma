@@ -146,6 +146,11 @@ and otherwise fills whatever is still unselected. Neither row counts as an
 option or is ever printed on stdout, so `--initial`, `--choose`, and
 `--selected` numbering is unaffected.
 
+Both multiple-selection components accept `--checkbox box|brackets`. `box`
+(the default) draws the `▣` / `▨` / `□` glyphs above; `brackets` draws the
+plain-text `[ x ]` (selected), `[ - ]` (partially selected "All" rows), and
+`[   ]` (empty) instead, for terminals and fonts without geometric shapes.
+
 When the full grouped layout is taller than the terminal, `moma-multi-select-groups`
 switches to a compact scrolling window like `moma-multi-select`'s: group
 heading lines are dropped, each group's "All" row is labeled with its group

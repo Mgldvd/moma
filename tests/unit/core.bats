@@ -194,7 +194,7 @@ setup() {
   run env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select \
-          "Options" 10 "" "" false false true \
+          "Options" 10 "" "" false false true box \
           Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa \
           Lambda Mu Nu Xi Omicron
     ' _ "$MOMA_DIST"
@@ -216,7 +216,7 @@ setup() {
   run env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select \
-          "Options" 0 "" "" false false false \
+          "Options" 0 "" "" false false false box \
           Alpha Beta Gamma Delta Epsilon Zeta Eta Theta Iota Kappa \
           Lambda Mu Nu Xi Omicron
     ' _ "$MOMA_DIST"
@@ -243,7 +243,7 @@ setup() {
     env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select_groups \
-          "Options" 8 "" "" false false true 3 \
+          "Options" 8 "" "" false false true box 3 \
           NorthAmerica SouthAmerica Europe \
           3 5 4 \
           UnitedStates Canada Mexico \
@@ -271,7 +271,7 @@ setup() {
   run env LINES=10 NO_COLOR=1 bash -c '
         source "$1"
         _moma_render_multi_select_groups \
-          "Options" 0 "" "" false false false 3 \
+          "Options" 0 "" "" false false false box 3 \
           NorthAmerica SouthAmerica Europe \
           3 5 4 \
           UnitedStates Canada Mexico \

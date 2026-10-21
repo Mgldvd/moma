@@ -214,6 +214,9 @@ _moma_preview_render_multi_select() {
     moma-multi-select \
       "Docker" "CI" "Tests" \
       --title "Features" --choose 1,3 >/dev/null
+    moma-multi-select \
+      "Docker" "CI" "Tests" \
+      --title "Features" --choose 1,3 --checkbox brackets >/dev/null
   } 2>&1
 }
 
