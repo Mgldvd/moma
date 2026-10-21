@@ -6,7 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and Moma follows [Semantic Versioning](https://semver.org/). See
 [Versioning](README.md#versioning) in the README for the release policy.
 
-## [Unreleased]
+## [2.1.0] - 2026-10-21
 
 ### Added
 
@@ -14,6 +14,15 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
   `--checkbox box|brackets`. `box` (default, matches prior behavior) draws
   `▣` / `▨` / `□`; `brackets` draws the plain-text `[ x ]` / `[ - ]` /
   `[   ]` instead, for terminals and fonts without geometric shapes.
+- The `moma preview` gallery shows a `--checkbox brackets` variant for
+  `moma-multi-select`.
+
+### Fixed
+
+- Removed the orphaned `moma-single-select` screenshot set (catalog entry
+  and published PNGs). The site documents `single-select` under the
+  `moma-select` entry, so those images were never shown and broke the smoke
+  suite's screenshot-to-API-entry check, which the release workflow runs.
 
 ## [2.0.0] - 2026-08-06
 
@@ -196,7 +205,8 @@ and Moma follows [Semantic Versioning](https://semver.org/). See
   dispatcher, `moma version`, and `moma update` for self-updating an
   installed executable.
 
-[Unreleased]: https://github.com/Mgldvd/moma/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/Mgldvd/moma/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/Mgldvd/moma/compare/v2.0.0...v2.1.0
 [1.2.0]: https://github.com/Mgldvd/moma/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Mgldvd/moma/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Mgldvd/moma/releases/tag/v1.0.0
